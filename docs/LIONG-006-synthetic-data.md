@@ -144,6 +144,18 @@ Every row specifies a proposed fixture, its expected result, and a result that m
 | SCN-015 | Attempt to include a truth alias, answer key, sibling evaluation drawing, or world lineage mapping in an ingestion bundle or evaluated process. | A pre-run manifest check rejects the contaminated bundle. Sealed evaluation inputs contain no private truth material; trusted scoring happens afterward. Partition overlap and contamination counts are zero. | A model receives expected edges as a retrieval document; random sheet splitting puts S1 in training and S2 of the same world in evaluation. |
 | SCN-016 | Run the bounded workload plan in LIONG-010 with R0-sized and scaled independent worlds. | Record exact workloads, resources, stage timings, errors and review effort. Every output still satisfies the semantic/control checks. Results remain unmeasured until execution. | A synthetic latency proposal is reported as a benchmark; better speed excuses missing edges or failed safety controls. |
 
+### Proposed extraction candidate subcases
+
+These subcases extend SCN-002, SCN-009, SCN-010, SCN-015, and SCN-016 without changing their expected engineering results. The candidate assessment in [LIONG-007](LIONG-007-stack-and-architecture.md) does not select a product or authorize execution.
+
+Use the same licensed inputs across eligible candidates: native PDFs, scans, dense drawings, crossings with and without junctions, tiny tags, cross-sheet continuations, and bypass paths. Preserve the R0/R2 and unknown-continuation expectations in SCN-009/010. Keep public drawings and synthetic variants separate, with frozen annotations for each variant.
+
+Compare full-page and tiled inputs. Each render and tile retains the source page hash, source artifact identity, render transform, crop coordinates, scale, overlap, and tile-to-page transform. Freeze tile merging and duplicate suppression so overlapping evidence cannot create extra objects or edges. Do not replace visual topology assessment with an undeclared text-only LLM input.
+
+Where technically eligible and separately authorized, pair the same extraction configuration with and without SAM3 segmentation. Record unsupported pairings rather than substituting another model. Segmentation supplies candidate regions, not verified engineering connectivity. SCN-002 retains raw and reviewed outputs; SCN-009/010 check bypasses and unsupported continuations; SCN-016 measures cost and runtime by cohort.
+
+Extend SCN-015 with instruction-like text in drawings, parser responses, API prompts, logs, and caches. Deny attempts to change tools, approval rules, upload destinations, or access to truth. No answer key enters a provider request. Record sanitized denial evidence without copying protected canaries into provider-visible artifacts.
+
 ### Mandatory subcases for SCN-013, SCN-014, and SCN-015
 
 SCN-013 must attempt self-assignment of the approver role, use of publisher

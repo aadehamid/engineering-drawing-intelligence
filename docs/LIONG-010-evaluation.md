@@ -57,6 +57,82 @@ To compare effort, time independent manual annotation and assisted review on mat
 
 Report total active seconds and seconds per sheet for each method, along with medians and ranges when enough tasks exist. Include startup/training time separately. Faster review cannot compensate for residual critical connectivity errors.
 
+## Proposed extraction candidate comparison
+
+Assess LiteParse, LlamaParse, Firecrawl Parse, Hugging Face Docling/Granite-Docling-258M, PaddleOCR-VL-1.6, Qwen3-VL-8B-Instruct, and optional SAM3 without selecting them. [LIONG-007](LIONG-007-stack-and-architecture.md) owns candidate details and gates. Sources are REF-TECH-008 through REF-TECH-014 in the [reference register](LIONG-REF-001-reference-register.md). This protocol grants no upload, paid-call, installation, or adoption permission.
+
+Use the paired fixtures in [LIONG-006](LIONG-006-synthetic-data.md#proposed-extraction-candidate-subcases) under SCN-002/009/010/015/016. Freeze identical eligible source inputs and scoring scope. Compare parsing quality (text, layout, tables, tags, and region coordinates) separately from engineering topology (ports, links, crossings, cross-sheet continuity, and bypasses). A successful parse cannot establish engineering correctness.
+
+### Parser truth and matching
+
+Before held-out inference, freeze an independently checked annotation manifest
+containing source/page hashes, page dimensions and orientation, region IDs,
+normalized block types, text-line strings, tag strings, boxes, table cells, and
+explicit reading-order pairs where meaningful. A table cell includes its row,
+column, row span, column span, and text. P&ID symbols have no assumed prose
+reading order. Record annotation disagreements and adjudication before sealing
+truth; exclude genuinely unscorable regions only through a predeclared scope rule.
+
+Freeze each parser's adapter to a common representation before inspecting held-out
+results. Define how native output becomes text lines, tags, tables, cells, and
+figures, including the label map and any split/merge rules. The adapter may not use
+expected text or gold boxes to repair predictions. A whole-page Markdown string
+without locations cannot receive localization credit. Report full-page detection
+separately from transcription of supplied crops.
+
+Map predicted geometry through recorded render/crop/tile transforms into the
+original unrotated page frame, then normalize x by page width and y by page height.
+Represent boxes as `[left, top, right, bottom]` in `[0,1]`. Invalid or missing
+geometry cannot match a located truth item. Deduplicate overlapping tile outputs
+using frozen rules, not the answer key.
+
+Proposed region matching uses the same page and normalized type with box
+intersection-over-union (IoU) at least 0.50. Select a maximum-cardinality one-to-one
+matching, maximize summed IoU among those matchings, then break ties by sorted
+truth-region ID and stable prediction index. Do not use text similarity to select
+geometry matches. The 0.50 threshold is a proposed scoring rule, not an acceptance
+target or measured accuracy; freeze its approved value before comparison.
+
+For ordinary text, use Unicode NFC and collapse whitespace runs to one space,
+with leading/trailing whitespace removed. Preserve case, punctuation, numbers,
+and symbols. For tags, use NFC and trim outer whitespace only; do not remove
+hyphens or confuse `O` with `0`. Store both raw and normalized strings.
+
+| Parser measure | Scoring unit and numerator/denominator |
+| --- | --- |
+| Layout localization precision/recall | One matched region is a TP; unmatched/duplicate predictions are FP and unmatched truth regions are FN. Report TP/predicted and TP/expected by block type, with the declared IoU threshold. |
+| Region quality | Sum box IoU over matched region pairs / number of matched pairs. Always report alongside localization recall; missed regions must not disappear behind a high conditional IoU. |
+| Character error rate | Sum Levenshtein edits for geometry-matched text lines, plus lengths of unmatched truth lines as deletions and unmatched predicted lines as insertions, divided by total normalized truth characters. Errors can exceed the denominator. |
+| Tag transcription and detection | Report exact normalized text matches / geometry-matched tag pairs as conditional transcription accuracy. Separately report exact-text-and-geometry correct tags / all expected tags and / all predicted tags, so missed and invented tags remain visible. |
+| Table structure | Within geometrically matched table regions, match cells one-to-one by exact row/column/span tuple. Duplicate cells count as FP. Report matched cells / predicted cells and / expected cells. All cells of unmatched tables count as FP or FN respectively. |
+| Table content | Cells with correct structure and exact normalized text / all expected cells and / all predicted cells. Report structure and content separately; a plausible Markdown table is not automatically correct. |
+| Reading order | Correct predicted directed order pairs / predicted pairs and / annotated pairs after matching their region endpoints. Unmatched endpoints cannot score as correct. Only explicitly annotated meaningful pairs are in scope. |
+
+All zero denominators yield N/A with counts and a reason, never a perfect score.
+For required features a parser cannot emit, report the limitation and missing
+predictions; do not remove their truth items to improve the score. A corpus with
+no tables cannot establish table capability. Retain per-page results and
+micro-aggregated numerators/denominators, split by native PDF, scan, and drawing
+condition. No composite parser score can offset a critical topology error.
+
+For the optional SAM 3 ablation, use separately annotated symbol masks. Match
+instances on page and declared symbol class with mask IoU at least 0.50, using
+the same one-to-one tie-breaking rule. Report detection precision/recall and
+conditional mean mask IoU, alongside topology and review effort. Missing mask
+annotations mean mask quality is unmeasured, not established by box accuracy.
+Refinement with a supplied human box or exemplar is a separate configuration
+from automatic text-prompted detection.
+
+### Inference configuration and engineering scoring
+
+Freeze prompts, model/checkpoint and provider versions, service tiers, decoding settings, seeds where supported, render/tile transforms, merge rules, and segmentation settings. Compare each eligible extraction configuration with and without SAM3; disclose unsupported pairings. Retain full-page context alongside tiles and declare which visual inputs each model receives. Text-only topology inference must be a separately labeled experiment, never a silent substitute.
+
+Use the existing matching and denominator definitions. Report hallucinated edges as false-positive counts and edge-precision errors, distinct from the unsupported-relationship evidence metric. Report port/entity and link/edge TP/FP/FN on a frozen annotated slice, with recall denominators from expected items and precision denominators from predictions. Do not add port nodes to the R0 17/31 comparison view. List missed bypasses, false junctions, invented cross-sheet links, and unknown-continuation errors separately as critical findings. Raw model scores are not calibrated engineering certainty.
+
+Score automatic and reviewed outputs separately and measure review effort with the paired method above. Repeat live inference at least three times with fixed configuration and report all output differences, not just the best run. Separately replay captured responses offline to test downstream determinism. Replay does not measure fresh model/provider nondeterminism. Retain request, response, intermediate artifact, and output hashes subject to the governance boundary.
+
+Report end-to-end cost alongside quality: successful, retried, rejected, and indeterminate calls; billed units; GPU time; hosting; storage; and reviewer time. Record actual charges or unavailable billing evidence, authorized caps, quotas, throttling, and recovery delays. Do not assume free tiers, low review effort, or zero cost for failed requests. Self-hosted and hosted parser results are separate configurations, with no presumed parity.
+
 ## Proposed acceptance gates
 
 For controlled synthetic cases, propose exact matching after required review: entity and edge precision/recall equal 1.0, supported source coverage equal 1.0, and evidence coverage equal 1.0. All expected attributes and scenario-specific sets must match. R0 must produce exactly 17 nodes and 31 edges, not merely those totals with different contents.
@@ -113,7 +189,7 @@ Report each missing field against each affected object, available units, selecti
 
 ## Workload and performance boundary
 
-SCN-016 is a proposed measurement protocol, not a performance result or service-level promise. Propose one local machine with four logical CPU cores, 16 GiB RAM, SSD storage, and no GPU. Record the actual CPU model, OS, container limits, dependency versions, graph engine, and cache state. If the actual machine differs, report that difference rather than claiming comparability.
+SCN-016 is a proposed measurement protocol, not a performance result or service-level promise. The simple local baseline proposes four logical CPU cores, 16 GiB RAM, SSD storage, and no GPU. This baseline does not exclude GPU extraction candidates. Use separate GPU and hosted cohorts, including the official CUDA-based SAM3 route if authorized. Record actual CPU/GPU hardware, memory, drivers, runtime, model versions, provider limits, OS, container limits, graph engine, and cache state. Report cohort-specific performance; do not attribute differences across unlike hardware or provider limits solely to model quality.
 
 | Workload | Exact unit and proposed size | Measurement boundary |
 |---|---|---|

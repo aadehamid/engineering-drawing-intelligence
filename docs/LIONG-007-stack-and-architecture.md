@@ -10,7 +10,7 @@ Use a local, self-hostable baseline as the proposed default. Evaluate PostgreSQL
 
 Every new technology choice in this document is **Proposed**, including this recommendation. The approved [requirements](../REQUIREMENTS.md), [logical architecture](../ARCHITECTURE.md), and [glossary](../GLOSSARY.md) govern behavior. Apache AGE is an existing candidate, not an approved graph choice. Compare it against Neo4j Community after testing the latter against LIONG's publication and traversal requirements.
 
-LIONG is independent of PPC. No PPC service, repository, ontology release, account, or deployment is a runtime prerequisite. Cloudflare and Databricks Free Edition are explicitly permitted exceptions to the fully-open-source condition. Permission does not require selection, authorize provisioning, or authorize spending.
+LIONG is independent of PPC. No PPC service, repository, ontology release, account, or deployment is a runtime prerequisite. Cloudflare and Databricks Free Edition are explicitly permitted exceptions to the fully-open-source condition. Proprietary document parsing and model APIs may also be assessed. These permissions do not select a provider, approve model-license terms, authorize uploads, or authorize provisioning or spending.
 
 This document records inspection and proposed design, not a deployed stack, tested integration, performance result, or dependency lockfile. No PPC code was installed or run.
 
@@ -35,12 +35,60 @@ PPC proposes a broad synthetic enterprise, including commercial applications, la
 | OpenMetadata, Great Expectations, OpenLineage, Grafana OSS | Catalog, quality, run lineage, technical health | Ownership, mandatory checks, provenance, job records, failure visibility | Reuse responsibilities; defer platform services | Versioned manifests and application checks can satisfy the first demonstration | Later adoption needs exact versions/licenses; generic quality checks cannot replace engineering checks |
 | Plotly Dash | Operational decisions and approvals | Review screen, source regions, graph exploration, state comparison | Adapt as UI candidate | A Python-first interface may reduce initial work | Compare Dash with FastAPI/Cytoscape.js; test graph interactions, review audit, and accessibility; versions not locked |
 | Superset | Governed BI | No initial KPI dashboard | Exclude | Connectivity inspection is not enterprise BI | Revisit only with approved analytical scope |
-| pgvector, Ollama, LangGraph, Langfuse | Retrieval, LLM execution, agents, agent tracing | None required | Exclude | Review and deterministic publication do not require an agent | No model download, inference service, or external prompt transmission |
+| pgvector, Ollama, LangGraph, Langfuse | Retrieval, model execution, agent workflows, tracing | Possible supporting runtime only if an extraction candidate needs it | Defer products, not extraction models | Evaluating a vision-language model does not require an agent framework, vector store, or PPC's analytical stack | Select runtime only after model and deployment checks; uploads, paid calls, and model access are not authorized by this proposal |
 | MLflow, StatsForecast/MLForecast, scikit-learn, XGBoost, LightGBM, DoWhy/EconML, PyMC, OR-Tools | Models, forecasting, inference, optimization | Named downstream export contract only | Exclude execution | ML, forecasting, simulation, and engineering calculation engines are deferred | A future consumer must define inputs; export is not a validated calculation |
 | Databricks Free Edition | Enterprise-style lakehouse/ML comparison | Optional experiment with copies of approved exports | Defer, permitted provider | Not suitable as the required publication or recovery dependency | Edition-specific connectors, outbound access, quotas, persistence, and terms need verification |
 | EIA/NOAA/EPA/PHMSA and other providers | External observations for PPC scenarios | Public engineering evidence with suitable usage rights | Exclude automatic inheritance | PPC's public-data scenario does not establish a LIONG drawing source | Record dataset permissions and provenance individually |
 
-PPC has no equivalent implementation for engineering drawing interpretation or backend-to-DEXPI generation. LIONG must supply adapters, XML generation and parsing, supported-subset validation, and engineering mappings. Drawing work also needs text extraction/OCR, symbol interpretation, line tracing, connection-point matching, cross-sheet resolution, page-region evidence, and review controls. Tesseract, OpenCV, and lxml remain candidates. OCR text alone cannot establish connectivity. Detailed DEXPI tooling and schema decisions belong in [LIONG-003](LIONG-003-sources-and-ontology.md) and [LIONG-005](LIONG-005-data-contracts.md).
+PPC has no equivalent implementation for engineering drawing interpretation or backend-to-DEXPI generation. LIONG must supply adapters, XML generation and parsing, supported-subset validation, and engineering mappings. Drawing work needs positioned text, symbol interpretation, line tracing, connection-point matching, cross-sheet resolution, evidence, and review. Assess higher-level parsers and visual models before building a custom OCR-centric pipeline. OpenCV may support geometry or image preparation; Tesseract may remain an internal parser option. Neither is the default end-to-end architecture. Detailed DEXPI decisions remain in [LIONG-003](LIONG-003-sources-and-ontology.md) and [LIONG-005](LIONG-005-data-contracts.md).
+
+## Modern drawing extraction candidates
+
+The following shortlist is a proposed comparison, not an installed or selected
+stack. Official documentation and model cards support the stated capabilities;
+none of the inspected evidence establishes accurate LIONG P&ID extraction.
+References REF-TECH-008 through REF-TECH-014 are in the
+[reference register](LIONG-REF-001-reference-register.md#drawing-extraction-references).
+
+| Candidate | Documented capability and license boundary | Proposed LIONG role | Required checks |
+| --- | --- | --- | --- |
+| LiteParse | Local spatial PDF text, bounding boxes, screenshots, JSON; Apache-2.0; bundles Tesseract and accepts alternative OCR backends | Lightweight native-PDF baseline and page-evidence preparation | Rasterization/coordinate fidelity, scan quality, native text loss, exact release and dependency licenses |
+| LlamaParse | Hosted generative parsing, scans, diagrams, structured outputs, custom instructions, versioned tiers | Hosted challenger for difficult drawings and supporting documents | Pin tier/version, prove source-region output, inspect terms/retention/training policy and total cost; diagram support is not topology certification |
+| Firecrawl Parse | Hosted file parsing with page output, typed layout blocks, bounding boxes, text-span grounding, schema-based JSON | Parsing challenger and public-source acquisition option | Test tiny tags, visual evidence, truncation, tier/limits, retention and pricing; hosted Parse parity with self-hosted components is not assumed |
+| Docling with Granite-Docling-258M | Docling-integrated multimodal conversion and bounding-box-guided inference; model card Apache-2.0 | Local structured-document challenger | Model is not intended for general image understanding; verify layout/evidence output, Docling/runtime licenses, and hardware fit |
+| PaddleOCR-VL-1.6 | Multimodal document parsing, text spotting, table/formula/chart recognition; model card Apache-2.0 | Local scan and positioned-tag challenger | No P&ID accuracy inferred from general benchmarks; verify selected runtime, required models, memory, and coordinate conventions |
+| Qwen3-VL-8B-Instruct | Image-text interpretation, OCR, and spatial grounding; model card Apache-2.0 | Propose symbol meanings and engineering relationships from source images plus parser evidence | Test tiny features, junction/crossing confusion, invented connections, context loss, hardware and supported inference runtime |
+| SAM 3 | Promptable segmentation with text or visual prompts; returns masks, boxes, and scores; Meta custom SAM License | Optional symbol-region localization or refinement and reviewer overlays | License review, gated checkpoint access, CUDA runtime, precise checkpoint/code pin, line/symbol performance, and benefit over the same workflow without segmentation |
+
+LiteParse is not an LLM, and Granite-Docling is not a general-purpose visual
+reasoner. These components have different responsibilities. Start with a
+LiteParse parsing baseline, a PaddleOCR-VL local challenger, and a LlamaParse
+hosted challenger if use is authorized. Compare Docling and Firecrawl Parse
+where layout, evidence localization, or source acquisition justify their inclusion.
+Evaluate Qwen-based engineering interpretation separately from parsing.
+Do not make all candidates dependencies.
+
+SAM 3 is complementary rather than a replacement parser. Test text or exemplar
+prompts for symbol regions, and reviewer-directed refinement. A good mask does
+not identify a tag, distinguish piping from signal lines, establish a junction,
+or resolve cross-sheet connectivity. Compare the same interpretation workflow
+with and without SAM 3 before adopting it.
+
+The inspected official SAM 3 setup lists Python 3.12+, PyTorch 2.7+, and a
+CUDA-compatible GPU with CUDA 12.6+. Access to checkpoints requires acceptance
+through Hugging Face. Do not assume this setup runs on a CPU-only or Apple
+Silicon machine. The repository also advertises SAM 3.1; that is a separate
+checkpoint selection, not an automatic substitution. The custom SAM License is
+not an Apache/MIT license and is not covered automatically by provider exceptions.
+
+Keep parser, interpretation, and optional segmentation behind separate adapter
+contracts. A parser can include its own model; logical stages need not be separate
+services. Preserve original pages, geometry, candidates, and raw outputs before
+validation. Do not reduce an engineering drawing to Markdown and ask a text-only
+model to reconstruct connections whose visual evidence was discarded.
+
+No candidate was installed or evaluated on P&IDs during this assessment.
+The comparison and admission controls are defined in LIONG-010 and LIONG-009.
 
 ## Minimum proposed architecture
 
@@ -50,8 +98,11 @@ The minimum design has one application boundary, a backend/control database, a g
 flowchart TB
     B["Synthetic backend and approved revision event"] --> X["Extract and generate DEXPI 2.0"]
     X --> P["Validate XML and map supported engineering content"]
-    F["Submitted P&ID revision"] --> E["Extract text, symbols, and connections"]
-    E --> R["Review evidence and resolve ambiguity"]
+    F["Submitted P&ID revision"] --> E["Parse layout, positioned text, and page images"]
+    E --> I["Propose engineering objects and relationships"]
+    I --> R["Validate candidates and review evidence"]
+    I -->|"Optional"| S["Refine symbol regions with segmentation"]
+    S --> R
     P --> M["Shared engineering model"]
     R --> M
     A["Asset hierarchy and instrumentation register"] --> V["Validate complete candidate revision"]
@@ -66,7 +117,7 @@ flowchart TB
 | Source authority and approved backend revision | PostgreSQL synthetic backend with immutable revision records and an outbox written in the approval transaction | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
 | Raw evidence and replay | Local durable artifact directory, content hashes, manifests, and independent backup | A missing or mismatched artifact blocks publication; cloud availability must not decide whether the local demo works |
 | Delivery and execution | Persistent worker using the outbox; optional Dagster OSS sensor and scheduled reconciliation | At-least-once delivery is expected; retries use stable revision keys, not assumptions of exactly-once delivery |
-| Conversion and extraction | Python adapters, XML tooling, drawing extraction, and review screens | Parse errors, unsupported content, and uncertain matches remain visible; no guessed edges or silent source replacement |
+| Conversion and extraction | XML adapters plus interchangeable document parsers, visual interpretation, optional segmentation, and review screens | Every model result is a candidate; parse errors, unsupported content, and uncertain matches remain visible; no direct model publication |
 | Shared engineering model | Versioned contracts, identity registry, source mappings, and validation rules | Stable object identity is independent of tags; disputed matches stay unresolved |
 | Review and engineering approval | Application role checks and durable decisions | Extraction acceptance and engineering-change approval are separate actions; neither authorizes real isolation |
 | Publication and history | Revision-scoped graph data plus immutable manifests and publication receipts | Only a complete validated revision becomes visible; failed writes leave the prior published revision available |
@@ -169,6 +220,8 @@ All gate proposals remain Proposed. None records a completed benchmark or approv
 | GATE-TECH-006 | Approve any Cloudflare use separately | Current terms and billing review, explicit provisioning/spending authorization, bounded request plan, access control, and restore test |
 | GATE-TECH-007 | Approve any Databricks Free Edition experiment separately | Non-commercial-use fit; current quota/account limits; edition-specific connector and network proof; persistence/export test; no dependency on service availability |
 | GATE-TECH-008 | Select the interface and demonstrate safe query scope | Role-specific review/approval audit, evidence regions, proposed-state exclusion, bounded traversal, clear incomplete/truncated results, and no safety claims |
+| GATE-TECH-009 | Select extraction components through separate parsing and topology comparisons | Same licensed fixtures, fixed model/parser configurations, grounded regions, false-edge/bypass checks, repeated-run variability, review effort and total costs; paired comparison with/without segmentation |
+| GATE-TECH-010 | Admit proprietary parsing/model services or custom-license models | Exact service/model terms, source-upload permission, retention/training/region controls, authorized budget, credentials, license acceptance where required, and reproducible version records; SAM 3 requires its own review |
 
 Follow the [index](LIONG-000-index.md) for the complete documentation set. [LIONG-004](LIONG-004-domain-model.md) owns domain identities and meanings; [LIONG-008](LIONG-008-interfaces-and-workflows.md) owns interface workflows. [LIONG-010](LIONG-010-evaluation.md) defines acceptance evidence. [LIONG-011](LIONG-011-build-runbook.md) must resolve applicable gates before presenting a runnable configuration.
 

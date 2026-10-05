@@ -135,6 +135,26 @@ alternative source of engineering authority.
 
 ## Operational and export contracts
 
+### Extraction-adapter evidence
+
+Proposed adapters return candidates, not accepted EngineeringAssertions. Preserve
+the input artifact hash, physical page, original dimensions, rendering settings,
+crop/tile transforms, text regions, masks if used, candidate relations, and explicit
+unknowns. Coordinates must resolve back to the unchanged source page.
+
+An extraction receipt records parser/model ID and revision, hosted tier/API version
+where applicable, prompt/schema/template hashes, decoding settings, runtime or
+provider request IDs, response hash, usage, retries, and failure/truncation status.
+Retain raw automatic results separately from reviewed corrections. Provider scores
+are not automatically calibrated probabilities of engineering correctness.
+
+Malformed model JSON, unresolved endpoints, unsupported content, or missing
+evidence cannot bypass validation. A segmentation mask is region evidence, not
+proof of an engineering connection. Replaying a captured response and rerunning
+model inference are different operations and must have distinct run records.
+
+### Context records and exports
+
 Work orders retain source IDs and status as recorded, without implying ERP workflow
 execution. Measurements retain measurement ID, target, quantity, unit, observed time,
 availability time, and source. Documents retain artifact hash and a locator with

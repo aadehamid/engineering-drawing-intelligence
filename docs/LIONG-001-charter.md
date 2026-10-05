@@ -78,13 +78,18 @@ Use open-source technology except for the user-permitted Cloudflare services and
 Databricks Free Edition. These exceptions allow assessment; they do not mandate
 providers, authorize charges, or verify that free-tier features meet requirements.
 
+The owner also permits assessment of proprietary document parsing and model APIs
+alongside local tools. Provider choice, uploads, spending, and custom model licenses
+require their own gates. Assessing an extraction model does not authorize a
+downstream analytical application.
+
 PPC is a reference for documentation and design patterns. LIONG has no automatic
 dependency on PPC or its upstream EPM/ECE repositories. Its commercial models,
 financial policies, provider arrangements, and model choices are not inherited.
 
-The initial scope excludes live facility integration, operational control,
+The initial scope excludes P&ID authoring, live facility integration, operational control,
 valve-operating procedures, declarations that equipment is safe to isolate,
-calculation engines, ML execution, forecasting, and simulation. Inspection,
+calculation engines, downstream ML analytics, forecasting, and simulation. Inspection,
 turnaround, process-flow, and procurement integrations remain extension points.
 Financial and organizational graphs are outside the initial implementation.
 

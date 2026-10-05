@@ -76,6 +76,22 @@ Each credential has one purpose and the least scope needed. The ingestion worker
 
 If a credential is exposed, stop the affected remote operation, revoke or rotate it, inspect access records, and assess affected artifacts before resuming. Redaction after a commit is not a substitute for revocation. No credential or paid service is required to review this documentation.
 
+## Proposed extraction API and model controls
+
+The user permits assessment of proprietary parser/model APIs, not document upload or spending. Candidates remain unselected; [LIONG-007](LIONG-007-stack-and-architecture.md) owns the candidate table and technology gates. SAM3 requires specific custom-license review before adoption. Dataset use permission and permission for third-party processing are separate records.
+
+Before any remote request, obtain explicit authorization for the provider, endpoint, version/tier, named input set, permitted payload fields, processing region, and spend cap. Only approved public or synthetic pages, crops, and necessary metadata may leave the workspace. Exclude sensitive facility data, credentials, private answer keys, held-out annotations, and scoring hints. Public availability alone grants no upload permission.
+
+Inspect provider retention, deletion, training use, data regions, subprocessors, and request/log/cache terms before authorization. Record the reviewed terms and date. A provider, version, tier, or terms change requires renewed gate review. Do not assume a hosted parser has the same behavior, license, or data boundary as its self-hosted counterpart.
+
+Treat all document, API prompt, response, log, and cache content as untrusted data. Prompt injection cannot change tools, system or approval instructions, credentials, or allowed destinations. Parse responses into constrained candidate records and validate their evidence. No provider response can directly publish or approve an engineering change. The existing logical publisher and review gates retain authority.
+
+Use scoped secrets outside tracked files and redact authorization headers and credentials from artifacts. Enforce an explicitly authorized spend ceiling, bounded retries, concurrency, and provider quotas before admitting calls. Count retries and rejected calls in the cost record, including unknown billing outcomes. Pause admission when authorization, budget, or quota evidence is unavailable.
+
+Record input/configuration hashes, request identities, attempt outcomes, and response hashes for rate-limit recovery and unknown outcomes. Reuse captured responses only under their exact recorded context; do not assume providers support idempotency or make retries free. A disabled route fails explicitly unless an approved fallback is configured and named in the result. No silent provider, model, privacy, or quality downgrade is permitted.
+
+These are proposed runtime controls, not configured safeguards. Assess them under SCN-015 and SCN-016, with recovery using the existing publication controls. Captured-response offline replay is separate from live inference and does not prove hosted availability or repeatability.
+
 ## Storage, retention, and disposal
 
 The Proposed default is durable local storage for the demonstration record. Temporary process memory or a disposable notebook session is not the sole copy. Storage paths, database choices, encryption, backup destinations, and capacity remain implementation decisions. A local path name does not establish permission or durability.

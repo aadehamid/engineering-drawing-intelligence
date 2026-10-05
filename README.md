@@ -38,6 +38,12 @@ Cloudflare services and Databricks Free Edition are permitted exceptions to the
 open-source condition. Their use is optional and requires verified fit and separate
 authorization before provisioning or spending.
 
+The [drawing extraction assessment](docs/LIONG-007-stack-and-architecture.md#modern-drawing-extraction-candidates)
+covers LiteParse, LlamaParse, Firecrawl Parse, document and vision-language models
+on Hugging Face, and optional SAM 3 segmentation. These are candidates, not selected
+dependencies. Proprietary API assessment does not authorize uploads or paid calls;
+SAM 3 also requires custom-license review. P&ID authoring remains out of scope.
+
 ## Check and rebuild the documentation package
 
 Requires Python 3.10 or later; no third-party Python packages are needed.
