@@ -70,7 +70,8 @@ use the same engineering definitions and validation rules.
 
 The supported DEXPI subset must preserve equipment, valves, instruments,
 pipe segments, connection points, tags, available attributes, and drawing
-context. Unsupported source content must be reported. DEXPI export to other
+context, including cross-sheet references. Preserve flow direction only when
+the source establishes it. Unsupported source content must be reported. DEXPI export to other
 applications requires sufficiently complete supported records and validation;
 it is not assumed to follow automatically from successful ingestion.
 
@@ -119,6 +120,13 @@ These views provide connected engineering information that could support a
 digital twin. They do not constitute a live operational twin or simulation.
 Relief and flare calculations, process modeling, forecasting, and ML execution
 remain potential consumers of exported subgraphs, not implemented engines.
+
+Isolation-planning support is limited to inspecting paths and candidate
+boundary valves within a declared analysis boundary. Results must show the
+graph revision and source evidence, including gaps in connectivity.
+The application must not recommend valve-operating sequences or declare
+equipment safe to isolate. Valve suitability, operating conditions, and
+approved procedures remain outside the demonstration.
 
 ## Changes and historical states
 
