@@ -42,14 +42,22 @@ compatibility claim and propose a documented change; do not silently downgrade.
 | M0: approve contracts | Review model, source policies, provider exceptions, and required tests | Approved sections/versions and unresolved-gate register | Unapproved substantive designs remain proposals |
 | M1: structured slice | Implement MILESTONE-001 | Source/exchange/graph manifests and independent exact comparison | Unsupported DEXPI stops the slice, not the standards requirement |
 | M2: controlled publication | Add revision events, reconciliation, candidate activation, and history | SCN-003 through SCN-008; duplicate, stale, and failure-injection reports | Failed candidate retains previous publication |
-| M3: drawing review | Add licensed flat-file inputs, pluggable extraction adapters, and review workflow | SCN-002; pre-review and post-review results; proposed candidate comparison under SCN-009/010/015/016 | Uncertain edges remain unresolved; candidate outputs cannot publish directly |
+| M3: drawing review | Integrate adapters and review on visible, licensed development fixtures only | Development SCN-002 results and the candidate comparison plan; no held-out or provider benchmark admission | Uncertain edges remain unresolved; no private evaluation material or unauthorized uploads |
 | M4: engineering context | Add work orders, measurement samples, documents, and MOC links | SCN-009 through SCN-012 with source locators | Missing required context is explicit |
-| M5: access and recovery | Enforce roles, isolate truth, restore and replay | SCN-013 through SCN-015 | Critical control failure blocks the demonstration |
-| M6: bounded evaluation | Freeze workload/public test partitions and run evaluation | SCN-016 plus separate public and synthetic reports | No acceptance claim without approved thresholds and measured results |
+| M5: access and recovery | Enforce roles, isolate truth, restore and replay; test protection using sacrificial canaries rather than held-out answers | SCN-013 through SCN-015 control evidence; extraction principal cannot read protected storage or leaked outputs | Critical control failure blocks release of held-out inputs to any extraction route |
+| M6: bounded evaluation | After M5, freeze workload, truth, partitions, parser adapters, and metrics; run authorized candidate comparisons | SCN-002/009/010/015/016 comparison results with separate development, held-out, public, and synthetic reports | No held-out execution before controls pass; no acceptance claim without frozen measures and required authorizations |
 | M7: optional hosted comparison | Assess selected Cloudflare/Databricks functions after authorization | Reproducible data movement, limits, cost boundary, export/recovery report | Hosted failure does not corrupt authoritative source or erase local evidence |
 
 This is dependency order, not a staffing or calendar plan. No delivery date is
 implied. Public data research can proceed alongside synthetic-contract work.
+
+M3 can develop the comparison harness using the visible R0 oracle and permitted
+development files. It does not satisfy blind-evaluation, isolation, or comparative
+performance gates. M5 establishes the access boundary before M6 admits held-out
+inputs. In M6, first freeze partitions, annotations, matching rules, and resource
+cohorts; then execute comparisons. Hosted routes also require upload and spend
+authorization regardless of stage. M7 is a separate optional storage/analytics
+comparison, not a prerequisite that can waive M6 parsing-provider controls.
 
 ## Repository responsibilities
 
@@ -95,9 +103,9 @@ between source approval state and the graph's currently served publication.
 
 This procedure is not executed. [LIONG-007](LIONG-007-stack-and-architecture.md) owns the unselected LiteParse, LlamaParse, Firecrawl Parse, Docling/Granite-Docling-258M, PaddleOCR-VL-1.6, Qwen3-VL-8B-Instruct, and optional SAM3 candidates. Prefer simple pluggable adapters and retain the baseline. PPC services and model orchestration are not required. The scope remains extraction and review, not drawing authoring. The downstream forecasting/ML analytics exclusion does not exclude extraction models.
 
-1. Close applicable technology, license, and dataset gates. Review SAM3's custom license specifically before adoption.
+1. Close applicable technology, license, and dataset gates. Review SAM3's custom license specifically before adoption. Complete M5 isolation/access checks before any M6 held-out inference; M3 work uses visible development fixtures only.
 2. Obtain separate authorization for third-party processing and spend before uploading documents or making paid calls. Apply [LIONG-009](LIONG-009-governance-and-operations.md#proposed-extraction-api-and-model-controls), including provider terms, secrets, caps, quotas, and disabled-route behavior.
-3. Freeze the licensed input set, held-out partition, prompts, versions/tiers, decoding, full-page/tile transforms, merge rules, and paired with/without-SAM3 configurations. Keep answer keys outside all extraction requests.
+3. At M6, freeze the licensed input set, held-out partition, parser truth and matching/scoring rules, prompts, versions/tiers, decoding, full-page/tile transforms, merge rules, and paired with/without-SAM3 configurations. Keep answer keys outside all extraction requests.
 4. Record the CPU baseline, GPU, and hosted cohorts separately. Do not force the official CUDA-based SAM3 route into the no-GPU baseline or claim cross-cohort performance parity.
 5. Execute only authorized SCN-002/009/010/015/016 subcases using the [evaluation protocol](LIONG-010-evaluation.md#proposed-extraction-candidate-comparison). Capture artifact and response hashes, parsing and topology results, review effort, and total measured cost.
 6. Test bounded rate-limit recovery with stable input/request identities and recorded attempt outcomes. A disabled route hard-fails unless an explicit approved fallback is identified in the report.
