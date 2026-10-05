@@ -12,6 +12,36 @@ Use clearly labeled synthetic data where public data is unavailable or insuffici
 Do not imply access to actual LIONG records or internal systems.
 Use open-source technology, with capabilities verified before final selection.
 
+User-approved exceptions to the open-source condition are Cloudflare services
+and Databricks Free Edition. These exceptions permit assessment and selection;
+they do not require either provider or authorize deployment or spending.
+Verify current free-tier limits, terms, required features, and compatibility
+before treating a proposed use as implementation-ready.
+
+LIONG is an independent project in this repository. PPC is a reference for
+documentation practices, architecture patterns, and technology assessment,
+not a parent application or a required runtime dependency. PPC changes do not
+automatically change LIONG's approved requirements.
+
+## Users
+
+The primary user is an engineering-data reviewer who checks extracted objects
+and connections, investigates conflicts, and accepts drawing-derived information
+for publication, subject to the required validation gates.
+
+The secondary user is a maintenance or process engineer who explores published
+connectivity and candidate isolation boundaries.
+
+Acceptance of extraction results is distinct from approval of an engineering
+modification or authorization of isolation. Neither user role implicitly grants
+those separate authorities.
+
+A separate engineering-change approver role approves proposed engineering
+modifications. Publication still requires validation after approval.
+One person may exercise both reviewer and approver roles in the demonstration,
+but each action records the role used. Neither role authorizes real-world isolation.
+Detailed permission and approval workflows remain to be defined.
+
 ## Intended outcome
 
 Build a maintained engineering foundation that supports both ingestion paths,

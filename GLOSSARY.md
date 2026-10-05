@@ -4,6 +4,18 @@ Terms for representing engineering information and its approved changes.
 
 ## Language
 
+**Engineering-data reviewer**:
+The role responsible for checking extracted engineering information and
+accepting drawing-derived results for publication.
+
+**Maintenance or process engineer**:
+The role that uses published engineering information to investigate
+connectivity and candidate isolation boundaries.
+
+**Engineering-change approver**:
+The role responsible for approving a proposed engineering modification,
+distinct from accepting extraction results or authorizing real-world isolation.
+
 **Engineering object**:
 An identifiable item in the engineering model, such as equipment, a valve,
 an instrument, a pipe segment, or a connection point.

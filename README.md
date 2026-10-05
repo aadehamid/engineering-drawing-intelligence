@@ -13,6 +13,11 @@ and publishes reviewed results through the same engineering model.
 
 ## Documentation
 
+- [Review package and reading order](docs/LIONG-000-index.md): eleven draft documents, decisions, references, and implementation gates.
+- [Download the complete Markdown package](docs/releases/LIONG-review-package-v0.1.zip): individual files with a SHA-256 manifest.
+
+The original approved baseline remains available:
+
 - [Problem statement](PROBLEM_STATEMENT.md): the engineering problem, intended outcome, and scope.
 - [Architecture](ARCHITECTURE.md): ingestion paths, source authority, graph domains, and change handling.
 - [Requirements](REQUIREMENTS.md): confirmed behavior and acceptance evidence.
@@ -20,6 +25,32 @@ and publishes reviewed results through the same engineering model.
 
 ## Project status
 
-The scope is confirmed. This repository currently contains documentation, not
-a working pipeline. Dataset selection, DEXPI compatibility checks, technology
-evaluation, and implementation planning remain to be done.
+The scope is confirmed. The expanded version 0.1 package is a draft for review;
+new technical proposals are not automatically approved. LIONG remains independent
+of PPC, which is a documentation and architecture reference.
+
+This repository contains documentation and documentation-checking utilities, not
+a working engineering pipeline. Public-source research and a PPC stack assessment
+are recorded in the package. Dataset admission, DEXPI interoperability tests,
+component locks, and deployment remain implementation gates.
+
+Cloudflare services and Databricks Free Edition are permitted exceptions to the
+open-source condition. Their use is optional and requires verified fit and separate
+authorization before provisioning or spending.
+
+## Check and rebuild the documentation package
+
+Requires Python 3.10 or later; no third-party Python packages are needed.
+
+```sh
+python3 scripts/bundle_docs.py
+python3 scripts/check_docs.py
+python3 scripts/test_doc_tools.py
+python3 scripts/bundle_docs.py --check
+```
+
+Build the archive first when working from an extracted copy. The archive does
+not contain another copy of itself.
+
+These checks validate documentation and archive integrity. They do not execute
+engineering acceptance scenarios or establish standards compliance.
