@@ -160,8 +160,14 @@ Evaluation must identify which results use public data and which use synthetic d
 
 The open-source stack is not yet selected. Candidates include PostgreSQL for
 the representative backend, PostgreSQL with Apache AGE for the graph, Python
-and lxml for transformations, and OpenCV and Tesseract for drawing extraction.
+and lxml for transformations. The expanded stack assessment considers modern
+parsers, vision-language models, and optional segmentation for drawing extraction.
 FastAPI and Cytoscape.js are candidates for the application interface.
+
+See [the extraction shortlist](docs/LIONG-007-stack-and-architecture.md#modern-drawing-extraction-candidates)
+for LiteParse, LlamaParse, Firecrawl Parse, selected Hugging Face models, and
+SAM 3. OpenCV and Tesseract are optional supporting components, not the default
+end-to-end extraction architecture. No authoring application is included.
 
 These components do not by themselves provide DEXPI compliance, engineering
 symbol interpretation, or a complete authoring system. Verify format support,

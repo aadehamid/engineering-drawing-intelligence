@@ -57,6 +57,20 @@ To compare effort, time independent manual annotation and assisted review on mat
 
 Report total active seconds and seconds per sheet for each method, along with medians and ranges when enough tasks exist. Include startup/training time separately. Faster review cannot compensate for residual critical connectivity errors.
 
+## Proposed extraction candidate comparison
+
+Assess LiteParse, LlamaParse, Firecrawl Parse, Hugging Face Docling/Granite-Docling-258M, PaddleOCR-VL-1.6, Qwen3-VL-8B-Instruct, and optional SAM3 without selecting them. [LIONG-007](LIONG-007-stack-and-architecture.md) owns candidate details and gates. Sources are REF-TECH-008 through REF-TECH-014 in the [reference register](LIONG-REF-001-reference-register.md). This protocol grants no upload, paid-call, installation, or adoption permission.
+
+Use the paired fixtures in [LIONG-006](LIONG-006-synthetic-data.md#proposed-extraction-candidate-subcases) under SCN-002/009/010/015/016. Freeze identical eligible source inputs and scoring scope. Compare parsing quality (text, layout, tables, tags, and region coordinates) separately from engineering topology (ports, links, crossings, cross-sheet continuity, and bypasses). A successful parse cannot establish engineering correctness.
+
+Freeze prompts, model/checkpoint and provider versions, service tiers, decoding settings, seeds where supported, render/tile transforms, merge rules, and segmentation settings. Compare each eligible extraction configuration with and without SAM3; disclose unsupported pairings. Retain full-page context alongside tiles and declare which visual inputs each model receives. Text-only topology inference must be a separately labeled experiment, never a silent substitute.
+
+Use the existing matching and denominator definitions. Report hallucinated edges as false-positive counts and edge-precision errors, distinct from the unsupported-relationship evidence metric. Report port/entity and link/edge TP/FP/FN on a frozen annotated slice, with recall denominators from expected items and precision denominators from predictions. Do not add port nodes to the R0 17/31 comparison view. List missed bypasses, false junctions, invented cross-sheet links, and unknown-continuation errors separately as critical findings. Raw model scores are not calibrated engineering certainty.
+
+Score automatic and reviewed outputs separately and measure review effort with the paired method above. Repeat live inference at least three times with fixed configuration and report all output differences, not just the best run. Separately replay captured responses offline to test downstream determinism. Replay does not measure fresh model/provider nondeterminism. Retain request, response, intermediate artifact, and output hashes subject to the governance boundary.
+
+Report end-to-end cost alongside quality: successful, retried, rejected, and indeterminate calls; billed units; GPU time; hosting; storage; and reviewer time. Record actual charges or unavailable billing evidence, authorized caps, quotas, throttling, and recovery delays. Do not assume free tiers, low review effort, or zero cost for failed requests. Self-hosted and hosted parser results are separate configurations, with no presumed parity.
+
 ## Proposed acceptance gates
 
 For controlled synthetic cases, propose exact matching after required review: entity and edge precision/recall equal 1.0, supported source coverage equal 1.0, and evidence coverage equal 1.0. All expected attributes and scenario-specific sets must match. R0 must produce exactly 17 nodes and 31 edges, not merely those totals with different contents.
@@ -113,7 +127,7 @@ Report each missing field against each affected object, available units, selecti
 
 ## Workload and performance boundary
 
-SCN-016 is a proposed measurement protocol, not a performance result or service-level promise. Propose one local machine with four logical CPU cores, 16 GiB RAM, SSD storage, and no GPU. Record the actual CPU model, OS, container limits, dependency versions, graph engine, and cache state. If the actual machine differs, report that difference rather than claiming comparability.
+SCN-016 is a proposed measurement protocol, not a performance result or service-level promise. The simple local baseline proposes four logical CPU cores, 16 GiB RAM, SSD storage, and no GPU. This baseline does not exclude GPU extraction candidates. Use separate GPU and hosted cohorts, including the official CUDA-based SAM3 route if authorized. Record actual CPU/GPU hardware, memory, drivers, runtime, model versions, provider limits, OS, container limits, graph engine, and cache state. Report cohort-specific performance; do not attribute differences across unlike hardware or provider limits solely to model quality.
 
 | Workload | Exact unit and proposed size | Measurement boundary |
 |---|---|---|

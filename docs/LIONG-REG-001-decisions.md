@@ -40,6 +40,8 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-009 | Permit Cloudflare and Databricks Free Edition as open-source exceptions | Assess their fit without making them mandatory or authorizing spending | LIONG-007 |
 | DEC-010 | Reviewer, consumer, and separate engineering-change approver roles | One demonstrator may exercise roles, but actions record the active role and do not authorize isolation | LIONG-002, LIONG-008 |
 | DEC-011 | Produce the document sequence in a batch, commit it, and open a PR | Owner will review later; permission to draft is not approval of new technical proposals | LIONG-000 |
+| DEC-012 | Exclude authoring and assess modern extraction tools, including Hugging Face options | Backend and existing/synthetic drawing ingestion remain the scope; do not default to a hand-built OpenCV/Tesseract pipeline | LIONG-001, LIONG-007 |
+| DEC-013 | Allow assessment of proprietary parsing and model APIs | Comparison design and public-documentation research are allowed; provider selection, uploads, paid calls and custom model-license acceptance require explicit gates | Root REQUIREMENTS; LIONG-007/009 |
 
 ## New proposals
 
@@ -54,6 +56,8 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-107 | Exact synthetic checks plus separate public evaluation versus one aggregate score | Critical control failures always block; automatic and reviewed accuracy remain separate | Project owner, LIONG-010 |
 | DEC-108 | Bounded standards mapping versus wholesale ontology import | Map only inspected definitions and required dependencies; leave unsupported equivalences unresolved | Project owner, LIONG-003/004 |
 | DEC-109 | Drawing-baseline acceptance versus engineering approval | Permit initial publication with engineering decision not applicable; require distinct source approval and a new approved baseline publication before engineering proposals use it as their base. Never relabel historical acceptance as approval | Project owner, LIONG-005/008 |
+| DEC-110 | Pluggable parsing and visual interpretation versus OCR-centric custom extraction | Compare LiteParse, hosted parsers, document models and a general vision-language model in their respective roles; treat SAM 3 as an optional segmentation experiment, not a parser or graph generator | Project owner, LIONG-005/007/010 |
+| DEC-111 | Evidence-based model admission versus adoption from general benchmarks | Require engineering fixtures, source-region checks, repeat-run records, hardware/cost cohorts and license/data-processing review before selection; no downstream publication authority for model outputs | Project owner, LIONG-007/009/010 |
 
 These are proposal groups. Document-local gate IDs retain finer-grained evidence
 requirements. Approval must identify which groups or sections it covers.
@@ -103,6 +107,6 @@ review request. Link corrections and status maintenance need no new design decis
 
 | Artifact | Version | State | Approval scope |
 | --- | --- | --- | --- |
-| Root REQUIREMENTS and GLOSSARY | Baseline plus accepted discovery amendments | User-approved decisions recorded | DEC-001 through DEC-010; no pipeline implementation |
+| Root REQUIREMENTS and GLOSSARY | Baseline plus accepted discovery amendments | User-approved decisions recorded | DEC-001 through DEC-010 and DEC-012 through DEC-013; no pipeline implementation |
 | LIONG-001 through LIONG-011 | 0.1 | Draft for review | None yet |
 | Index, reference register, this register | 0.1 | Review aids | Not approval of referenced tools or external artifacts |

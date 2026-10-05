@@ -151,6 +151,27 @@ Referenced software/service names do not waive licensing or provider terms.
 No third-party packages, specifications, or example datasets are redistributed
 in this documentation archive. New LIONG code/data licensing remains an owner decision.
 
+## Drawing extraction references
+
+Accessed 2026-10-05 UTC. These are documentation and model-card inspections, not
+P&ID benchmarks or installed dependencies. Model weights were not downloaded.
+Pinned source revisions aid review; runtime compatibility and complete dependency
+licenses remain separate gates.
+
+| ID | Inspected primary source | Supported claim | Limits and outstanding checks |
+| --- | --- | --- | --- |
+| REF-TECH-008 | [LiteParse README](https://github.com/run-llama/liteparse/blob/b2a87350e5a40638d8e39d47875a6b8f4e4a0faf/README.md), commit `b2a87350e5a40638d8e39d47875a6b8f4e4a0faf`; repository metadata identifies Apache-2.0 | Local PDF parsing, bounding boxes, screenshots, JSON, bundled Tesseract and replaceable OCR; not an LLM | Pin a package release and platform dependencies; verify evidence coordinates and scans; its document benchmarks do not establish P&ID topology accuracy |
+| REF-TECH-009 | [LlamaParse overview](https://developers.llamaindex.ai/python/cloud/llamaparse/), rolling service documentation | Hosted generative parsing, diagram support, structured output, custom instructions and versioned tiers | No tier selected or request executed; verify current prices, tier limits, grounding fields, retention/training terms, regions and upload permission |
+| REF-TECH-010 | [Firecrawl Parse documentation](https://docs.firecrawl.dev/features/parse), also inspected via its [Markdown representation](https://docs.firecrawl.dev/features/parse.md) | PDF pages and typed layout blocks include bounding boxes and Markdown-span grounding; JSON extraction and OCR fallback are documented | Service features are not proof of self-hosted parity; verify truncation, pricing, effective retention mode, third-party processing, and P&ID results |
+| REF-TECH-011 | [Granite-Docling-258M model card](https://huggingface.co/ibm-granite/granite-docling-258M/blob/982fe3b40f2fa73c365bdb1bcacf6c81b7184bfe/README.md), revision `982fe3b40f2fa73c365bdb1bcacf6c81b7184bfe` | Apache-2.0 model-card declaration; document conversion, Docling integration, full-page and bounding-box-guided inference | Card says not intended for general image understanding; inspect Docling/runtime packages and all model dependencies before adoption |
+| REF-TECH-012 | [PaddleOCR-VL-1.6 model card](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6/blob/c5630abae1d940eafe0697512a0325494b02ab42/README.md), revision `c5630abae1d940eafe0697512a0325494b02ab42` | Apache-2.0 model-card declaration; multimodal document parsing, text spotting, table/formula/chart recognition | General benchmark results are publisher claims, not LIONG measurements; pin runtime, preprocessing and additional models; test hardware fit |
+| REF-TECH-013 | [Qwen3-VL-8B-Instruct model card](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/blob/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b/README.md), revision `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b` | Apache-2.0 model-card declaration; visual interpretation, spatial grounding and OCR | No engineering accuracy established; pin compatible runtime and decoding settings, verify image limits, memory and source grounding |
+| REF-TECH-014 | [SAM 3 README](https://github.com/facebookresearch/sam3/blob/2345a4ad109ac29c569da749c91d84f10dc08c40/README.md) and [SAM License](https://github.com/facebookresearch/sam3/blob/2345a4ad109ac29c569da749c91d84f10dc08c40/LICENSE), commit `2345a4ad109ac29c569da749c91d84f10dc08c40`; license dated 2025-11-19 | Text/visual-prompted segmentation returns masks, boxes and scores; official setup lists Python 3.12+, PyTorch 2.7+, CUDA GPU/CUDA 12.6+; checkpoint access is gated | Custom use/redistribution restrictions need review and specific acceptance; no assumed CPU/Mac or P&ID support. README also advertises SAM 3.1, which is not automatically the evaluated checkpoint |
+
+The requested Meta project page returned an error during inspection; SAM claims
+above come from the official repository and license. No hosted extraction API was
+invoked, no documents were uploaded, and no license agreement was accepted.
+
 ## Review outcome
 
 Primary evidence establishes a native DEXPI 2.0 example and a separately licensed legacy example collection. It does not yet establish a working native 2.0 toolchain. Model import access, exact 2.0-family version selection, dataset-level rights checks, and public scan coverage remain open.

@@ -12,8 +12,14 @@ The owner authorized batch drafting and a PR, not automatic approval of new desi
 
 Read [LIONG-001](LIONG-001-charter.md) for the purpose and boundaries.
 Then review [the decisions](LIONG-REG-001-decisions.md), especially DEC-101 through
-DEC-109 and GATE-001 through GATE-008. All eleven substantive documents are version
+DEC-111 and GATE-001 through GATE-008. All eleven substantive documents are version
 0.1 drafts. No engineering pipeline has been implemented or tested.
+
+The extraction assessment amendment adds modern parsers, vision-language models,
+and optional SAM 3 segmentation. No authoring application is included. Compare
+the candidate responsibilities and gates in LIONG-007 before approving selection.
+The draft version is identified by its repository commit and archive hashes;
+this amendment does not approve the other outstanding design proposals.
 
 ## Document map
 

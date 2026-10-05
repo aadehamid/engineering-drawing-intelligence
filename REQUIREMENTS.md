@@ -18,6 +18,15 @@ they do not require either provider or authorize deployment or spending.
 Verify current free-tier limits, terms, required features, and compatibility
 before treating a proposed use as implementation-ready.
 
+P&ID authoring is out of scope. The project consumes backend records and existing
+or synthetic drawing files; it does not replace an engineering authoring suite.
+
+Assess modern document parsers and vision-language models for flat-file extraction,
+including open-source tools and proprietary parsing/model APIs. This permits
+research and comparison design, not paid calls, model-license acceptance, deployment,
+or third-party uploads. Named tools remain candidates until their fit and terms
+are reviewed. Optional SAM 3 segmentation requires separate custom-license review.
+
 LIONG is an independent project in this repository. PPC is a reference for
 documentation practices, architecture patterns, and technology assessment,
 not a parent application or a required runtime dependency. PPC changes do not
@@ -60,6 +69,10 @@ schedules, process flows, and procurement history, as extension points.
 Retain relief and flare calculations, process modeling, machine learning,
 forecasting, and simulation as potential consumers. Their execution is deferred.
 Financial and organizational graphs are outside the initial implementation.
+
+The deferred machine-learning scope concerns downstream analytical applications.
+It does not exclude assessed models used to extract or interpret drawing content.
+Extraction model outputs remain candidates subject to evidence, validation, and review.
 
 ## Ingestion and source authority
 
