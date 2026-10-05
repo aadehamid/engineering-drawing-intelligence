@@ -1,0 +1,63 @@
+# LIONG engineering information
+
+Terms for representing engineering information and its approved changes.
+
+## Language
+
+**Engineering object**:
+An identifiable item in the engineering model, such as equipment, a valve,
+an instrument, a pipe segment, or a connection point.
+
+**Tag**:
+A contextual engineering label associated with an object and applicable
+revisions. A tag is not the object's stable identity.
+_Avoid_: Asset identity, unique global identifier
+
+**Drawing appearance**:
+A representation of an engineering object in a particular drawing.
+An object can have more than one drawing appearance.
+
+**Authoritative source**:
+The declared source that governs engineering information for a dataset.
+
+**System of authoring**:
+The system in which engineering information is created or edited.
+
+**System of record**:
+The system holding authoritative information for a declared scope.
+
+**System of reference**:
+A connected representation used for queries and analysis without replacing
+the authority of its source records.
+
+**P&ID data product**:
+The validated set of engineering objects and relationships prepared for
+publication, including their provenance, identifiers, revisions, and review status.
+
+**Layer 0**:
+The engineering objects and connectivity behind P&IDs that form the foundation
+for connected domain information.
+
+**Accepted baseline**:
+The initial engineering state accepted for subsequent comparison and change.
+For drawing-only datasets, it consists of reviewed extraction results.
+
+**Approved state**:
+An engineering state whose required approval has been recorded.
+Approval and publication are distinct: an approved source revision can fail graph validation.
+
+**Published state**:
+An accepted graph state that has passed the required validation and review.
+
+**Proposed state**:
+A candidate engineering state based on a named approved revision, kept
+separate from approved information until explicitly approved.
+
+**Management of Change record**:
+A record of an engineering modification's reason, affected assets,
+proposed revision, approval status, and approval history.
+_Avoid_: Ingestion log
+
+**Equipment bridge**:
+The relationships that connect operational measurement identifiers to
+the engineering assets they describe.
