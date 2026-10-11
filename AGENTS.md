@@ -41,9 +41,11 @@ recorded; [the decision register](docs/LIONG-REG-001-decisions.md) holds their s
 
 - Decision interviews use `/grill-with-docs`, which the owner starts.
 - A question the owner skips in a decision round counts as agreement with the
-  recommendation. The record quotes the round.
-- A merge approves nothing. A newer file is not more authoritative than an
-  approved one.
+  recommendation. The record quotes the round. The owner set this rule on
+  2026-10-11, answering "yes" to Q12 of the synthetic-data interview.
+- A pull request merge alone does not approve draft proposals, unless the owner
+  records that approval is the merge's intent and names its scope. A newer file is
+  not more authoritative than an approved one.
 
 ## Terms
 
