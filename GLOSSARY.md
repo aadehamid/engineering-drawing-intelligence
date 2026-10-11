@@ -73,3 +73,17 @@ _Avoid_: Ingestion log
 **Equipment bridge**:
 The relationships that connect operational measurement identifiers to
 the engineering assets they describe.
+
+**Canonical world**:
+The complete engineering truth for one synthetic facility, including its
+revisions and intended errors. Every source representation is derived from it.
+_Avoid_: Ground truth dataset, master data
+
+**Source representation**:
+One view of a canonical world as a particular source presents it, such as the
+engineering backend, a drawing set, or a register. Each has its own record keys.
+
+**World lineage**:
+A canonical world together with every source representation, revision, render,
+and crop derived from it. Training and evaluation partitions separate whole
+lineages, never individual pages or files.
