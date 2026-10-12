@@ -8,8 +8,10 @@ Date: 2026-10-11
 LIONG-006 specifies the canonical world R0 and its revisions. MILESTONE-001 in
 LIONG-011 needs only the R0 engineering backend, its answer key, and one
 invalid-reference variant, which is part of SCN-005. The other source
-representations belong to later milestones: drawings in M3, registers and the
-operational fixture in M4, and held-out worlds in M6.
+representations belong to later milestones in LIONG-011's stage table: the
+registers behind SCN-008 in M2, drawings in M3, the operational fixture for SCN-011
+in M4, and held-out worlds in M6. The interview question placed the registers in
+M4; the stage table puts SCN-008 in M2.
 
 ## Decision
 

@@ -26,9 +26,10 @@ state; a register row links here when its decision has a record.
 | [DEC-029](DEC-029-two-canonical-worlds.md) | There are two canonical worlds, each generated into one vendor's schema | Decided | 2026-10-11 |
 | [DEC-030](DEC-030-plant-3d-backend-first.md) | MILESTONE-001 builds the Plant 3D-style backend first | Decided | 2026-10-11 |
 | [DEC-031](DEC-031-stored-data-not-behaviour.md) | The backends copy each application's saved data, not its editing behaviour | Decided | 2026-10-11 |
-| [DEC-032](DEC-032-minimal-data-dictionary.md) | Each backend carries a minimal data dictionary for the classes its world uses | Decided | 2026-10-11 |
+| [DEC-032](DEC-032-minimal-data-dictionary.md) | Each backend carries a minimal data dictionary for the classes R0 uses | Decided | 2026-10-11 |
 | [DEC-033](DEC-033-architecture-wording.md) | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Decided | 2026-10-11 |
 | [DEC-034](DEC-034-r0-smartplant-cross-check.md) | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Decided | 2026-10-11 |
+| [DEC-035](DEC-035-r0-is-the-autodesk-world.md) | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Proposed | 2026-10-12 |
 
 ## Record format
 

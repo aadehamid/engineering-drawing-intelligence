@@ -1,4 +1,4 @@
-# DEC-032: Each backend carries a minimal data dictionary for the classes its world uses
+# DEC-032: Each backend carries a minimal data dictionary for the classes R0 uses
 
 Status: Decided
 Date: 2026-10-11
@@ -11,7 +11,7 @@ dictionary with item types and select lists, and Plant 3D has class definitions.
 ## Decision
 
 Each backend includes a small version of its product's metadata layer, covering
-only the classes its world uses. The DEXPI mapping has to read that layer.
+only the classes R0 uses. The DEXPI mapping has to read that layer.
 
 ## Alternatives considered
 
@@ -30,8 +30,8 @@ The owner answered:
 
 > Q19: Agreed.
 
-The question predates [DEC-029](DEC-029-two-canonical-worlds.md). With two worlds,
-the SmartPlant-style backend covers the classes W-SP uses.
+The question predates [DEC-029](DEC-029-two-canonical-worlds.md). Which classes the
+backend of the second world covers stays open until that world is specified.
 
 ## Evidence
 

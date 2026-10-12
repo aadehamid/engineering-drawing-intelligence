@@ -29,6 +29,11 @@ Asked as Q17 of the synthetic-data interview on 2026-10-11:
 > Should MILESTONE-001 build the Plant 3D-style backend first, with SmartPlant-style
 > as the next step?
 
+The recommendation given with it:
+
+> Yes. Do Plant 3D-style first to prove the route, then add SmartPlant-style as
+> MILESTONE-001b.
+
 The owner answered:
 
 > Q17: Agreed.
@@ -37,3 +42,4 @@ The owner answered:
 
 - The vendor research run during the interview, on how each product stores
   connections.
+- MILESTONE-001b is a new milestone ID. LIONG-011 does not define it yet.

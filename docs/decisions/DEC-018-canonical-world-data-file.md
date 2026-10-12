@@ -12,9 +12,7 @@ the manifest can hash, and the scorer can read without running generator code.
 
 Each canonical world is a declarative data file, such as YAML, checked against a
 JSON Schema in `schemas/`. The file lists aliases, typed objects, attributes, edges,
-and revisions as changes from a named base. Code does the work around the file: the
-schema rejects a malformed world, a Python generator turns the world into source
-representations, and tests check the generator's own output.
+and revisions as changes from a named base.
 
 ## Alternatives considered
 
@@ -33,7 +31,11 @@ The owner answered:
 
 > Q4. Agreed. What are then going to do with this file. Should we use code here?
 
-The follow-up reply described the three code pieces in the Decision section.
+The follow-up reply answered the owner's question by proposing three pieces of code
+around the file: the JSON Schema that rejects a malformed world, a Python generator
+that turns the world into source representations, and tests of the generator's own
+output. The owner has not confirmed that proposal in words, so this record does not
+decide it.
 
 ## Evidence
 

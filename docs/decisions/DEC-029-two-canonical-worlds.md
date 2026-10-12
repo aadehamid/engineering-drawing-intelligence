@@ -19,15 +19,11 @@ stated the decision in those terms.
 ## Decision
 
 The project has two canonical worlds, and each is generated into one vendor's
-schema:
-
-- **R0** is the Autodesk world. Its backend uses the Plant 3D-style schema.
-- **W-SP** is the SmartPlant world. Its backend uses the SmartPlant-style schema.
-  It is built to exercise what only SmartPlant has, such as connectors split at
-  inline valves and pipelines derived from matching properties.
-
-Each answer key is written against its world, not against vendor tables, so one
-scorer checks both backends. What W-SP contains is still open in the interview.
+schema: one world into the SmartPlant-style schema, the other into the Plant
+3D-style schema. Each answer key is written against its world, not against vendor
+tables, so one scorer checks both backends. Which world is which is proposed in
+[DEC-035](DEC-035-r0-is-the-autodesk-world.md). What the second world contains is
+still open in the interview.
 [DEC-034](DEC-034-r0-smartplant-cross-check.md) adds R0 in SmartPlant form as test
 data only.
 
@@ -62,10 +58,8 @@ The owner wrote:
 > Q22. Essesntially what I want two canonical world.. one in SMartplant schema and
 > the other in Autodesk schema.
 
-The owner's words do not name which world is which. R0 as the Autodesk world
-follows from the Q22 proposal, which the owner did not contest, and from
-[DEC-030](DEC-030-plant-3d-backend-first.md), which builds the Plant 3D-style
-backend first for MILESTONE-001's R0 slice.
+The owner's words do not name which world is which, so this record does not
+decide it. DEC-035 proposes the assignment.
 
 ## Evidence
 
