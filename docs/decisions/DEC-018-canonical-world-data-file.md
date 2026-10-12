@@ -25,7 +25,12 @@ and revisions as changes from a named base.
 
 Asked as Q4 of the synthetic-data interview on 2026-10-11, with three options: a
 declarative data file checked against a JSON Schema, Python code that builds the
-world, or rows in a database. The recommendation was the data file.
+world, or rows in a database.
+
+The recommendation given with it:
+
+> (a). A data file is easy to review in a PR and easy to hash for the manifest.
+> It also lets the scorer read the truth without running generator code.
 
 The owner answered:
 

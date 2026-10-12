@@ -28,6 +28,11 @@ Asked as Q3 of the synthetic-data interview on 2026-10-11:
 > Should LIONG-011:21 say "the visible R0 development fixture" instead of "a known
 > private fixture"? The milestone tests the structured path, not truth isolation.
 
+The recommendation given with it:
+
+> Yes. MILESTONE-001 uses the public R0 oracle. Private truth starts with held-
+> out worlds.
+
 The owner answered:
 
 > Q3. agreed

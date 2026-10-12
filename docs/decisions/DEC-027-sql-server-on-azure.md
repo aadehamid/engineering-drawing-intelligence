@@ -38,6 +38,11 @@ Asked as Q21 of the synthetic-data interview on 2026-10-11:
 > CI, and the decision would be recorded as a new exception to the open-source
 > condition.
 
+The recommendation given with it:
+
+> (a). It's the only engine both vendors support, it meets your any-machine
+> requirement, and the pause setting caps the cost at zero.
+
 The owner answered:
 
 > Q21: agreed

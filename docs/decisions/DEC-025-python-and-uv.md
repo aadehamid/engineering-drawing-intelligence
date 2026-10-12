@@ -24,6 +24,10 @@ Asked as Q13 of the synthetic-data interview on 2026-10-11:
 
 > Should the generator use Python 3.12 with dependencies locked by uv?
 
+The recommendation given with it:
+
+> Yes.
+
 The owner answered:
 
 > Q13: yes

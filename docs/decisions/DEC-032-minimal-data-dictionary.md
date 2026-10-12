@@ -26,6 +26,11 @@ Asked as Q19 of the synthetic-data interview on 2026-10-11:
 > Should each backend include a small version of that metadata, covering only the
 > classes R0 uses?
 
+The recommendation given with it:
+
+> Yes, a minimal version. It's part of what makes these schemas awkward to read,
+> and the DEXPI mapping should have to deal with it.
+
 The owner answered:
 
 > Q19: Agreed.

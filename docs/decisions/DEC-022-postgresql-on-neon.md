@@ -26,6 +26,11 @@ Asked as Q8 of the synthetic-data interview on 2026-10-11:
 > Should we confirm PostgreSQL for the backend now, and leave the graph database
 > choice until MILESTONE-001's graph step?
 
+The recommendation given with it:
+
+> Yes. Confirm PostgreSQL for the backend now. Decide the graph database later,
+> from the same R0 tests.
+
 The owner answered:
 
 > Q8: Postgressql confirmed. Let us host it on https://neon.com/

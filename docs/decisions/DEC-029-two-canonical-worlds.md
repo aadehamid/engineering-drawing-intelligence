@@ -14,14 +14,15 @@ new world, W-SP, for SmartPlant.
 
 A canonical world is vendor-neutral truth, and the vendor schema belongs to the
 source representation generated from it. The reply to the owner's Q22 answer
-stated the decision in those terms.
+stated the decision in those terms. It added that answer keys written against the world
+would let one scorer check both backends. The owner has not confirmed that, so this
+record does not decide it.
 
 ## Decision
 
 The project has two canonical worlds, and each is generated into one vendor's
 schema: one world into the SmartPlant-style schema, the other into the Plant
-3D-style schema. Each answer key is written against its world, not against vendor
-tables, so one scorer checks both backends. Which world is which is proposed in
+3D-style schema. Which world is which is proposed in
 [DEC-035](DEC-035-r0-is-the-autodesk-world.md). What the second world contains is
 still open in the interview.
 [DEC-034](DEC-034-r0-smartplant-cross-check.md) adds R0 in SmartPlant form as test

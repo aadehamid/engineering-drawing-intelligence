@@ -26,6 +26,11 @@ Asked as Q10 of the synthetic-data interview on 2026-10-11:
 > Should I build the five guardrail steps above as five small PRs before the
 > glossary PR and the generator work?
 
+The recommendation given with it:
+
+> Yes, in that order. Each PR is small, and the first two are mostly wiring
+> around the doc checks that already exist.
+
 The owner answered:
 
 > Q10: Agreed

@@ -24,6 +24,10 @@ leave the canonical world's truth outside the lineage.
 Asked as Q7 of the synthetic-data interview on 2026-10-11, with a proposed
 definition for each term.
 
+The recommendation given with it:
+
+> Yes, add all three as written.
+
 The owner answered:
 
 > Q7. Please add them

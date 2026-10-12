@@ -29,6 +29,12 @@ Asked as Q5 of the synthetic-data interview on 2026-10-11:
 > scripts and a manifest, that a separate loader then applies to PostgreSQL? The
 > alternative is for the generator to write straight into a live database.
 
+The recommendation given with it:
+
+> Yes, files. LIONG-006 requires a SHA-256 of every emitted file, and file
+> output keeps the generator and the source database as separate identities
+> (LIONG-009:57).
+
 The owner answered:
 
 > Q5. Agreed

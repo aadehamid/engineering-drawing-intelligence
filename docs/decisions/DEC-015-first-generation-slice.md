@@ -37,6 +37,11 @@ Asked as Q1 of the synthetic-data interview on 2026-10-11:
 > worlds in M6. Should the first slice be limited to the R0 backend, the R0 answer
 > key, and that one invalid variant?
 
+The recommendation given with it:
+
+> Yes. Build only what MILESTONE-001 needs, and add the other representations at
+> the milestones that use them.
+
 The owner answered:
 
 > Q1. What excatly are we doing in R0. I do agree with your recommendation

@@ -29,6 +29,11 @@ Asked as Q2 of the synthetic-data interview on 2026-10-11:
 > choose. Should seed 2701006 be removed from the R0 description and kept for the
 > first procedural world?
 
+The recommendation given with it:
+
+> Yes. R0 stays deterministic and hand-authored. Seeds belong to procedural
+> worlds only.
+
 The owner answered:
 
 > Q2. Aligned

@@ -26,6 +26,11 @@ Asked as Q20 of the synthetic-data interview on 2026-10-11: should the
 ARCHITECTURE.md sentence change to the wording quoted in the Decision section,
 with LIONG-003 and LIONG-006 updated to match?
 
+The recommendation given with it:
+
+> Yes. This changes an approved baseline document, so it goes in its own PR with
+> a decision record quoting your Q9 answer.
+
 The owner answered:
 
 > Q20. Agreed.

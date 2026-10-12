@@ -27,6 +27,11 @@ Asked as Q11 of the synthetic-data interview on 2026-10-11:
 > quoting your words, and have the check script verify the records against the
 > index?
 
+The recommendation given with it:
+
+> Yes. Keep the register as the summary and put the evidence in per-decision
+> records. Today's answers (Q1 to Q9) would become the first records.
+
 The owner answered:
 
 > Q11: Follow way of working skill recommendation

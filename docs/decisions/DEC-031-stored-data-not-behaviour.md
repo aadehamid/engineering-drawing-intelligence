@@ -26,7 +26,13 @@ It does not simulate check-out and check-in, tag reservation, or tag recomputati
 
 Asked as Q18 of the synthetic-data interview on 2026-10-11, with option (a), match
 how each application stores its saved data, and option (b), also simulate
-application behaviour. The recommendation was (a).
+application behaviour.
+
+The recommendation given with it:
+
+> (a). Our pipeline only reads saved data. Simulating the applications' editing
+> behaviour would be building an authoring tool, and that is out of scope
+> (DEC-012).
 
 The owner answered:
 
