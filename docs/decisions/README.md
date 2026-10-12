@@ -19,6 +19,7 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
 - **File name** `DEC-NNN-short-slug.md`, first line `# DEC-NNN: <decision>`, then a
   `Status:` line (`Proposed`, `Decided`, or `Superseded`) and a `Date: YYYY-MM-DD`
   line.
+- **No raw HTML or HTML comments** anywhere outside code spans and fences.
 - **Sections**, in order and none empty: `## Context`, `## Decision`,
   `## Alternatives considered`, `## Owner's words`, `## Evidence`.
 - **Owner's words** in a `Decided` record: a line `The owner answered:` (or

@@ -399,5 +399,16 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.replace_evidence("\n<style>\nRecorded in the register.\n</style>\n")
         self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
 
+    def test_any_raw_html_fails(self) -> None:
+        for wrapper in ("<div hidden>", "<details>", "<span style=\"display:none\">"):
+            with self.subTest(wrapper=wrapper):
+                self.setUp()
+                self.edit(self.RECORD, "## Owner's words", f"{wrapper}\n\n## Owner's words")
+                self.assertTrue(any("no raw HTML" in e for e in self.errors()))
+
+    def test_html_inside_code_is_allowed(self) -> None:
+        self.replace_evidence("\nThe tag `<approved>` is literal.\n\n```html\n<div hidden>\n```\n")
+        self.assertEqual(self.errors(), [])
+
 if __name__ == "__main__":
     unittest.main()

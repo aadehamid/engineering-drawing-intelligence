@@ -502,7 +502,12 @@ def check_decisions(root: Path) -> list[str]:
     records: dict[str, Record] = {}
     names: dict[str, str] = {}
     for name, path in sorted(files.items()):
-        record = parse_record(path.read_text(encoding="utf-8"))
+        raw = path.read_text(encoding="utf-8")
+        outside_code = re.sub(r"`[^`\n]*`", "", re.sub(r"^ {0,3}(`{3,}|~{3,}).*?(^ {0,3}\1|\Z)", "", raw,
+                                                         flags=re.DOTALL | re.MULTILINE))
+        if re.search(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?]", outside_code):  # an autolink <https://...> is text
+            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
+        record = parse_record(raw)
         if not record or not name.startswith(record.record_id + "-"):
             errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")
             continue
