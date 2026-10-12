@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Tests for scripts/world.py and worlds/R0.yaml.
 
-R0's states are compared, node for node and edge for edge, with the graph that
-liong_facts.py parses from LIONG-006, so the world file and the document cannot drift.
+`fidelity_errors` compares R0.yaml with LIONG-006 fact by fact: every node's class,
+role, tag or drawing name, sheet and attributes (and nothing more), the tag context,
+every edge, and each revision's base, MOC, changes and resulting state. The tests
+below break each kind of fact on purpose and assert the error it produces.
 """
 from __future__ import annotations
 
 import copy
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -17,13 +20,89 @@ import liong_facts  # noqa: E402
 import world  # noqa: E402
 
 R0 = world.ROOT / "worlds" / "R0.yaml"
+CLASSES = {
+    "Equipment": "equipment", "Valve": "valve", "Instrument": "instrument",
+    "Connection point": "connection_point", "Pipe segment": "pipe_segment", "Drawing document": "drawing",
+}
+
+
+def documented_nodes(text: str) -> dict[str, dict]:
+    """Each node of LIONG-006's R0 table as R0.yaml must write it, attributes included."""
+    nodes = {}
+    lines = text[text.index("| Alias | Type |"):].splitlines()[2:]
+    for line in lines:
+        if not line.startswith("|"):
+            break
+        alias_cell, type_cell, tag_cell, sheet_cell = (c.strip() for c in line.strip("|").split("|"))
+        kind, _, role = type_cell.partition(", ")
+        aliases = re.split(r"\s*,\s*", alias_cell)
+        tags = re.split(r"\s*,\s*", tag_cell) if len(aliases) > 1 else [tag_cell]
+        for alias, tag in zip(aliases, tags if len(tags) == len(aliases) else [tag_cell] * len(aliases)):
+            node = {"class": CLASSES[kind]}
+            if node["class"] == "drawing":
+                node["name"] = tag
+            else:
+                if role:
+                    node["role"] = role
+                if tag != "No display tag":
+                    node["tag"] = tag
+                node["sheet"] = sheet_cell
+            nodes[alias] = node
+    diameter = int(re.search(r"Pipe segments have nominal diameter `(\d+) mm`", text).group(1))
+    for alias, unit in re.findall(r"(\w+) has measurement unit `(\w+)`", text):
+        nodes[alias]["attributes"] = {"unit": unit}
+    for node in nodes.values():
+        if node["class"] == "pipe_segment":
+            node["attributes"] = {"nominal_diameter_mm": diameter}
+    return nodes
+
+
+def documented_revisions(fixtures: str) -> dict[str, dict]:
+    """Each revision of LIONG-006's revision table as R0.yaml must write it."""
+    r1 = re.search(r"Rename (\w+) from [\w-]+ to ([\w-]+); record synthetic (MOC-\w+)",
+                   liong_facts.table_row(fixtures, "R1"))
+    r2 = re.search(r"From (\w+), delete (\w+) and (\w+); remove (.*?), and their .*record (MOC-\w+)",
+                   liong_facts.table_row(fixtures, "R2"))
+    bad = re.search(r"From (\w+), delete (\w+) but leave .*; record (MOC-\w+)",
+                    liong_facts.table_row(fixtures, "Rbad"))
+    removed = [{"delete_edge": ["FLOW", a, b]} for a, b in re.findall(r"`(\w+)→(\w+)`", r2.group(4))]
+    return {
+        "R0": {"base": None, "moc": None},
+        "R1": {"base": "R0", "moc": r1.group(3), "changes": [{"set_tag": {"node": r1.group(1), "tag": r1.group(2)}}]},
+        "R2": {"base": r2.group(1), "moc": r2.group(5),
+               "changes": removed + [{"delete_node": r2.group(2)}, {"delete_node": r2.group(3)}]},
+        "Rbad": {"base": bad.group(1), "moc": bad.group(3), "expected": "rejected",
+                 "changes": [{"delete_node": bad.group(2)}]},
+    }
+
+
+def fidelity_errors(data: dict) -> list[str]:
+    """Every way R0.yaml differs from LIONG-006."""
+    fixtures = (world.ROOT / liong_facts.FIXTURES).read_text(encoding="utf-8")
+    text = liong_facts.section(fixtures, "## Exact baseline R0")
+    errors = []
+    context = re.search(r"All tags have context `([^`]+)`", text).group(1)
+    if data["tag_context"] != context:
+        errors.append(f"tag_context is {data['tag_context']}, LIONG-006 says {context}")
+    expected = documented_nodes(text)
+    for alias in sorted(set(expected) | set(data["nodes"])):
+        if data["nodes"].get(alias) != expected.get(alias):
+            errors.append(f"node {alias} is {data['nodes'].get(alias)}, LIONG-006 says {expected.get(alias)}")
+    doc_edges = set(liong_facts.baseline(world.ROOT).edges)
+    if world.state(data, "R0").all_edges() != doc_edges:
+        errors.append("R0's edges differ from LIONG-006")
+    for name, revision in documented_revisions(fixtures).items():
+        if data["revisions"].get(name) != revision:
+            errors.append(f"revision {name} is {data['revisions'].get(name)}, LIONG-006 says {revision}")
+    if set(data["revisions"]) != {"R0", "R1", "R2", "Rbad"}:
+        errors.append(f"revisions are {sorted(data['revisions'])}, LIONG-006 has R0, R1, R2, Rbad")
+    return errors
 
 
 class R0MatchesLiong006(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data = world.load(R0)
-        cls.doc = liong_facts.baseline(world.ROOT)
 
     def test_world_file_is_valid(self):
         errors, notes = world.check(self.data, "R0.yaml")
@@ -31,26 +110,20 @@ class R0MatchesLiong006(unittest.TestCase):
         self.assertEqual(len(notes), 1)
         self.assertIn("Rbad is rejected as expected: FLOW P6->VB has missing endpoint VB", notes[0])
 
-    def test_r0_is_the_documented_baseline(self):
-        r0 = world.state(self.data, "R0")
-        self.assertEqual(set(r0.nodes), self.doc.nodes)
-        self.assertEqual({a for a, n in r0.nodes.items() if n["class"] == "drawing"}, self.doc.drawings)
-        self.assertEqual(r0.all_edges(), set(self.doc.edges))
+    def test_every_fact_matches_liong006(self):
+        self.assertEqual(fidelity_errors(self.data), [])
 
-    def test_r1_renames_e2_and_keeps_every_identity_and_edge(self):
-        r0, r1 = world.state(self.data, "R0"), world.state(self.data, "R1")
-        self.assertEqual(r1.nodes["E2"]["tag"], "TK-202")
-        self.assertEqual(r0.nodes["E2"]["tag"], "TK-102")
-        self.assertEqual(set(r1.nodes), set(r0.nodes))
+    def test_revision_states(self):
+        r0, r1, r2, bad = (world.state(self.data, r) for r in ("R0", "R1", "R2", "Rbad"))
+        renamed = copy.deepcopy(r0.nodes)
+        renamed["E2"]["tag"] = "TK-202"
+        self.assertEqual(r1.nodes, renamed)
         self.assertEqual(r1.all_edges(), r0.all_edges())
-
-    def test_r2_deletes_the_bypass_as_documented(self):
-        r2 = world.state(self.data, "R2")
-        deleted = self.doc.r2_deleted
-        self.assertEqual(set(r2.nodes), self.doc.nodes - deleted)
-        expected = {e for e in self.doc.edges if not liong_facts.touches(e, deleted)}
-        self.assertEqual(r2.all_edges(), expected)
-        self.assertEqual(r2.nodes["E2"]["tag"], "TK-202")
+        deleted = liong_facts.baseline(world.ROOT).r2_deleted
+        self.assertEqual(r2.nodes, {a: n for a, n in renamed.items() if a not in deleted})
+        self.assertEqual(r2.all_edges(), {e for e in r0.all_edges() if not liong_facts.touches(e, deleted)})
+        self.assertEqual(bad.nodes, {a: n for a, n in r0.nodes.items() if a != "VB"})
+        self.assertEqual(bad.edges, r0.edges)
 
     def test_counts_match_the_figures_tool(self):
         figures = liong_facts.compute(world.ROOT)
@@ -58,6 +131,74 @@ class R0MatchesLiong006(unittest.TestCase):
             s = world.state(self.data, revision)
             self.assertEqual(len(s.nodes), figures[f"{prefix}.nodes"], revision)
             self.assertEqual(len(s.all_edges()), figures[f"{prefix}.edges"], revision)
+
+
+class FidelityFailsOnWrongFacts(unittest.TestCase):
+    """Each case changes one fact of R0.yaml and asserts the fidelity error names it."""
+
+    def setUp(self):
+        self.data = copy.deepcopy(world.load(R0))
+
+    def assertFidelityError(self, text):
+        found = fidelity_errors(self.data)
+        self.assertTrue(any(text in e for e in found), found)
+
+    def test_wrong_class(self):
+        self.data["nodes"]["E1"]["class"] = "valve"
+        self.assertFidelityError("node E1 is")
+
+    def test_wrong_role(self):
+        self.data["nodes"]["E1"]["role"] = "pump"
+        self.assertFidelityError("node E1 is")
+
+    def test_wrong_tag(self):
+        self.data["nodes"]["V1"]["tag"] = "WRONG"
+        self.assertFidelityError("node V1 is")
+
+    def test_wrong_drawing_name(self):
+        self.data["nodes"]["S1"]["name"] = "WRONG"
+        self.assertFidelityError("node S1 is")
+
+    def test_wrong_tag_context(self):
+        self.data["tag_context"] = "WRONG"
+        self.assertFidelityError("tag_context is WRONG")
+
+    def test_wrong_diameter(self):
+        self.data["nodes"]["P1"]["attributes"]["nominal_diameter_mm"] = 500
+        self.assertFidelityError("node P1 is")
+
+    def test_missing_unit(self):
+        del self.data["nodes"]["I1"]["attributes"]
+        self.assertFidelityError("node I1 is")
+
+    def test_invented_value(self):
+        self.data["nodes"]["V1"]["attributes"] = {"operating_pressure_bar": 10}
+        self.assertFidelityError("node V1 is")
+
+    def test_tag_on_an_untagged_junction(self):
+        self.data["nodes"]["J1"]["tag"] = "J-1"
+        self.assertFidelityError("node J1 is")
+
+    def test_wrong_moc(self):
+        self.data["revisions"]["R1"]["moc"] = "MOC-WRONG"
+        self.assertFidelityError("revision R1 is")
+
+    def test_extra_change(self):
+        self.data["revisions"]["R1"]["changes"].append({"set_tag": {"node": "E1", "tag": "TK-999"}})
+        self.assertFidelityError("revision R1 is")
+
+    def test_extra_rbad_deletion(self):
+        self.data["revisions"]["Rbad"]["changes"].append({"delete_node": "S1"})
+        self.assertFidelityError("revision Rbad is")
+
+    def test_extra_revision(self):
+        self.data["revisions"]["R3"] = {"base": "R2", "moc": "MOC-3"}
+        self.assertFidelityError("revisions are")
+
+    def test_wrong_edge(self):
+        self.data["edges"]["FLOW"][-1] = ["VB", "P3"]
+        self.data["revisions"]["R2"]["changes"][2] = {"delete_edge": ["FLOW", "VB", "P3"]}
+        self.assertFidelityError("R0's edges differ from LIONG-006")
 
 
 class CheckFailsOnBrokenWorlds(unittest.TestCase):
