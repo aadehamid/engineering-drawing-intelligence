@@ -32,8 +32,8 @@ formatting is removed from the quotes below.
 > fields:
 > - SmartPlant-style: a drawing revision record with major and minor numbers, plus
 >   status on the drawing.
-> - Plant 3D-style: the revision and status columns on each row, plus a work-
->   history row for each change.
+> - Plant 3D-style: the revision and status columns on each row, plus a
+>   work-history row for each change.
 >
 > A deleted object is missing from the next snapshot, and only the history records
 > its removal. The alternative is one database that keeps every revision with

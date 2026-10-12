@@ -5,8 +5,8 @@ Date: 2026-10-12
 
 ## Context
 
-Asked as Q31 (Foreign keys in the vendor-style schemas) in round 5 of the synthetic-
-data interview, after DEC-015 to DEC-035.
+Asked as Q31 (Foreign keys in the vendor-style schemas) in round 5 of the
+synthetic-data interview, after DEC-015 to DEC-035.
 
 ## Decision
 
