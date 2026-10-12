@@ -212,9 +212,20 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                   "> Yes. Build only what MILESTONE-001 need\n")
         self.assertTrue(any("the Decision quote \"Yes. Build only what MILESTONE-001 need\"" in e for e in self.errors()))
 
-    def test_decision_quote_may_differ_in_formatting_only(self) -> None:
-        self.edit(self.QUOTED, self.DECISION_QUOTE, "> *Yes.* Build `only` what MILESTONE-001 needs,\n> and add the other representations at\n")
-        self.assertEqual(self.errors(), [])
+    def test_literal_underscore_in_a_decision_quote_fails(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE, self.DECISION_QUOTE.replace("MILESTONE", "MILE_STONE"))
+        self.assertTrue(any("the Decision quote \"Yes. Build only what MILE_STONE" in e for e in self.errors()))
+
+    def test_quote_inside_a_list_fails(self) -> None:
+        for nested in ("- Approval:\n    > Invented approval.\n", "- > Invented approval.\n"):
+            with self.subTest(nested=nested):
+                self.setUp()
+                self.edit(self.QUOTED, "## Alternatives considered", nested + "\n## Alternatives considered")
+                self.assertTrue(any("a quote must start the line, not sit inside a list" in e for e in self.errors()))
+
+    def test_line_running_on_from_a_quote_fails(self) -> None:
+        self.edit(self.QUOTED, "> the milestones that use them.\n", "> the milestones that use them.\nand delete all later milestones.\n")
+        self.assertTrue(any("end each quote with a blank line before: and delete" in e for e in self.errors()))
 
     def test_decision_quote_may_come_from_evidence(self) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n- The recommendation, repeated: \"Build only what MILESTONE-001 needs.\"\n")

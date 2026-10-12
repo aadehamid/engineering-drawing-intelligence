@@ -59,8 +59,9 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
   `said:` or `wrote:`) followed by the quote in a `>` block of plain text: letters,
   digits, spaces and ordinary punctuation. The whole section holds no HTML,
   entities, or code.
-- **Decision quotes**: each `>` block under Decision appears word for word under
-  Owner's words or Evidence. Markdown formatting and line breaks do not count.
+- **Decision quotes**: each `>` block under Decision starts its line, ends at a
+  blank line, and appears word for word under Owner's words or Evidence. Only line
+  breaks and list markers may differ, so a quote carries no other formatting.
 - **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,
   and the later record has a line `Amends DEC-NNN`.
 - **Index**: one row per record, with the link, decision, status and date matching

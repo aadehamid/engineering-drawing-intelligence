@@ -10,7 +10,7 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, LINK
+from check_docs import BASELINE, link_targets
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,7 +50,7 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
     for name, data in sorted(contents.items()):
         if not name.endswith(".md"):
             continue
-        for target in re.findall(LINK, data.decode("utf-8")):
+        for target in link_targets(data.decode("utf-8")):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc or not parsed.path:
                 continue

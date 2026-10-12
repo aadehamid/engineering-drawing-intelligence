@@ -15,7 +15,14 @@ BASELINE = (
     "GLOSSARY.md",
 )
 
-LINK = r"\[[^\]\n]+\]\(([^)\n]+)\)"  # a Markdown link; the group is its target
+INLINE_LINK = r"\]\(\s*(<[^>\n]*>|[^)\s]+)"   # [text](target), even split across lines
+REFERENCE = r"^ {0,3}\[[^\]]+\]:\s*(<[^>\n]*>|\S+)"  # [label]: target, used by reference links
+
+
+def link_targets(text: str) -> list[str]:
+    """Every link and image target in a Markdown file: inline ones and reference definitions."""
+    found = re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
+    return [target.strip("<>") for target in found]
 
 
 def heading_ids(text: str) -> set[str]:
@@ -63,7 +70,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"{label}: missing explicit draft status")
 
     for path, text in texts.items():
-        for target in re.findall(LINK, text):
+        for target in link_targets(text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc:
                 continue  # External source availability is a separate research check.

@@ -432,30 +432,36 @@ def owner_answer_is_plain(body: str) -> bool:
     )
 
 
-def quote_blocks(body: str) -> list[str]:
-    """Each '>' block in a section, as flat text (see flat_quote)."""
-    blocks, current = [], []
+def quote_blocks(body: str) -> tuple[list[str], list[str]]:
+    """Each '>' block in a section as flat text, and the layout errors that would hide a quote.
+
+    Only a top-level '>' block that ends at a blank line is compared. A quote nested in a
+    list, or a line that runs on from a quote without its own '>', would show text the
+    comparison never sees, so both are errors.
+    """
+    blocks, errors, current = [], [], []
     for line in body.splitlines() + [""]:
         if re.match(r" {0,3}>", line):
             current.append(line)
-        elif current:
+            continue
+        if re.match(r"\s*(?:(?:[-*+]|\d+[.)])\s+)*>", line):
+            errors.append(f"a quote must start the line, not sit inside a list: {line.strip()[:60]}")
+        if current:
+            if line.strip():
+                errors.append(f"end each quote with a blank line before: {line.strip()[:60]}")
             blocks.append(flat_quote("\n".join(current)))
             current = []
-    return blocks
+    return blocks, errors
 
 
 def flat_quote(text: str) -> str:
-    """Words and punctuation only: quote and list markers, emphasis, code marks, and line breaks removed.
-
-    Records quote with Markdown formatting removed, so a quote and its source compare equal
-    when only their formatting differs.
-    """
+    """The quoted words: quote and list markers and line breaks removed, every other character kept."""
     lines = []
     for line in text.splitlines():
         while re.match(CONTAINER_MARKER, line):
             line = re.sub(CONTAINER_MARKER, "", line, count=1)
         lines.append(line)
-    return " ".join(re.sub(r"[`*_]", "", " ".join(lines)).split())
+    return " ".join(" ".join(lines).split())
 
 
 def parse_record(text: str) -> Record | None:
@@ -515,7 +521,9 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
     sources = flat_quote(bodies["## Owner's words"] + "\n" + bodies["## Evidence"])
-    for quote in quote_blocks(bodies["## Decision"]):
+    quotes, layout = quote_blocks(bodies["## Decision"])
+    errors += [f"{label}: Decision: {error}" for error in layout]
+    for quote in quotes:
         if not re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", sources):
             errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word under Owner's words or Evidence")
     status = record.statuses[0] if record.statuses else None

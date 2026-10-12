@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 import zipfile
@@ -86,6 +88,26 @@ class DocumentationToolsTests(unittest.TestCase):
         path.write_text(path.read_text() + "\n[World](../scripts/world.py)\n", encoding="utf-8")
         self.assertEqual(bundle_docs.broken_links(bundle_docs.payload(self.root)),
                          ["docs/LIONG-REG-001-decisions.md: links to ../scripts/world.py, which is not in the archive"])
+
+    def test_reference_and_multiline_links_are_checked(self):
+        path = self.root / "docs/LIONG-REG-001-decisions.md"
+        for link in ("[missing][ref]\n\n[ref]: ../absent-1.md\n", "[bad](\n../absent-2.md\n)\n",
+                     "[angle](<../absent-3.md>)\n"):
+            path.write_text(path.read_text() + "\n" + link, encoding="utf-8")
+        errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
+        for name in ("absent-1.md", "absent-2.md", "absent-3.md"):
+            self.assertTrue(any(f"../{name}, which is not in the archive" in e for e in errors), name)
+
+    def test_bundler_refuses_a_broken_link_and_writes_nothing(self):
+        archive = self.root / bundle_docs.OUTPUT
+        before = archive.read_bytes()
+        path = self.root / "docs/LIONG-REG-001-decisions.md"
+        path.write_text(path.read_text() + "\n[World](../scripts/world.py)\n", encoding="utf-8")
+        result = subprocess.run([sys.executable, str(self.root / "scripts/bundle_docs.py")],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("../scripts/world.py, which is not in the archive", result.stdout)
+        self.assertEqual(archive.read_bytes(), before)
 
     def test_register_links_need_the_decision_records_in_the_archive(self):
         contents = bundle_docs.payload(self.root)
