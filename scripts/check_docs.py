@@ -21,9 +21,13 @@ INLINE_LINK = r"\]\(\s*(<[^>\n]*>|[^)\s]+)"   # [text](target), even split acros
 REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:\s*(<[^>\n]*>|\S+)"
 
 
+HTML_TARGET = r"""\b(?:href|src)\s*=\s*["']?([^"'\s>]+)"""  # <a href>, <img src>
+
+
 def link_targets(text: str) -> list[str]:
-    """Every link and image target in a Markdown file: inline ones and reference definitions."""
-    found = re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
+    """Every link and image target in a Markdown file: inline, reference definitions, and raw HTML."""
+    found = (re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
+             + re.findall(HTML_TARGET, text, re.IGNORECASE))
     return [target.strip("<>") for target in found]
 
 

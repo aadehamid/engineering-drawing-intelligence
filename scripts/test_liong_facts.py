@@ -224,6 +224,24 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n", f"> {last} {first}\n")
         self.assertTrue(any("is not word for word" in e for e in self.errors()))
 
+    INVENTED = "> Ship nothing and delete the fixture.\n"
+
+    def test_quote_after_a_false_fence_is_compared(self) -> None:
+        # "``` `" is text, not a fence: its info string holds a backtick
+        self.edit(self.QUOTED, "## Alternatives considered", "``` `\n" + self.INVENTED + "\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+
+    def test_source_text_a_reader_cannot_see_does_not_count(self) -> None:
+        hidden = ("[Ship nothing and delete the fixture.]: https://example.com\n",
+                  "[see this](https://example.com \"Ship nothing and delete the fixture.\")\n",
+                  "![Ship nothing and delete the fixture.](https://example.com/logo.png)\n")
+        for source in hidden:
+            with self.subTest(source=source):
+                self.setUp()
+                self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source)
+                self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
+                self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+
     def test_quote_inside_a_list_fails(self) -> None:
         for nested in ("- Approval:\n    > Invented approval.\n", "- > Invented approval.\n"):
             with self.subTest(nested=nested):

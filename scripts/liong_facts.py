@@ -327,6 +327,9 @@ class Record(NamedTuple):
     raw_owner_words: str
 
 
+# A fence opens on three backticks or tildes. A backtick fence's info string holds no
+# backtick; a line like "``` `" is ordinary text in CommonMark.
+FENCE_OPEN = r"^ {0,3}(`{3,}(?=[^`\n]*$)|~{3,})"
 HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNORECASE)
 
 
@@ -366,7 +369,7 @@ def rendered(text: str) -> str:
                     visible, rest = visible + rest[:start.start()], rest[start.end():]
         if hidden_close and not visible.strip():
             continue
-        opening = re.match(r" {0,3}(`{3,}|~{3,})", visible)
+        opening = re.match(FENCE_OPEN, visible)
         if opening:
             fence = opening.group(1)
             continue
@@ -520,7 +523,7 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
-    sources = [flat_quote(bodies["## Owner's words"]), flat_quote(bodies["## Evidence"])]
+    sources = [flat_quote("\n".join(visible_lines(bodies[h]))) for h in ("## Owner's words", "## Evidence")]
     quotes, layout = quote_blocks(bodies["## Decision"])
     errors += [f"{label}: Decision: {error}" for error in layout]
     for quote in quotes:
@@ -559,7 +562,7 @@ def check_decisions(root: Path) -> list[str]:
     names: dict[str, str] = {}
     for name, path in sorted(files.items()):
         raw = path.read_text(encoding="utf-8")
-        outside_code = re.sub(r"`[^`\n]*`", "", re.sub(r"^ {0,3}(`{3,}|~{3,}).*?(^ {0,3}\1|\Z)", "", raw,
+        outside_code = re.sub(r"`[^`\n]*`", "", re.sub(FENCE_OPEN + r".*?(^ {0,3}\1|\Z)", "", raw,
                                                          flags=re.DOTALL | re.MULTILINE))
         if re.search(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?]", outside_code):  # an autolink <https://...> is text
             errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
