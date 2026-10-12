@@ -457,6 +457,20 @@ def quote_blocks(body: str) -> tuple[list[str], list[str]]:
     return blocks, errors
 
 
+# Letters, digits, spaces and punctuation that CommonMark shows as written. No backtick,
+# tilde, bracket, angle bracket, backslash or pipe: code, fences, links, images,
+# reference definitions, HTML, escapes and tables need one of them to hide or change text.
+PLAIN_TEXT = r"(?:[^\W_]|[ .,:;?!'\"’‘“”/%+=@()*_&–—-])*"
+
+
+def plain_block(block: str) -> bool:
+    """True when every line of a '>' block is plain text a reader sees exactly as written."""
+    return all(
+        re.fullmatch(PLAIN_TEXT, re.sub(r"^ {0,3}>", "", line)) and not re.search(r"&#?\w+;", line)
+        for line in block.splitlines()
+    )
+
+
 def flat_quote(text: str) -> str:
     """The quoted words: quote and list markers and line breaks removed, every other character kept."""
     lines = []
@@ -523,10 +537,8 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
-    # A source is a '>' block under Owner's words or Evidence with no character that can
-    # hide text: links, images, reference definitions, HTML and escapes all need one.
     sources = [flat_quote(block) for heading in ("## Owner's words", "## Evidence")
-               for block in quote_blocks(bodies[heading])[0] if not re.search(r"[\[\]<\\]", block)]
+               for block in quote_blocks(bodies[heading])[0] if plain_block(block)]
     blocks, layout = quote_blocks(bodies["## Decision"])
     errors += [f"{label}: Decision: {error}" for error in layout]
     for quote in map(flat_quote, blocks):
@@ -566,7 +578,7 @@ def check_decisions(root: Path) -> list[str]:
     for name, path in sorted(files.items()):
         raw = path.read_text(encoding="utf-8")
         if raw_html(raw):
-            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
+            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments, even in code")
         record = parse_record(raw)
         if not record or not name.startswith(record.record_id + "-"):
             errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")

@@ -52,7 +52,7 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
         if not name.endswith(".md"):
             continue
         text = data.decode("utf-8")
-        errors += [f"{name}: raw HTML is not allowed outside code: {tag[:60]}" for tag in raw_html(text)]
+        errors += [f"{name}: raw HTML is not allowed, even in code: {tag[:60]}" for tag in raw_html(text)]
         for target in link_targets(text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc or not parsed.path:

@@ -27,10 +27,12 @@ FENCE_OPEN = r"^ {0,3}(`{3,}(?=[^`\n]*$)|~{3,})"
 
 
 def raw_html(text: str) -> list[str]:
-    """Raw HTML tags and comments outside code. An autolink such as <https://...> is text."""
-    outside = re.sub(FENCE_OPEN + r".*?(^ {0,3}\1|\Z)", "", text, flags=re.DOTALL | re.MULTILINE)
-    outside = re.sub(r"`[^`\n]*`", "", outside)
-    return re.findall(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?][^>\n]*>?", outside)
+    """Every HTML tag or comment, code spans and fences included. An autolink <https://...> is text.
+
+    Code is not exempt: telling CommonMark code from text needs its full escape and
+    delimiter rules, and a mistake there would hide a live tag.
+    """
+    return re.findall(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?][^>\n]*>?", text)
 
 
 def link_targets(text: str) -> list[str]:

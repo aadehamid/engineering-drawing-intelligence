@@ -111,11 +111,15 @@ class DocumentationToolsTests(unittest.TestCase):
             self.assertTrue(any(e.startswith("docs/LIONG-000-index.md: raw HTML") and first_line[:20] in e
                                 for e in errors), tag)
 
-    def test_html_inside_code_is_allowed(self):
-        path = self.root / "docs/LIONG-000-index.md"
-        path.write_text(path.read_text() + "\nUse `<a href=\"x\">` here.\n\n```\n<img src=\"y\">\n```\n",
-                        encoding="utf-8")
-        self.assertEqual(bundle_docs.broken_links(bundle_docs.payload(self.root)), [])
+    def test_html_in_code_and_around_false_code_is_refused(self):
+        for html in ('Use `<a href="x">` here.', '```\n<img src="y">\n```', '\\`<a href="../scripts/world.py">W</a>\\`',
+                     '```<a href="../scripts/world.py">W</a>``'):
+            with self.subTest(html=html):
+                self.setUp()
+                path = self.root / "docs/LIONG-000-index.md"
+                path.write_text(path.read_text() + "\n" + html + "\n", encoding="utf-8")
+                self.assertTrue(any("raw HTML is not allowed, even in code" in e
+                                    for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
     def test_bundler_refuses_a_broken_link_and_writes_nothing(self):
         archive = self.root / bundle_docs.OUTPUT

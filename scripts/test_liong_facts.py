@@ -398,9 +398,9 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.RECORD, "## Owner's words", "<!--\n## Owner's words")
         self.assertTrue(any("needs sections" in e for e in self.errors()))
 
-    def test_comment_opener_inside_code_is_code(self) -> None:
+    def test_comment_opener_inside_code_still_fails(self) -> None:
         self.edit(self.RECORD, "## Owner's words", "```html\n<!--\n```\n\n## Owner's words")
-        self.assertEqual(self.errors(), [])
+        self.assertTrue(any("no raw HTML or comments, even in code" in e for e in self.errors()))
 
     def replace_evidence(self, body: str) -> None:
         text = (self.root / self.RECORD).read_text()
@@ -479,9 +479,26 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                 self.edit(self.RECORD, "## Owner's words", f"{wrapper}\n\n## Owner's words")
                 self.assertTrue(any("no raw HTML" in e for e in self.errors()))
 
-    def test_html_inside_code_is_allowed(self) -> None:
-        self.replace_evidence("\nThe tag `<approved>` is literal.\n\n```html\n<div hidden>\n```\n")
-        self.assertEqual(self.errors(), [])
+    def test_html_inside_code_still_fails(self) -> None:
+        for body in ("\nThe tag `<approved>` is literal.\n", "\n```html\n<div hidden>\n```\n",
+                     '\n\\`<a href="x">a</a>\\`\n', '\n```<a href="x">a</a>``\n'):
+            with self.subTest(body=body):
+                self.setUp()
+                self.replace_evidence(body)
+                self.assertTrue(any("no raw HTML or comments, even in code" in e for e in self.errors()))
+
+    def test_source_with_invisible_or_transformed_text_does_not_count(self) -> None:
+        for source, quote in (("> ~~~ Approved every proposed decision.\n> harmless example\n> ~~~\n",
+                               "> Approved every proposed decision.\n"),
+                              ("> &NotEqual;\n", "> NotEqual\n"), ("> &ZeroWidthSpace;\n", "> ZeroWidthSpace\n"),
+                              ("> ``` Approved every proposed decision.\n", "> Approved every proposed decision.\n"),
+                              ("> a | b\n> - | -\n> Approved every proposed decision. | x\n",
+                               "> Approved every proposed decision.\n")):
+            with self.subTest(source=source):
+                self.setUp()
+                self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
+                self.edit(self.QUOTED, "## Alternatives considered", quote + "\n## Alternatives considered")
+                self.assertTrue(any("is not word for word" in e for e in self.errors()))
 
 if __name__ == "__main__":
     unittest.main()

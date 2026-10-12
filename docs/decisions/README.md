@@ -49,10 +49,11 @@ What each status means, when a decision is Decided, and how one decision amends
 another follow the way-of-working standard (`references/deciding.md`). This
 section fixes only the shape that `python3 scripts/liong_facts.py check` verifies.
 
-- **File name** `DEC-NNN-short-slug.md`, first line `# DEC-NNN: <decision>`, then a
+- **File name** `DEC-NNN-short-slug.md`, first line `# DEC-NNN: ` followed by the decision, then a
   `Status:` line (`Proposed`, `Decided`, or `Superseded`) and a `Date: YYYY-MM-DD`
   line.
-- **No raw HTML or HTML comments** anywhere outside code spans and fences.
+- **No raw HTML or HTML comments** anywhere, code spans and fences included. The
+  review archive holds these records, and its rule is the same.
 - **Sections**, in order and none empty: `## Context`, `## Decision`,
   `## Alternatives considered`, `## Owner's words`, `## Evidence`.
 - **Owner's words** in a `Decided` record: a line `The owner answered:` (or
@@ -61,9 +62,9 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
   entities, or code.
 - **Decision quotes**: each `>` block under Decision starts its line, ends at a
   blank line, and appears word for word inside one `>` block under Owner's words or
-  Evidence. That source block holds no `[`, `]`, `<` or backslash, the characters
-  that links, images, reference definitions, HTML and escapes need to hide text.
-  Only line breaks and list markers may differ.
+  Evidence. Every line of that source block is plain text: letters, digits, spaces
+  and ordinary punctuation, with no backtick, tilde, bracket, angle bracket,
+  backslash, pipe or character entity. Only line breaks and list markers may differ.
 - **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,
   and the later record has a line `Amends DEC-NNN`.
 - **Index**: one row per record, with the link, decision, status and date matching
