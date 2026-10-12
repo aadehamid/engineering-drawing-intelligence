@@ -382,5 +382,13 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                 self.replace_evidence(body)
                 self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
 
+    def test_owner_words_inside_raw_html_block_fail(self) -> None:
+        for tag in ("script", "style"):
+            with self.subTest(tag=tag):
+                self.setUp()
+                self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                          f"<{tag}>\nThe owner answered:\n\n> Q12: yes\n</{tag}>\n")
+                self.assertTrue(any("plain text only" in e for e in self.errors()))
+
 if __name__ == "__main__":
     unittest.main()

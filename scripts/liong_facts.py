@@ -306,6 +306,7 @@ class Record(NamedTuple):
     sections: list[tuple[str, str]]
     amends: list[str]
     superseded_by: list[str]
+    raw_owner_words: str
 
 
 def rendered(text: str) -> str:
@@ -408,6 +409,8 @@ def owner_answer_is_plain(body: str) -> bool:
 
 
 def parse_record(text: str) -> Record | None:
+    raw = re.search(r"^## Owner's words\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+    raw_owner_words = raw.group(1) if raw else ""
     text = rendered(text)
     heading = re.match(r"\s*# (DEC-\d{3}): (.+)\n", text)
     if not heading:
@@ -427,6 +430,7 @@ def parse_record(text: str) -> Record | None:
         sections,
         re.findall(r"^Amends (DEC-\d{3})\b", text, re.MULTILINE),
         re.findall(r"^Superseded by (DEC-\d{3}) on \d{4}-\d{2}-\d{2}\.?$", text, re.MULTILINE),
+        raw_owner_words,
     )
 
 
@@ -461,6 +465,8 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
     status = record.statuses[0] if record.statuses else None
+    if re.search(r"[<&`]|~~~", record.raw_owner_words):
+        errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
     if status == "Decided" and not owner_answer_is_plain(bodies["## Owner's words"]):
         errors.append(
             f"{label}: a Decided record quotes the owner after 'The owner answered:' in a plain-text '>' block"
