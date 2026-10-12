@@ -41,6 +41,7 @@ state; a register row links here when its decision has a record.
 | [DEC-044](DEC-044-stable-separate-keys.md) | Keys stay the same across a world's snapshots, and the backends never share keys | Decided | 2026-10-12 |
 | [DEC-045](DEC-045-revision-time-sources.md) | Each revision time comes from the system that records it | Decided | 2026-10-12 |
 | [DEC-046](DEC-046-next-pr-order.md) | The next pull requests land in a set order | Decided | 2026-10-12 |
+| [DEC-047](DEC-047-loader-outbox-schema.md) | The outbox lives in a third, non-vendor schema in the same SQL Server database | Decided | 2026-10-12 |
 
 ## Record format
 
