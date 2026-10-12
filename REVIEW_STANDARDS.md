@@ -26,10 +26,11 @@ change while it skipped gitignored paths (fixed in `25ed2ec`). The Codex review 
 
 A change to the patterns in `scripts/liong_facts.py` is tested with each form a
 writer could use for a node or edge figure: digits, number words, backticks,
-hyphenated compounds such as `17-node/31-edge`, zero padding, wrapped lines, and
-several words between the number and "nodes" or "edges".
+hyphenated compounds such as `17-node/31-edge`, zero padding, and several words
+between the number and "nodes" or "edges".
 
-Taught by: the Codex review of #8 found "15 nodes", "seventeen nodes", and a
-backticked number escaping the sweep (redesigned in `d956bd2` and `afc3d7d`). The
-Cursor review of #8 then found `17-node/31-edge` in SCN-001 escaping it (fixed in
-`55231c3`).
+Taught by: the Codex review of #8 found the zero-padded pair `018/031` escaping the
+pair check (fixed in `c2cd189`), then "15 nodes", "seventeen nodes", a backticked
+number, and a long noun phrase escaping the sweep (redesigned in `d956bd2` and
+`afc3d7d`). The Cursor review of #8 then found `17-node/31-edge` in SCN-001
+escaping it (fixed in `55231c3`).
