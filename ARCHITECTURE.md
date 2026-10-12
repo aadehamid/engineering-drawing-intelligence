@@ -159,8 +159,9 @@ fill missing or insufficient public coverage, including backend records,
 revisions, operational context, and controlled failure cases.
 Evaluation must identify which results use public data and which use synthetic data.
 
-The open-source stack is not yet selected. Candidates include PostgreSQL for
-the representative backend, PostgreSQL with Apache AGE for the graph, Python
+The open-source stack is not yet selected. The synthetic backends run on SQL
+Server, a recorded exception (DEC-027). Candidates include PostgreSQL with
+Apache AGE for the graph, Python
 and lxml for transformations. The expanded stack assessment considers modern
 parsers, vision-language models, and optional segmentation for drawing extraction.
 FastAPI and Cytoscape.js are candidates for the application interface.
