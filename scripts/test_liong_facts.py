@@ -390,5 +390,14 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                           f"<{tag}>\nThe owner answered:\n\n> Q12: yes\n</{tag}>\n")
                 self.assertTrue(any("plain text only" in e for e in self.errors()))
 
+    def test_html_block_opened_earlier_hides_owner_words(self) -> None:
+        self.edit(self.RECORD, "## Alternatives considered", "<script>\n\n## Alternatives considered")
+        self.edit(self.RECORD, "## Evidence", "</script>\n\n## Evidence")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_words_only_inside_style_are_empty(self) -> None:
+        self.replace_evidence("\n<style>\nRecorded in the register.\n</style>\n")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
 if __name__ == "__main__":
     unittest.main()

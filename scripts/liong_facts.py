@@ -309,16 +309,20 @@ class Record(NamedTuple):
     raw_owner_words: str
 
 
-def rendered(text: str) -> str:
-    """The text a reader sees outside code: HTML comments and fenced code blocks removed.
+HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNORECASE)
 
-    One pass tracks both, so a comment marker inside code and a fence inside a comment
-    are left alone. A fence closes only on the same character repeated at least as
-    many times; an unclosed fence or comment runs to the end of the document.
+
+def rendered(text: str) -> str:
+    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences removed.
+
+    One pass tracks all three, so a comment marker inside code and a fence inside a
+    comment are left alone. Comments and script, style, textarea, and title blocks hide
+    their contents and run to the end of the document if unclosed. A fence closes only
+    on the same character repeated at least as many times.
     """
     kept: list[str] = []
     fence = None
-    in_comment = False
+    hidden_close = None  # the closing marker of the comment or HTML block we are inside
     for line in text.splitlines():
         if fence is not None:
             marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
@@ -328,19 +332,21 @@ def rendered(text: str) -> str:
         visible = ""
         rest = line
         while rest:
-            if in_comment:
-                end = rest.find("-->")
-                if end == -1:
+            if hidden_close:
+                end = re.search(hidden_close, rest, re.IGNORECASE)
+                if not end:
                     rest = ""
                 else:
-                    in_comment, rest = False, rest[end + 3:]
+                    hidden_close, rest = None, rest[end.end():]
             else:
-                start = rest.find("<!--")
-                if start == -1:
+                start = HIDDEN_OPEN.search(rest)
+                if not start:
                     visible, rest = visible + rest, ""
                 else:
-                    visible, in_comment, rest = visible + rest[:start], True, rest[start + 4:]
-        if in_comment and not visible.strip():
+                    tag = start.group(1)
+                    hidden_close = rf"</{tag}\s*>" if tag else "-->"
+                    visible, rest = visible + rest[:start.start()], rest[start.end():]
+        if hidden_close and not visible.strip():
             continue
         opening = re.match(r" {0,3}(`{3,}|~{3,})", visible)
         if opening:
