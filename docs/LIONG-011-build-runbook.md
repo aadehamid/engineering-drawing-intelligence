@@ -20,7 +20,7 @@ authorizes cloud provisioning, charges, sensitive data, or publishing datasets.
 
 MILESTONE-001 is a verified structured vertical slice:
 
-1. Materialize a small synthetic engineering backend from a known private fixture.
+1. Materialize a small synthetic engineering backend from the visible R0 development fixture.
 2. Extract source records without reading the hidden scoring truth.
 3. Generate the selected DEXPI 2.0 representation and validate its supported subset.
 4. Parse and publish one immutable engineering graph snapshot.
