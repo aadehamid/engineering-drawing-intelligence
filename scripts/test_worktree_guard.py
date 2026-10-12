@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+from typing import Callable
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -30,7 +31,7 @@ class WorktreeGuardTest(unittest.TestCase):
     def git(self, *args: str) -> None:
         subprocess.run(["git", *args], cwd=self.root, check=True, capture_output=True)
 
-    def changes(self, mutate) -> list[str]:
+    def changes(self, mutate: Callable[[], object]) -> list[str]:
         before = guard.snapshot(self.root)
         mutate()
         return guard.differences(before, guard.snapshot(self.root))

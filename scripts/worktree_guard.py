@@ -9,6 +9,7 @@ from pathlib import Path
 import stat
 import subprocess
 import sys
+from typing import NamedTuple
 
 
 def git(root: Path, *args: str) -> bytes:
@@ -37,26 +38,32 @@ def entry(path: Path) -> tuple:
     return ("other", stat.S_IFMT(info.st_mode), mode)
 
 
-def snapshot(root: Path) -> dict[str, object]:
+class Snapshot(NamedTuple):
+    entries: dict[bytes, tuple]
+    index: bytes
+    status: bytes
+
+
+def snapshot(root: Path) -> Snapshot:
     """Capture contents, entries, index blobs, and git status for every non-ignored path."""
     listed = git(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
     names = sorted({name for name in listed.split(b"\0") if name})
-    return {
-        "entries": {name: entry(root / os.fsdecode(name)) for name in names},
-        "index": git(root, "ls-files", "-s", "-z"),
-        "status": git(root, "status", "--porcelain=v1", "-z", "--untracked-files=all"),
-    }
+    return Snapshot(
+        entries={name: entry(root / os.fsdecode(name)) for name in names},
+        index=git(root, "ls-files", "-s", "-z"),
+        status=git(root, "status", "--porcelain=v1", "-z", "--untracked-files=all"),
+    )
 
 
-def differences(before: dict, after: dict) -> list[str]:
+def differences(before: Snapshot, after: Snapshot) -> list[str]:
     found: list[str] = []
-    old, new = before["entries"], after["entries"]
+    old, new = before.entries, after.entries
     for name in sorted(old.keys() | new.keys()):
         if old.get(name) != new.get(name):
             found.append(f"changed entry: {os.fsdecode(name)}")
-    if before["index"] != after["index"]:
+    if before.index != after.index:
         found.append("changed index")
-    if before["status"] != after["status"]:
+    if before.status != after.status:
         found.append("changed git status")
     return found
 
