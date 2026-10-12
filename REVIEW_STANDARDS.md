@@ -11,12 +11,11 @@ finding a reviewer made in this repository, after reading the commit that shows 
 
 ## Descriptions of this repository's checks keep their boundaries
 
-Text that describes `scripts/check.sh` or its parts states what they cover and no
-more. The worktree guard covers tracked files, untracked files that are not
-gitignored, the index, and git status. `liong_facts.py check` covers registered
-claims, plus every number in a sentence about nodes or edges in LIONG-006 and
-LIONG-010. Figures in other documents are outside the sweep; a reviewer checks them
-against `python3 scripts/liong_facts.py figures`.
+Text that describes `scripts/check.sh` or its parts claims no more than the
+boundaries stated in `AGENTS.md` ("Checks") and in the docstrings of
+`scripts/worktree_guard.py` and `scripts/liong_facts.py`. A figure in a document
+the figures sweep does not cover is checked by hand against
+`python3 scripts/liong_facts.py figures`.
 
 Taught by: the Codex review of #7 found `AGENTS.md` said the guard caught any
 change while it skipped gitignored paths (fixed in `25ed2ec`). The Codex review of
