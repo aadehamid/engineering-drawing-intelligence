@@ -13,3 +13,5 @@ python3 scripts/bundle_docs.py --check
 python3 scripts/check_docs.py
 python3 scripts/test_doc_tools.py
 python3 scripts/test_worktree_guard.py
+python3 scripts/liong_facts.py check
+python3 scripts/test_liong_facts.py

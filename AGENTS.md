@@ -31,6 +31,12 @@ The review archive in `docs/releases/` contains the root baseline files, every
 `docs/*.md` file, and the three scripts. A change to any of them needs
 `python3 scripts/bundle_docs.py` to rebuild the archive in the same commit.
 
+## Figures and searches
+
+Take every count, total, and ID list a document quotes from `scripts/liong_facts.py`
+(`figures`, `check`, `find`), never from memory or a one-off script. When a figure is
+missing, extend that tool and its tests.
+
 ## Decisions
 
 The owner is Hamid (`aadehamid`). Decisions are proposals until his words are
