@@ -77,6 +77,8 @@ Neither role authorizes real-world isolation.
 Use open-source technology except for the user-permitted Cloudflare services and
 Databricks Free Edition. These exceptions allow assessment; they do not mandate
 providers, authorize charges, or verify that free-tier features meet requirements.
+SQL Server, hosted on an Azure SQL Database free-offer database, is a further
+exception: both synthetic vendor-style backends run on it (DEC-027).
 
 The owner also permits assessment of proprietary document parsing and model APIs
 alongside local tools. Provider choice, uploads, spending, and custom model licenses

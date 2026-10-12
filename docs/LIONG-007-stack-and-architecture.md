@@ -6,11 +6,11 @@ Evidence accessed: 2026-10-05 UTC
 
 ## Recommendation and authority
 
-Use a local, self-hostable baseline as the proposed default. Evaluate PostgreSQL for the synthetic backend and control records, Neo4j Community for the shared graph, and a small Python application for conversion, review, publication, and queries. Keep source files and revision artifacts in durable local storage with separate backups. Add remote storage or orchestration only when a demonstrated need justifies it.
+Use a local, self-hostable baseline as the proposed default. Run both synthetic vendor-style backends on SQL Server, as two schemas in one Azure SQL Database free-offer database, with a local SQL Server container for tests and CI (DEC-027). Evaluate PostgreSQL for control records, Neo4j Community for the shared graph, and a small Python application for conversion, review, publication, and queries. Keep source files and revision artifacts in durable local storage with separate backups. Add remote storage or orchestration only when a demonstrated need justifies it.
 
 Every new technology choice in this document is **Proposed**, including this recommendation. The approved [requirements](../REQUIREMENTS.md), [logical architecture](../ARCHITECTURE.md), and [glossary](../GLOSSARY.md) govern behavior. Apache AGE is an existing candidate, not an approved graph choice. Compare it against Neo4j Community after testing the latter against LIONG's publication and traversal requirements.
 
-LIONG is independent of PPC. No PPC service, repository, ontology release, account, or deployment is a runtime prerequisite. Cloudflare and Databricks Free Edition are explicitly permitted exceptions to the fully-open-source condition. Proprietary document parsing and model APIs may also be assessed. These permissions do not select a provider, approve model-license terms, authorize uploads, or authorize provisioning or spending.
+LIONG is independent of PPC. No PPC service, repository, ontology release, account, or deployment is a runtime prerequisite. Cloudflare and Databricks Free Edition are explicitly permitted exceptions to the fully-open-source condition. SQL Server, hosted on an Azure SQL Database free-offer database, is a further exception: both synthetic vendor-style backends run on it (DEC-027). Proprietary document parsing and model APIs may also be assessed. These permissions do not select a provider, approve model-license terms, authorize uploads, or authorize provisioning or spending.
 
 This document records inspection and proposed design, not a deployed stack, tested integration, performance result, or dependency lockfile. No PPC code was installed or run.
 
@@ -22,7 +22,7 @@ PPC proposes a broad synthetic enterprise, including commercial applications, la
 
 | PPC component | PPC responsibility | LIONG responsibility | Treatment, Proposed | Rationale | Outstanding version, license, or integration checks |
 | --- | --- | --- | --- | --- | --- |
-| PostgreSQL | Commercial source records | Synthetic engineering backend; separate control records for revisions, review, identity, and jobs | Adapt | Transactions support approved revisions and durable event records | Inspect PostgreSQL 18.6; pin driver and image; verify restore and outbox behavior |
+| PostgreSQL | Commercial source records | Separate control records for revisions, review, identity, and jobs. The synthetic backends run on SQL Server instead (DEC-027) | Adapt | Transactions support approved revisions and durable event records | Inspect PostgreSQL 18.6; pin driver and image; verify restore and outbox behavior |
 | Twenty, ERPNext, MySQL, SQLite | CRM, ERP, logistics, refinery source systems | Small synthetic work-order, register, measurement, and change-record fixtures | Exclude from initial stack | Multiple business applications do not prove drawing-to-graph fidelity | No package selection; reconsider only for a named integration |
 | Cloudflare R2 | Durable raw evidence and replay; local disk is scratch in PPC | Optional off-machine copy of source artifacts and exports | Adapt, optional | Reuse checksums and replay manifests, not PPC's mandatory remote-storage policy | Standard-tier billing, account limits, credentials, retention, and restore gate |
 | Cloudflare Workers and D1 | Edge ingestion/API and workflow state | Local API and transactional review/approval records | Defer | No edge or second workflow store is required | Verify service terms, limits, authentication, and transaction boundaries before any selection |
@@ -114,7 +114,7 @@ flowchart TB
 
 | Logical responsibility | Proposed owner | Failure boundary |
 | --- | --- | --- |
-| Source authority and approved backend revision | PostgreSQL synthetic backend with immutable revision records and an outbox written in the approval transaction | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
+| Source authority and approved backend revision | SQL Server synthetic backend (DEC-027) with immutable revision records and an outbox written in the approval transaction | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
 | Raw evidence and replay | Local durable artifact directory, content hashes, manifests, and independent backup | A missing or mismatched artifact blocks publication; cloud availability must not decide whether the local demo works |
 | Delivery and execution | Persistent worker using the outbox; optional Dagster OSS sensor and scheduled reconciliation | At-least-once delivery is expected; retries use stable revision keys, not assumptions of exactly-once delivery |
 | Conversion and extraction | XML adapters plus interchangeable document parsers, visual interpretation, optional segmentation, and review screens | Every model result is a candidate; parse errors, unsupported content, and uncertain matches remain visible; no direct model publication |
@@ -166,7 +166,7 @@ Subgraph exports carry stable IDs, available attributes and units, source eviden
 
 ### PostgreSQL and the operational graph
 
-PostgreSQL provides the proposed transactional backend and control store under the PostgreSQL License. The official versioning page reports 18.6 as the current supported 18.x minor release, with major-version support through 2030-11-14 [REF-TECH-002]. This is inspected evidence, not an installed version. Pin the selected server, driver, and migration tooling together before implementation.
+PostgreSQL provides the proposed transactional control store under the PostgreSQL License. The synthetic backends run on SQL Server instead (DEC-027). The official versioning page reports 18.6 as the current supported 18.x minor release, with major-version support through 2030-11-14 [REF-TECH-002]. This is inspected evidence, not an installed version. Pin the selected server, driver, and migration tooling together before implementation.
 
 Neo4j Community is the first graph candidate because PPC's operational graph responsibility maps directly to LIONG's paths and relationship queries. Official documentation describes ACID transactions, Cypher, APIs, and single-instance deployment. The inspected `2026.09.0` source license is GPLv3 [REF-TECH-003].
 

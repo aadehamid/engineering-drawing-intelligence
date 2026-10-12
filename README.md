@@ -36,7 +36,9 @@ component locks, and deployment remain implementation gates.
 
 Cloudflare services and Databricks Free Edition are permitted exceptions to the
 open-source condition. Their use is optional and requires verified fit and separate
-authorization before provisioning or spending.
+authorization before provisioning or spending. SQL Server, hosted on an Azure SQL
+Database free-offer database, is a further exception: both synthetic vendor-style
+backends run on it (DEC-027).
 
 The [drawing extraction assessment](docs/LIONG-007-stack-and-architecture.md#modern-drawing-extraction-candidates)
 covers LiteParse, LlamaParse, Firecrawl Parse, document and vision-language models

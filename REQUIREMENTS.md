@@ -15,6 +15,8 @@ Use open-source technology, with capabilities verified before final selection.
 User-approved exceptions to the open-source condition are Cloudflare services
 and Databricks Free Edition. These exceptions permit assessment and selection;
 they do not require either provider or authorize deployment or spending.
+SQL Server, hosted on an Azure SQL Database free-offer database, is a further
+user-approved exception: both synthetic vendor-style backends run on it (DEC-027).
 Verify current free-tier limits, terms, required features, and compatibility
 before treating a proposed use as implementation-ready.
 
