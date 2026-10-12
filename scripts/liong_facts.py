@@ -294,17 +294,69 @@ class IndexRow(NamedTuple):
     date: str
 
 
+def read_index(text: str, label: str, errors: list[str]) -> dict[str, IndexRow]:
+    """Parse the Index table; any row that is not the header or a well-formed entry is an error."""
+    indexed: dict[str, IndexRow] = {}
+    table = section(text, "## Index")
+    for line in table.splitlines():
+        if not line.startswith("|") or line.startswith("| ID |") or line.startswith("| ---"):
+            continue
+        row = re.match(INDEX_ROW, line)
+        if not row:
+            errors.append(f"{label}: malformed index row: {line}")
+            continue
+        record_id, link, title, status, date = row.groups()
+        if record_id in indexed:
+            errors.append(f"{label}: {record_id} is indexed twice")
+        indexed[record_id] = IndexRow(link, title, status, date)
+    return indexed
+
+
+def check_record_shape(text: str, record_id: str, label: str, files: dict[str, Path]) -> list[str]:
+    """The header lines, non-empty sections in order, the owner's answer, and supersession links."""
+    errors: list[str] = []
+    status_line = re.search(r"^Status: (\w+)$", text, re.MULTILINE)
+    status = status_line.group(1) if status_line else None
+    if status not in STATUSES:
+        errors.append(f"{label}: Status must be one of {', '.join(STATUSES)}")
+    if not re.search(r"^Date: \d{4}-\d{2}-\d{2}$", text, re.MULTILINE):
+        errors.append(f"{label}: missing 'Date: YYYY-MM-DD' line")
+
+    positions = [text.find(f"\n{heading}\n") for heading in RECORD_SECTIONS]
+    if -1 in positions or positions != sorted(positions):
+        errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)} in that order")
+        return errors
+    bodies = {
+        heading: text[start + len(heading) + 2:end].strip()
+        for heading, start, end in zip(RECORD_SECTIONS, positions, positions[1:] + [len(text)])
+    }
+    for heading, body in bodies.items():
+        if not body:
+            errors.append(f"{label}: section {heading} is empty")
+    if status == "Decided" and not re.search(
+        r"^The owner (?:answered|said|wrote):\n+> \S", bodies["## Owner's words"], re.MULTILINE
+    ):
+        errors.append(f"{label}: a Decided record quotes the owner after 'The owner answered:' in a '>' block")
+
+    if status == "Superseded":
+        successor = re.search(r"^Superseded by (DEC-\d{3}) on \d{4}-\d{2}-\d{2}\.?$", text, re.MULTILINE)
+        if not successor:
+            errors.append(f"{label}: a Superseded record says 'Superseded by DEC-NNN on YYYY-MM-DD'")
+        else:
+            later = [path for name, path in files.items() if name.startswith(successor.group(1) + "-")]
+            if not later:
+                errors.append(f"{label}: successor {successor.group(1)} has no record")
+            elif not re.search(rf"^Amends {record_id}\b", later[0].read_text(encoding="utf-8"), re.MULTILINE):
+                errors.append(f"{label}: successor {successor.group(1)} does not say 'Amends {record_id}'")
+    return errors
+
+
 def check_decisions(root: Path) -> list[str]:
     """Each decision record has the documented shape and matches its index row."""
     folder = root / DECISIONS
     index_label = f"{DECISIONS}/README.md"
     errors: list[str] = []
-    indexed: dict[str, IndexRow] = {}
-    index = (folder / "README.md").read_text(encoding="utf-8")
-    for record_id, link, title, status, date in re.findall(INDEX_ROW, index, re.MULTILINE):
-        if record_id in indexed:
-            errors.append(f"{index_label}: {record_id} is indexed twice")
-        indexed[record_id] = IndexRow(link, title, status, date)
+    indexed = read_index((folder / "README.md").read_text(encoding="utf-8"), index_label, errors)
     files = {path.name: path for path in folder.glob("DEC-*.md")}
     for record_id, row in indexed.items():
         if row.link not in files:
@@ -318,33 +370,22 @@ def check_decisions(root: Path) -> list[str]:
             errors.append(f"{label}: first line must be '# DEC-NNN: <decision>' matching the file name")
             continue
         record_id, title = heading.groups()
-        status_line = re.search(r"^Status: (\w+)$", text, re.MULTILINE)
-        date_line = re.search(r"^Date: (\d{4}-\d{2}-\d{2})$", text, re.MULTILINE)
-        status = status_line.group(1) if status_line else None
-        if status not in STATUSES:
-            errors.append(f"{label}: Status must be one of {', '.join(STATUSES)}")
-        if not date_line:
-            errors.append(f"{label}: missing 'Date: YYYY-MM-DD' line")
-        positions = [text.find(f"\n{section}\n") for section in RECORD_SECTIONS]
-        if -1 in positions or positions != sorted(positions):
-            errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)} in that order")
-        elif status == "Decided" and not re.search(r"^> \S", text[positions[3]:positions[4]], re.MULTILINE):
-            errors.append(f"{label}: a Decided record quotes the owner in a '>' block")
-        if status == "Superseded" and not re.search(r"^Superseded by DEC-\d{3}", text, re.MULTILINE):
-            errors.append(f"{label}: a Superseded record names its successor ('Superseded by DEC-NNN')")
+        errors += check_record_shape(text, record_id, label, files)
 
         if record_id not in indexed:
             errors.append(f"{label}: {record_id} has no index row")
             continue
         row = indexed[record_id]
+        status = re.search(r"^Status: (\w+)$", text, re.MULTILINE)
+        date = re.search(r"^Date: (\d{4}-\d{2}-\d{2})$", text, re.MULTILINE)
         if row.link != name:
             errors.append(f"{index_label}: {record_id} links to {row.link}, not {name}")
         if row.title != title:
             errors.append(f"{index_label}: {record_id} title differs from its record")
-        if status and row.status != status:
-            errors.append(f"{index_label}: {record_id} status {row.status}; the record says {status}")
-        if date_line and row.date != date_line.group(1):
-            errors.append(f"{index_label}: {record_id} date {row.date}; the record says {date_line.group(1)}")
+        if status and row.status != status.group(1):
+            errors.append(f"{index_label}: {record_id} status {row.status}; the record says {status.group(1)}")
+        if date and row.date != date.group(1):
+            errors.append(f"{index_label}: {record_id} date {row.date}; the record says {date.group(1)}")
     return errors
 
 

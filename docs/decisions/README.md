@@ -12,18 +12,18 @@ state; a register row links here when its decision has a record.
 
 ## Record format
 
-Name each file `DEC-NNN-short-slug.md`. It starts with `# DEC-NNN: <decision>`,
-then a `Status:` line and a `Date:` line, then these sections in order:
-`## Context`, `## Decision`, `## Alternatives considered`, `## Owner's words`, and
-`## Evidence`.
+What each status means, when a decision is Decided, and how one decision amends
+another follow the way-of-working standard (`references/deciding.md`). This
+section fixes only the shape that `python3 scripts/liong_facts.py check` verifies.
 
-- **Status** is `Proposed`, `Decided`, or `Superseded`. A decision the agent
-  inferred, rather than one the owner stated, stays `Proposed` until the owner
-  confirms it in words.
-- **Owner's words** quotes the owner exactly, in a `>` block, with the question
-  it answered. A `Decided` record needs one.
-- **Superseded** records keep their text and add a line `Superseded by DEC-NNN`
-  with the date. The later record names the one it amends.
-
-`python3 scripts/liong_facts.py check` verifies that the index and the records
-agree and that each record has this shape.
+- **File name** `DEC-NNN-short-slug.md`, first line `# DEC-NNN: <decision>`, then a
+  `Status:` line (`Proposed`, `Decided`, or `Superseded`) and a `Date: YYYY-MM-DD`
+  line.
+- **Sections**, in order and none empty: `## Context`, `## Decision`,
+  `## Alternatives considered`, `## Owner's words`, `## Evidence`.
+- **Owner's words** in a `Decided` record: a line `The owner answered:` (or
+  `said:` or `wrote:`) followed by the quote in a `>` block.
+- **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,
+  and the later record has a line `Amends DEC-NNN`.
+- **Index**: one row per record, with the link, decision, status and date matching
+  the record. Any other row in the Index table fails the check.

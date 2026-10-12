@@ -195,8 +195,6 @@ class DecisionRecordsTest(CopiedDocsTestCase):
 
     def test_decided_needs_owner_quote(self) -> None:
         self.edit(self.RECORD, "> Q12: yes", "Q12: yes")
-        self.edit(self.RECORD, "> When you don't answer", "When you don't answer")
-        self.edit(self.RECORD, "> agreement with my recommendation?", "agreement with my recommendation?")
         self.assertTrue(any("quotes the owner" in e for e in self.errors()))
 
     def test_missing_section_fails(self) -> None:
@@ -207,12 +205,51 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.RECORD, "Status: Decided", "Status: Approved")
         self.assertTrue(any("Status must be one of" in e for e in self.errors()))
 
-    def test_superseded_names_successor(self) -> None:
+    def supersede(self, line: str) -> None:
         self.edit(self.RECORD, "Status: Decided", "Status: Superseded")
         self.edit(self.INDEX, "| Decided | 2026-10-11 |", "| Superseded | 2026-10-11 |")
-        self.assertTrue(any("names its successor" in e for e in self.errors()))
-        self.edit(self.RECORD, "## Context", "Superseded by DEC-020 on 2026-11-01.\n\n## Context")
+        self.edit(self.RECORD, "## Context", f"{line}\n\n## Context")
+
+    def add_successor(self, amends_line: str) -> None:
+        text = (self.root / self.RECORD).read_text().replace("DEC-014", "DEC-020")
+        text = text.replace("Status: Superseded", "Status: Decided").replace("Superseded by DEC-020 on 2026-11-01.\n\n", "")
+        text = text.replace("Date: 2026-10-11", "Date: 2026-11-01").replace("## Context", f"{amends_line}\n\n## Context", 1)
+        (self.root / "docs/decisions/DEC-020-successor.md").write_text(text, encoding="utf-8")
+        title = "A skipped question in a decision round counts as agreement"
+        row = f"| [DEC-020](DEC-020-successor.md) | {title} | Decided | 2026-11-01 |\n"
+        self.edit(self.INDEX, "\n\n## Record format", f"\n{row}\n## Record format")
+
+    def test_superseded_needs_dated_successor_line(self) -> None:
+        self.supersede("Superseded by DEC-020")
+        self.assertTrue(any("Superseded by DEC-NNN on YYYY-MM-DD" in e for e in self.errors()))
+
+    def test_successor_must_exist(self) -> None:
+        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.assertTrue(any("successor DEC-020 has no record" in e for e in self.errors()))
+
+    def test_successor_must_say_it_amends(self) -> None:
+        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.add_successor("Follows DEC-014")
+        self.assertTrue(any("does not say 'Amends DEC-014'" in e for e in self.errors()))
+
+    def test_valid_supersession_passes(self) -> None:
+        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.add_successor("Amends DEC-014")
         self.assertEqual(self.errors(), [])
+
+    def test_empty_section_fails(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start], encoding="utf-8")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_question_without_owner_answer_fails(self) -> None:
+        self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n", "")
+        self.assertTrue(any("after 'The owner answered:'" in e for e in self.errors()))
+
+    def test_malformed_index_row_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format", "\n| DEC-099 | Ghost | Decided | 2026-10-11 |\n\n## Record format")
+        self.assertTrue(any("malformed index row: | DEC-099 | Ghost" in e for e in self.errors()))
 
 
 if __name__ == "__main__":
