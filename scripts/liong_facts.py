@@ -297,60 +297,101 @@ class IndexRow(NamedTuple):
 INDEX_HEADER = ("| ID | Decision | Status | Date |", "| --- | --- | --- | --- |")
 
 
-def read_index(text: str, label: str, errors: list[str]) -> dict[str, IndexRow]:
-    """Parse the Index table: the exact header once, then only well-formed entries."""
-    indexed: dict[str, IndexRow] = {}
-    lines = [line for line in section(text, "## Index").splitlines() if line.startswith("|")]
+class Record(NamedTuple):
+    record_id: str
+    title: str
+    statuses: list[str]
+    dates: list[str]
+    sections: dict[str, str]
+    amends: list[str]
+    superseded_by: list[str]
+
+
+def rendered(text: str) -> str:
+    """The text a reader sees: HTML comments and fenced code blocks removed."""
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    return re.sub(r"^ {0,3}(```|~~~).*?^ {0,3}\1[^\n]*$", "", text, flags=re.DOTALL | re.MULTILINE)
+
+
+def has_content(body: str) -> bool:
+    """True when a line holds something other than a heading or a horizontal rule."""
+    return any(
+        line.strip() and not re.match(r"\s*#", line) and not re.fullmatch(r"\s*([-*_])(\s*\1){2,}\s*", line)
+        for line in body.splitlines()
+    )
+
+
+def parse_record(text: str) -> Record | None:
+    text = rendered(text)
+    heading = re.match(r"\s*# (DEC-\d{3}): (.+)\n", text)
+    if not heading:
+        return None
+    sections: dict[str, str] = {}
+    current = None
+    for line in text.splitlines():
+        if re.match(r"## \S", line):
+            current = line.strip()
+            sections.setdefault(current, "")
+        elif current:
+            sections[current] += line + "\n"
+    return Record(
+        heading.group(1),
+        heading.group(2),
+        re.findall(r"^Status: (\w+)$", text, re.MULTILINE),
+        re.findall(r"^Date: (\d{4}-\d{2}-\d{2})$", text, re.MULTILINE),
+        sections,
+        re.findall(r"^Amends (DEC-\d{3})\b", text, re.MULTILINE),
+        re.findall(r"^Superseded by (DEC-\d{3}) on \d{4}-\d{2}-\d{2}\.?$", text, re.MULTILINE),
+    )
+
+
+def read_index(text: str, label: str, errors: list[str]) -> list[tuple[str, IndexRow]]:
+    """Every table row a reader sees in the Index: the exact header, then well-formed entries."""
+    lines = [line.strip() for line in section(rendered(text), "## Index").splitlines() if re.match(r" {0,3}\|", line)]
     if tuple(lines[:2]) != INDEX_HEADER:
         errors.append(f"{label}: the Index table must start with {INDEX_HEADER[0]}")
+    rows = []
     for line in lines[2:]:
         row = re.match(INDEX_ROW, line)
         if not row:
             errors.append(f"{label}: malformed index row: {line}")
             continue
         record_id, link, title, status, date = row.groups()
-        if record_id in indexed:
-            errors.append(f"{label}: {record_id} is indexed twice")
-        indexed[record_id] = IndexRow(link, title, status, date)
-    return indexed
+        rows.append((record_id, IndexRow(link, title, status, date)))
+    return rows
 
 
-def check_record_shape(text: str, record_id: str, label: str, files: dict[str, Path]) -> list[str]:
-    """The header lines, non-empty sections in order, the owner's answer, and supersession links."""
+def check_record(record: Record, label: str, records: dict[str, Record]) -> list[str]:
+    """One status and date, non-empty sections in order, the owner's answer, and two-way amendments."""
     errors: list[str] = []
-    status_line = re.search(r"^Status: (\w+)$", text, re.MULTILINE)
-    status = status_line.group(1) if status_line else None
-    if status not in STATUSES:
-        errors.append(f"{label}: Status must be one of {', '.join(STATUSES)}")
-    if not re.search(r"^Date: \d{4}-\d{2}-\d{2}$", text, re.MULTILINE):
-        errors.append(f"{label}: missing 'Date: YYYY-MM-DD' line")
-
-    positions = [text.find(f"\n{heading}\n") for heading in RECORD_SECTIONS]
-    if -1 in positions or positions != sorted(positions):
+    if len(record.statuses) != 1 or record.statuses[0] not in STATUSES:
+        errors.append(f"{label}: needs exactly one Status line, one of {', '.join(STATUSES)}")
+    if len(record.dates) != 1:
+        errors.append(f"{label}: needs exactly one 'Date: YYYY-MM-DD' line")
+    if [h for h in record.sections if h in RECORD_SECTIONS] != list(RECORD_SECTIONS):
         errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)} in that order")
         return errors
-    bodies = {
-        heading: re.sub(r"<!--.*?-->", "", text[start + len(heading) + 2:end], flags=re.DOTALL).strip()
-        for heading, start, end in zip(RECORD_SECTIONS, positions, positions[1:] + [len(text)])
-    }
-    for heading, body in bodies.items():
-        if not body:
+    for heading in RECORD_SECTIONS:
+        if not has_content(record.sections[heading]):
             errors.append(f"{label}: section {heading} is empty")
+    status = record.statuses[0] if record.statuses else None
     if status == "Decided" and not re.search(
-        r"^The owner (?:answered|said|wrote):\n+> \S", bodies["## Owner's words"], re.MULTILINE
+        r"^The owner (?:answered|said|wrote):\n+> \S", record.sections["## Owner's words"], re.MULTILINE
     ):
         errors.append(f"{label}: a Decided record quotes the owner after 'The owner answered:' in a '>' block")
-
     if status == "Superseded":
-        successor = re.search(r"^Superseded by (DEC-\d{3}) on \d{4}-\d{2}-\d{2}\.?$", text, re.MULTILINE)
-        if not successor:
+        if len(record.superseded_by) != 1:
             errors.append(f"{label}: a Superseded record says 'Superseded by DEC-NNN on YYYY-MM-DD'")
-        else:
-            later = [path for name, path in files.items() if name.startswith(successor.group(1) + "-")]
-            if not later:
-                errors.append(f"{label}: successor {successor.group(1)} has no record")
-            elif not re.search(rf"^Amends {record_id}\b", later[0].read_text(encoding="utf-8"), re.MULTILINE):
-                errors.append(f"{label}: successor {successor.group(1)} does not say 'Amends {record_id}'")
+        elif record.superseded_by[0] not in records:
+            errors.append(f"{label}: successor {record.superseded_by[0]} has no record")
+        elif record.record_id not in records[record.superseded_by[0]].amends:
+            errors.append(f"{label}: successor {record.superseded_by[0]} does not say 'Amends {record.record_id}'")
+    for earlier in record.amends:
+        target = records.get(earlier)
+        if not target:
+            errors.append(f"{label}: amends {earlier}, which has no record")
+        elif target.statuses != ["Superseded"] or target.superseded_by != [record.record_id]:
+            errors.append(f"{label}: amends {earlier}, which is not marked 'Superseded by {record.record_id} on YYYY-MM-DD'")
     return errors
 
 
@@ -359,45 +400,42 @@ def check_decisions(root: Path) -> list[str]:
     folder = root / DECISIONS
     index_label = f"{DECISIONS}/README.md"
     errors: list[str] = []
-    indexed = read_index((folder / "README.md").read_text(encoding="utf-8"), index_label, errors)
     files = {path.name: path for path in folder.glob("DEC-*.md")}
-    for record_id, row in indexed.items():
+    records: dict[str, Record] = {}
+    names: dict[str, str] = {}
+    for name, path in sorted(files.items()):
+        record = parse_record(path.read_text(encoding="utf-8"))
+        if not record or not name.startswith(record.record_id + "-"):
+            errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")
+            continue
+        records[record.record_id] = record
+        names[record.record_id] = name
+
+    rows = read_index((folder / "README.md").read_text(encoding="utf-8"), index_label, errors)
+    seen: set[str] = set()
+    for record_id, row in rows:
+        if record_id in seen:
+            errors.append(f"{index_label}: {record_id} is indexed twice")
+        seen.add(record_id)
         if row.link not in files:
             errors.append(f"{index_label}: {record_id} links to missing file {row.link}")
-
-    for name, path in sorted(files.items()):
-        text = path.read_text(encoding="utf-8")
-        label = f"{DECISIONS}/{name}"
-        heading = re.match(r"# (DEC-\d{3}): (.+)\n", text)
-        if not heading or not name.startswith(heading.group(1) + "-"):
-            errors.append(f"{label}: first line must be '# DEC-NNN: <decision>' matching the file name")
             continue
-        record_id, title = heading.groups()
-        errors += check_record_shape(text, record_id, label, files)
-        for earlier in re.findall(r"^Amends (DEC-\d{3})\b", text, re.MULTILINE):
-            target = [p for n, p in files.items() if n.startswith(earlier + "-")]
-            if not target:
-                errors.append(f"{label}: amends {earlier}, which has no record")
-            elif not (
-                re.search(r"^Status: Superseded$", earlier_text := target[0].read_text(encoding="utf-8"), re.MULTILINE)
-                and re.search(rf"^Superseded by {record_id} on \d{{4}}-\d{{2}}-\d{{2}}\.?$", earlier_text, re.MULTILINE)
-            ):
-                errors.append(f"{label}: amends {earlier}, which is not marked 'Superseded by {record_id} on YYYY-MM-DD'")
-
-        if record_id not in indexed:
-            errors.append(f"{label}: {record_id} has no index row")
+        if names.get(record_id) != row.link:
+            errors.append(f"{index_label}: {record_id} links to {row.link}, which is not the {record_id} record")
             continue
-        row = indexed[record_id]
-        status = re.search(r"^Status: (\w+)$", text, re.MULTILINE)
-        date = re.search(r"^Date: (\d{4}-\d{2}-\d{2})$", text, re.MULTILINE)
-        if row.link != name:
-            errors.append(f"{index_label}: {record_id} links to {row.link}, not {name}")
-        if row.title != title:
+        record = records[record_id]
+        if row.title != record.title:
             errors.append(f"{index_label}: {record_id} title differs from its record")
-        if status and row.status != status.group(1):
-            errors.append(f"{index_label}: {record_id} status {row.status}; the record says {status.group(1)}")
-        if date and row.date != date.group(1):
-            errors.append(f"{index_label}: {record_id} date {row.date}; the record says {date.group(1)}")
+        if record.statuses and row.status != record.statuses[0]:
+            errors.append(f"{index_label}: {record_id} status {row.status}; the record says {record.statuses[0]}")
+        if record.dates and row.date != record.dates[0]:
+            errors.append(f"{index_label}: {record_id} date {row.date}; the record says {record.dates[0]}")
+
+    for record_id, record in sorted(records.items()):
+        label = f"{DECISIONS}/{names[record_id]}"
+        errors += check_record(record, label, records)
+        if record_id not in seen:
+            errors.append(f"{label}: {record_id} has no index row")
     return errors
 
 

@@ -203,7 +203,7 @@ class DecisionRecordsTest(CopiedDocsTestCase):
 
     def test_unknown_status_fails(self) -> None:
         self.edit(self.RECORD, "Status: Decided", "Status: Approved")
-        self.assertTrue(any("Status must be one of" in e for e in self.errors()))
+        self.assertTrue(any("needs exactly one Status line" in e for e in self.errors()))
 
     def supersede(self, line: str) -> None:
         self.edit(self.RECORD, "Status: Decided", "Status: Superseded")
@@ -265,6 +265,34 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         start = text.index("## Evidence\n") + len("## Evidence\n")
         (self.root / self.RECORD).write_text(text[:start] + "\n<!-- empty -->\n", encoding="utf-8")
         self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_indented_index_row_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format", "\n | DEC-099 | Ghost | Decided | 2026-10-11 |\n\n## Record format")
+        self.assertTrue(any("malformed index row: | DEC-099 | Ghost" in e for e in self.errors()))
+
+    def test_comment_spanning_sections_hides_them(self) -> None:
+        self.edit(self.RECORD, "## Context", "<!--\n## Context")
+        (self.root / self.RECORD).write_text((self.root / self.RECORD).read_text() + "-->\n", encoding="utf-8")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_hidden_metadata_is_ignored(self) -> None:
+        self.edit(self.RECORD, "Status: Decided\nDate: 2026-10-11",
+                  "<!--\nStatus: Decided\nDate: 2026-10-11\n-->\nStatus: Proposed\nDate: 2026-10-12")
+        errors = self.errors()
+        self.assertIn(f"{self.INDEX}: DEC-014 status Decided; the record says Proposed", errors)
+        self.assertIn(f"{self.INDEX}: DEC-014 date 2026-10-11; the record says 2026-10-12", errors)
+
+    def test_heading_only_section_is_empty(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start] + "\n### Pending evidence\n", encoding="utf-8")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_row_aliasing_another_record_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format",
+                  "\n| [DEC-099](DEC-014-skipped-question-convention.md) | Ghost | Proposed | 2026-10-12 |\n\n## Record format")
+        self.assertTrue(any("DEC-099 links to DEC-014-skipped-question-convention.md, which is not the DEC-099 record" in e
+                            for e in self.errors()))
 
 if __name__ == "__main__":
     unittest.main()
