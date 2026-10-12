@@ -16,7 +16,9 @@ BASELINE = (
 )
 
 INLINE_LINK = r"\]\(\s*(<[^>\n]*>|[^)\s]+)"   # [text](target), even split across lines
-REFERENCE = r"^ {0,3}\[[^\]]+\]:\s*(<[^>\n]*>|\S+)"  # [label]: target, used by reference links
+# [label]: target, used by reference links. It may sit inside quotes and lists, and its
+# label may escape a bracket; matching too much only checks one more target.
+REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:\s*(<[^>\n]*>|\S+)"
 
 
 def link_targets(text: str) -> list[str]:

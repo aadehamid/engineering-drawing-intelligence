@@ -216,6 +216,14 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.QUOTED, self.DECISION_QUOTE, self.DECISION_QUOTE.replace("MILESTONE", "MILE_STONE"))
         self.assertTrue(any("the Decision quote \"Yes. Build only what MILE_STONE" in e for e in self.errors()))
 
+    def test_decision_quote_spanning_owner_words_and_evidence_fails(self) -> None:
+        record = facts.parse_record((self.root / self.QUOTED).read_text(encoding="utf-8"))
+        bodies = dict(record.sections)
+        last = facts.flat_quote(bodies["## Owner's words"]).split(". ")[-1]
+        first = facts.flat_quote(bodies["## Evidence"]).split(". ")[0]
+        self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n", f"> {last} {first}\n")
+        self.assertTrue(any("is not word for word" in e for e in self.errors()))
+
     def test_quote_inside_a_list_fails(self) -> None:
         for nested in ("- Approval:\n    > Invented approval.\n", "- > Invented approval.\n"):
             with self.subTest(nested=nested):

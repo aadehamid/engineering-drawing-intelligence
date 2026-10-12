@@ -520,11 +520,11 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
-    sources = flat_quote(bodies["## Owner's words"] + "\n" + bodies["## Evidence"])
+    sources = [flat_quote(bodies["## Owner's words"]), flat_quote(bodies["## Evidence"])]
     quotes, layout = quote_blocks(bodies["## Decision"])
     errors += [f"{label}: Decision: {error}" for error in layout]
     for quote in quotes:
-        if not re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", sources):
+        if not any(re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", source) for source in sources):
             errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word under Owner's words or Evidence")
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
