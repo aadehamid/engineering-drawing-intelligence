@@ -57,12 +57,13 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-026 | The backend database is reachable from any of the owner's machines and runs on the engine closest to both vendors | Owner's Q14 answer: Neon was chosen only for access from any machine; the engine follows the vendors unless that proves really difficult | LIONG-007; [record](decisions/DEC-026-reachable-backend-close-to-vendors.md) |
 | DEC-027 | Both backends run on SQL Server, hosted on an Azure SQL Database free-offer database | Owner accepted the Q21 recommendation | LIONG-007; [record](decisions/DEC-027-sql-server-on-azure.md) |
 | DEC-028 | Both vendor schemas live in one database | Owner's Q15 answer, in place of the recommended separate databases | LIONG-007; [record](decisions/DEC-028-one-database-two-schemas.md) |
-| DEC-029 | There are two canonical worlds, each generated into one vendor's schema | Owner's Q16 and Q22 answers. Which world is which is proposed in DEC-035 | LIONG-006; [record](decisions/DEC-029-two-canonical-worlds.md) |
+| DEC-029 | There are two canonical worlds, each generated into one vendor's schema | Owner's Q16 and Q22 answers. Which world is which is decided in DEC-035 | LIONG-006; [record](decisions/DEC-029-two-canonical-worlds.md) |
 | DEC-030 | MILESTONE-001 builds the Plant 3D-style backend first | Owner accepted the Q17 recommendation | LIONG-011; [record](decisions/DEC-030-plant-3d-backend-first.md) |
 | DEC-031 | The backends copy each application's saved data, not its editing behaviour | Owner accepted the Q18 recommendation | LIONG-006; [record](decisions/DEC-031-stored-data-not-behaviour.md) |
 | DEC-032 | Each backend carries a minimal data dictionary for the classes R0 uses | Owner accepted the Q19 recommendation | LIONG-006; [record](decisions/DEC-032-minimal-data-dictionary.md) |
 | DEC-033 | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Owner accepted the Q20 recommendation | ARCHITECTURE.md, LIONG-003, LIONG-006; [record](decisions/DEC-033-architecture-wording.md) |
 | DEC-034 | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Owner's answer to Q23: keep the cross check | LIONG-006; [record](decisions/DEC-034-r0-smartplant-cross-check.md) |
+| DEC-035 | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Owner's answer on 2026-10-12: "yes, R0 is Autodesk and W-SP is SmartPlant" | LIONG-006; [record](decisions/DEC-035-r0-is-the-autodesk-world.md) |
 
 ## New proposals
 
@@ -79,7 +80,6 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-109 | Drawing-baseline acceptance versus engineering approval | Permit initial publication with engineering decision not applicable; require distinct source approval and a new approved baseline publication before engineering proposals use it as their base. Never relabel historical acceptance as approval | Project owner, LIONG-005/008 |
 | DEC-110 | Pluggable parsing and visual interpretation versus OCR-centric custom extraction | Compare LiteParse, hosted parsers, document models and a general vision-language model in their respective roles; treat SAM 3 as an optional segmentation experiment, not a parser or graph generator | Project owner, LIONG-005/007/010 |
 | DEC-111 | Evidence-based model admission versus adoption from general benchmarks | Require engineering fixtures, source-region checks, repeat-run records, hardware/cost cohorts and license/data-processing review before selection; no downstream publication authority for model outputs | Project owner, LIONG-007/009/010 |
-| DEC-035 | R0 as the Autodesk world and a new world W-SP for SmartPlant, versus R0 for SmartPlant | R0 keeps its Plant 3D-style backend, so MILESTONE-001 starts on the simpler connection model (DEC-030); [record](decisions/DEC-035-r0-is-the-autodesk-world.md) | Project owner, LIONG-006 |
 
 These are proposal groups. Document-local gate IDs retain finer-grained evidence
 requirements. Approval must identify which groups or sections it covers.
