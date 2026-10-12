@@ -13,8 +13,9 @@ for connected queries and analysis; it does not replace source approval.
 
 For the structured demonstration, a representative backend holds engineering
 objects, connections, drawing references, and revisions. Its schema and
-extraction mappings must be documented. It is a synthetic test source, not a
-replica of an undisclosed engineering platform.
+extraction mappings must be documented. Two synthetic backends follow the
+documented storage patterns of SmartPlant P&ID and AutoCAD Plant 3D, using original
+names. Neither copies a vendor schema.
 
 Each dataset declares its authoritative source. Where an approved backend
 exists, drawing extraction supplies evidence and flags discrepancies without

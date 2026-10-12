@@ -37,7 +37,7 @@ Proposal: keep an eligibility record for each selected artifact, not just its we
 
 Proposal: retain metadata and links while redistribution remains unresolved. Do not vendor an artifact with unclear terms. Derived annotations, crops, raster images, and converted XML need their own provenance and rights assessment. Synthetic degradation of a licensed vector drawing does not make the drawing independently created.
 
-Public data and synthetic data serve different purposes. Public examples can expose format and extraction problems. Synthetic backend records provide controlled revisions, expected connectivity, tag renaming, ambiguity, bypasses, and rejected updates. Importing a public DEXPI file alone cannot demonstrate backend-to-DEXPI generation.
+Public data and synthetic data serve different purposes. Public examples can expose format and extraction problems. Synthetic backend records provide controlled revisions, expected connectivity, tag renaming, ambiguity, bypasses, and rejected updates. Two synthetic backends follow the documented storage patterns of SmartPlant P&ID and AutoCAD Plant 3D, using original names. Neither copies a vendor schema. Importing a public DEXPI file alone cannot demonstrate backend-to-DEXPI generation.
 
 ## 3. DEXPI version and artifact findings
 

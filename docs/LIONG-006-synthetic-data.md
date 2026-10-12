@@ -20,7 +20,7 @@ and scoring keys private. Produce these artifacts separately:
 | Representation | Content and authority |
 |---|---|
 | Canonical truth and answer key | Exact relationships, scenario changes, permitted matches, and expected failures. R0 is a public development oracle. For fresh held-out worlds, only the generator and trusted scorer may read the private keys and truth. |
-| Engineering backend | Source-local primary keys, equipment, valves, instruments, pipe segments, connection points, contextual tags, attributes, drawing appearances, revision records, and approval events. This is authoritative for the structured dataset. |
+| Engineering backend | Source-local primary keys, equipment, valves, instruments, pipe segments, connection points, contextual tags, attributes, drawing appearances, revision records, and approval events. This is authoritative for the structured dataset. Two synthetic backends follow the documented storage patterns of SmartPlant P&ID and AutoCAD Plant 3D, using original names. Neither copies a vendor schema. |
 | Flat P&IDs | Two sheets with symbols, tag text, established flow arrows, line connections, and reciprocal cross-sheet labels. They contain page/region evidence but no hidden object IDs. |
 | Asset hierarchy | A separate register with its own record keys, facility context, location, asset type, and explicit cross-reference evidence. It validates engineering data without replacing connectivity. |
 | Instrumentation register | Independent record keys, instrument tags, parent equipment, units, and required attributes. Deliberate conflicting versions support SCN-008. |
