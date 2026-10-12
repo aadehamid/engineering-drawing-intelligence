@@ -11,6 +11,7 @@ Usage: world.py check [WORLD.yaml ...]   (default: every worlds/*.yaml)
 """
 from __future__ import annotations
 
+import functools
 import json
 import sys
 from pathlib import Path
@@ -19,15 +20,9 @@ from typing import NamedTuple
 import yaml
 from jsonschema import Draft202012Validator
 
-ROOT = Path(__file__).resolve().parent.parent
+from liong_facts import ON_SHEET, ROOT, Edge
+
 SCHEMA = ROOT / "schemas" / "canonical-world.schema.json"
-ON_SHEET = "ON_SHEET"
-
-
-class Edge(NamedTuple):
-    kind: str
-    source: str
-    target: str
 
 
 class State(NamedTuple):
@@ -49,9 +44,13 @@ def load(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+@functools.cache
+def validator() -> Draft202012Validator:
+    return Draft202012Validator(json.loads(SCHEMA.read_text(encoding="utf-8")))
+
+
 def schema_errors(world: dict) -> list[str]:
-    validator = Draft202012Validator(json.loads(SCHEMA.read_text(encoding="utf-8")))
-    return [f"{'/'.join(map(str, e.absolute_path)) or '(root)'}: {e.message}" for e in validator.iter_errors(world)]
+    return [f"{'/'.join(map(str, e.absolute_path)) or '(root)'}: {e.message}" for e in validator().iter_errors(world)]
 
 
 def base_state(world: dict) -> State:
@@ -87,9 +86,9 @@ def state(world: dict, revision: str) -> State:
     current: str | None = revision
     while current is not None:
         if current in chain:
-            raise RevisionError(f"revision {revision} has a cycle in its bases: {' -> '.join(chain + [current])}")
+            raise RevisionError(f"cycle in its bases: {' -> '.join(chain + [current])}")
         if current not in world["revisions"]:
-            raise RevisionError(f"revision {chain[-1] if chain else revision} has unknown base {current}")
+            raise RevisionError(f"unknown base {current}" if chain else f"no revision named {current}")
         chain.append(current)
         current = world["revisions"][current]["base"]
     result = base_state(world)

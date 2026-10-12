@@ -19,10 +19,6 @@ import world  # noqa: E402
 R0 = world.ROOT / "worlds" / "R0.yaml"
 
 
-def as_facts(edges) -> set[tuple[str, str, str]]:
-    return {(e.kind, e.source, e.target) for e in edges}
-
-
 class R0MatchesLiong006(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -39,7 +35,7 @@ class R0MatchesLiong006(unittest.TestCase):
         r0 = world.state(self.data, "R0")
         self.assertEqual(set(r0.nodes), self.doc.nodes)
         self.assertEqual({a for a, n in r0.nodes.items() if n["class"] == "drawing"}, self.doc.drawings)
-        self.assertEqual(as_facts(r0.all_edges()), as_facts(self.doc.edges))
+        self.assertEqual(r0.all_edges(), set(self.doc.edges))
 
     def test_r1_renames_e2_and_keeps_every_identity_and_edge(self):
         r0, r1 = world.state(self.data, "R0"), world.state(self.data, "R1")
@@ -52,8 +48,8 @@ class R0MatchesLiong006(unittest.TestCase):
         r2 = world.state(self.data, "R2")
         deleted = self.doc.r2_deleted
         self.assertEqual(set(r2.nodes), self.doc.nodes - deleted)
-        expected = {e for e in as_facts(self.doc.edges) if e[1] not in deleted and e[2] not in deleted}
-        self.assertEqual(as_facts(r2.all_edges()), expected)
+        expected = {e for e in self.doc.edges if not liong_facts.touches(e, deleted)}
+        self.assertEqual(r2.all_edges(), expected)
         self.assertEqual(r2.nodes["E2"]["tag"], "TK-202")
 
     def test_counts_match_the_figures_tool(self):
@@ -95,11 +91,11 @@ class CheckFailsOnBrokenWorlds(unittest.TestCase):
 
     def test_unknown_base_fails(self):
         self.data["revisions"]["R2"]["base"] = "R9"
-        self.assertError("revision R2: revision R2 has unknown base R9")
+        self.assertError("revision R2: unknown base R9")
 
     def test_cycle_in_bases_fails(self):
         self.data["revisions"]["R0"]["base"] = "R1"
-        self.assertError("has a cycle in its bases")
+        self.assertError("cycle in its bases: R0 -> R1 -> R0")
 
     def test_change_to_a_missing_node_fails(self):
         self.data["revisions"]["R1"]["changes"] = [{"set_tag": {"node": "ZZ", "tag": "X"}}]

@@ -18,12 +18,8 @@
     },
     "edges": {
       "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "FLOW": {"$ref": "#/$defs/edge_list"},
-        "INSTRUMENT_PARENT": {"$ref": "#/$defs/edge_list"},
-        "CROSS_SHEET_REFERENCE": {"$ref": "#/$defs/edge_list"}
-      }
+      "propertyNames": {"$ref": "#/$defs/edge_kind"},
+      "additionalProperties": {"$ref": "#/$defs/edge_list"}
     },
     "revisions": {
       "type": "object",
@@ -34,6 +30,7 @@
   },
   "$defs": {
     "alias": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*$"},
+    "edge_kind": {"enum": ["FLOW", "INSTRUMENT_PARENT", "CROSS_SHEET_REFERENCE"]},
     "name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*$"},
     "edge_list": {
       "type": "array",
@@ -114,7 +111,7 @@
             "delete_edge": {
               "type": "array",
               "prefixItems": [
-                {"enum": ["FLOW", "INSTRUMENT_PARENT", "CROSS_SHEET_REFERENCE"]},
+                {"$ref": "#/$defs/edge_kind"},
                 {"$ref": "#/$defs/alias"},
                 {"$ref": "#/$defs/alias"}
               ],
