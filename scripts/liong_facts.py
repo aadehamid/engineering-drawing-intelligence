@@ -388,10 +388,23 @@ def has_content(body: str) -> bool:
     return any(re.search(r"[^\W_]", line) for line in visible_lines(body))
 
 
-def owner_answer_is_visible(body: str) -> bool:
-    """The quote block after 'The owner answered:' (or said/wrote) shows the reader some words."""
+PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*"
+
+
+def owner_answer_is_plain(body: str) -> bool:
+    """The quote after 'The owner answered:' (or said/wrote) is plain text: words and punctuation only.
+
+    An allow-list, not a Markdown parser: no link, tag, entity, code, or nested container
+    can stand in for the owner's words, because none of their characters are allowed.
+    """
     answer = re.search(r"^The owner (?:answered|said|wrote):\n+((?:>.*\n?)+)", body, re.MULTILINE)
-    return bool(answer) and has_content(answer.group(1))
+    if not answer:
+        return False
+    lines = [line for line in answer.group(1).splitlines() if line.strip() != ">"]
+    list_item = r"> (?:[-+]|\d+[.)])(\s|$)"
+    return bool(lines) and all(
+        re.fullmatch(PLAIN_QUOTE_LINE, line) and not re.match(list_item, line) for line in lines
+    )
 
 
 def parse_record(text: str) -> Record | None:
@@ -448,8 +461,10 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
     status = record.statuses[0] if record.statuses else None
-    if status == "Decided" and not owner_answer_is_visible(bodies["## Owner's words"]):
-        errors.append(f"{label}: a Decided record quotes the owner after 'The owner answered:' in a '>' block")
+    if status == "Decided" and not owner_answer_is_plain(bodies["## Owner's words"]):
+        errors.append(
+            f"{label}: a Decided record quotes the owner after 'The owner answered:' in a plain-text '>' block"
+        )
     if status == "Superseded":
         if len(record.superseded_by) != 1:
             errors.append(f"{label}: a Superseded record says 'Superseded by DEC-NNN on YYYY-MM-DD'")

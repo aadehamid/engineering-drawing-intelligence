@@ -22,7 +22,8 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
 - **Sections**, in order and none empty: `## Context`, `## Decision`,
   `## Alternatives considered`, `## Owner's words`, `## Evidence`.
 - **Owner's words** in a `Decided` record: a line `The owner answered:` (or
-  `said:` or `wrote:`) followed by the quote in a `>` block.
+  `said:` or `wrote:`) followed by the quote in a `>` block of plain text: letters,
+  digits, spaces and ordinary punctuation, with no Markdown or HTML.
 - **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,
   and the later record has a line `Amends DEC-NNN`.
 - **Index**: one row per record, with the link, decision, status and date matching
