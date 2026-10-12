@@ -11,6 +11,7 @@ workload table in LIONG-010. The tool reads files only; it never writes to the r
 """
 
 import argparse
+import html
 import json
 from pathlib import Path
 import re
@@ -368,10 +369,18 @@ def visible_lines(body: str) -> list[str]:
             line = re.sub(CONTAINER_MARKER, "", line, count=1)
         unwrapped.append(line)
     return [
-        re.sub(HTML_TAG, "", line)
+        visible_inline(line)
         for line in rendered("\n".join(unwrapped)).splitlines()
         if not re.fullmatch(INVISIBLE_LINE, line)
     ]
+
+
+def visible_inline(line: str) -> str:
+    """One line's displayed text: images dropped, links reduced to labels, tags removed, entities decoded."""
+    line = re.sub(r"!\[[^\]]*\](\([^)]*\)|\[[^\]]*\])", "", line)
+    line = re.sub(r"\[([^\]]*)\](\([^)]*\)|\[[^\]]*\])", r"\1", line)
+    line = re.sub(HTML_TAG, "", line)
+    return html.unescape(line).replace("\xa0", " ")
 
 
 def has_content(body: str) -> bool:

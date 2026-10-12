@@ -348,7 +348,8 @@ class DecisionRecordsTest(CopiedDocsTestCase):
 
     def test_markup_only_owner_answer_fails(self) -> None:
         for answer in ("> <br>", "> [approval]: ../LIONG-REG-001-decisions.md", "> >", "> -", "> 1.",
-                       "> ```\n> ```", "> > ---", "> **  **"):
+                       "> ```\n> ```", "> > ---", "> **  **", "> [](../LIONG-REG-001-decisions.md)",
+                       "> &nbsp;", "> &#32;", "> ![](logo.png)"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)
@@ -363,7 +364,8 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.assertEqual(self.errors(), [])
 
     def test_owner_words_in_containers_pass(self) -> None:
-        for answer in ("> - Q12: yes", "> > Q12: yes", "> 1. Q12: yes"):
+        for answer in ("> - Q12: yes", "> > Q12: yes", "> 1. Q12: yes", "> [Q12: yes](../LIONG-REG-001-decisions.md)",
+                       "> Q12&#58; yes", "> &#89;es"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)
