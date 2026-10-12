@@ -4,7 +4,7 @@ Status: Proposed draft v0.1. The requirements in [REQUIREMENTS.md](../REQUIREMEN
 
 ## Purpose and scope
 
-Use one small synthetic engineering world to produce separate source representations. The representations must describe the same physical system without sharing hidden answer keys with ingestion. This supports OUT-001 trustworthy connectivity, OUT-002 maintained approved history, and OUT-003 evidence-supported engineering use.
+Use two small synthetic canonical worlds, R0 for Autodesk and W-SP for SmartPlant (DEC-029 and DEC-035 in the [decision register](LIONG-REG-001-decisions.md)), each producing separate source representations. The representations of one world must describe the same physical system without sharing hidden answer keys with ingestion. This supports OUT-001 trustworthy connectivity, OUT-002 maintained approved history, and OUT-003 evidence-supported engineering use.
 
 The facility context is a fictional LIONG demonstration in Lekki, Lagos State, Nigeria. No record represents an actual LIONG asset, drawing, approval, operating condition, or internal system. The example supports connectivity inspection, not engineering design or authorization to isolate equipment.
 
@@ -180,7 +180,7 @@ the report. Deny all reads and verify no canary appears in accessible outputs.
 Check sibling-world partition overlap separately. Contamination rejection alone
 does not prove runtime isolation. Repeat the runtime access tests after restore.
 
-In SCN-004, a full source snapshot may allow direct publication of R2 after validating its complete state and ancestry. Retain R1's source record and the fact that it was not published in that run. A delta-only source requires reconstruction of missing ancestors first. Historical queries must distinguish source revisions from states actually published.
+In SCN-004, a full source snapshot may allow direct publication of R2 after validating its complete state and ancestry. The synthetic backends always supply full snapshots (DEC-037 in the [decision register](LIONG-REG-001-decisions.md)); the delta-only case below applies to other sources. Retain R1's source record and the fact that it was not published in that run. A delta-only source requires reconstruction of missing ancestors first. Historical queries must distinguish source revisions from states actually published.
 
 Reusing a source revision ID with a different content digest is a source-integrity conflict, not a new idempotent delivery. Quarantine that input and retain the published state until the source supplies an explicit correction revision.
 
@@ -206,7 +206,7 @@ The equipment bridge is the explicit `MEASURES_ASSET` relationship with matching
 
 ## Recovery fixtures
 
-An approved source record commitment and graph publication are separate durability boundaries. For the synthetic backend, propose a source transaction that commits its revision and a durable pending-event record together. A small worker can retry delivery; no distributed two-phase transaction is required.
+An approved source record commitment and graph publication are separate durability boundaries. For the synthetic backends, the loader that applies a snapshot commits the revision and a durable pending-event record together, writing the event to an outbox in a third, non-vendor schema of the same database (DEC-047 in the [decision register](LIONG-REG-001-decisions.md)). The vendor schemas hold only the data each application saves. A small worker can retry delivery; no distributed two-phase transaction is required.
 
 | Interruption point | Required recovery observation |
 |---|---|

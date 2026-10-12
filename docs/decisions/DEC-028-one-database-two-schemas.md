@@ -33,5 +33,8 @@ The owner answered:
 
 ## Evidence
 
+- [DEC-047](DEC-047-loader-outbox-schema.md) later adds a third, non-vendor schema
+  to the same database, for the loader's outbox.
+
 - Q21, recorded in DEC-027, restated one database with two schemas, and the owner
   agreed.

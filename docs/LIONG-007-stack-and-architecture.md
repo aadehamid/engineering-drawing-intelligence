@@ -114,7 +114,7 @@ flowchart TB
 
 | Logical responsibility | Proposed owner | Failure boundary |
 | --- | --- | --- |
-| Source authority and approved backend revision | SQL Server synthetic backend (DEC-027) with immutable revision records and an outbox written in the approval transaction | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
+| Source authority and approved backend revision | SQL Server synthetic backend (DEC-027) with immutable revision records. In one transaction, the loader writes each revision into its vendor schema and its event into an outbox in a non-vendor schema of the same database (DEC-047) | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
 | Raw evidence and replay | Local durable artifact directory, content hashes, manifests, and independent backup | A missing or mismatched artifact blocks publication; cloud availability must not decide whether the local demo works |
 | Delivery and execution | Persistent worker using the outbox; optional Dagster OSS sensor and scheduled reconciliation | At-least-once delivery is expected; retries use stable revision keys, not assumptions of exactly-once delivery |
 | Conversion and extraction | XML adapters plus interchangeable document parsers, visual interpretation, optional segmentation, and review screens | Every model result is a candidate; parse errors, unsupported content, and uncertain matches remain visible; no direct model publication |
@@ -186,7 +186,7 @@ Apache AGE could reduce the number of database services and simplify SQL/control
 
 Dagster OSS is self-hostable and Apache-2.0 licensed; the inspected release is 1.13.25 [REF-TECH-004]. Its role would be scheduling and observing work, not storing engineering approval or making graph publication atomic. A durable outbox and a small worker are the proposed starting point.
 
-If Dagster is selected, retain its instance state and test sensor restarts, run deduplication, retries, and backfills. Approval occurs in the source transaction; a sensor may detect the resulting event later. Kafka and Debezium add no required behavior until multiple sources or delivery needs justify them. A CDC row event must never be treated as an approved engineering revision by itself.
+If Dagster is selected, retain its instance state and test sensor restarts, run deduplication, retries, and backfills. Approval arrives in the loaded source snapshot, and the loader commits it with its outbox event (DEC-047); a sensor may detect that event later. Kafka and Debezium add no required behavior until multiple sources or delivery needs justify them. A CDC row event must never be treated as an approved engineering revision by itself.
 
 ### Optional Cloudflare storage
 
@@ -214,7 +214,7 @@ All gate proposals remain Proposed. None records a completed benchmark or approv
 | --- | --- | --- |
 | GATE-TECH-001 | Choose the operational graph after evaluating Neo4j Community first and AGE as an alternative | Same synthetic cases for branches/bypasses, revision isolation, duplicate delivery, atomic visibility during crash/retry, historical reconstruction, and bounded exports; exact edition/version/license record |
 | GATE-TECH-002 | Choose and lock the local package set and deployment shape | Server/driver/tool versions, artifact digests, licenses, platform support, secret handling, and offline recovery procedure; no floating `latest` |
-| GATE-TECH-003 | Define publication and event contracts | Approval plus outbox transaction; immutable input capture; concurrent revision conflict policy; duplicate, missed-event, and interrupted-publication tests |
+| GATE-TECH-003 | Define publication and event contracts | Snapshot load plus outbox transaction (DEC-047); immutable input capture; concurrent revision conflict policy; duplicate, missed-event, and interrupted-publication tests |
 | GATE-TECH-004 | Verify DEXPI subset and drawing tooling | Backend-generated DEXPI 2.0 fixtures, unsupported-content reports, engineering equivalence tests, and independently checked drawing annotations; coordinated with LIONG-003/005/010 |
 | GATE-TECH-005 | Decide whether Dagster or other PPC platforms earn their operating cost | A specific requirement the minimal worker cannot meet clearly; pinned OSS integrations and recovery tests |
 | GATE-TECH-006 | Approve any Cloudflare use separately | Current terms and billing review, explicit provisioning/spending authorization, bounded request plan, access control, and restore test |
