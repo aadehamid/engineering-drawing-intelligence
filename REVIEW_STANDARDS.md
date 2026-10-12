@@ -1,46 +1,36 @@
 # Review standards
 
-Judgement rules a reviewer applies to every pull request in this repository.
-Mechanical rules live in `scripts/check.sh`; the working rules live in
-[AGENTS.md](AGENTS.md). Each rule below names the review finding that taught it.
-Add a rule only from a finding a reviewer actually made, after reading the commit
-that shows it.
+Judgement rules a reviewer applies to pull requests in this repository, beyond the
+shared way-of-working standard. That standard owns the general review rules: owner
+words on the record (rule 1), one wording per rule (rule 6), and proving that a
+check fails and redesigning one that does not converge (`before-push.md`).
+Mechanical rules live in `scripts/check.sh`.
 
-## Owner words have a record in the repository
+Each rule below names the review finding that taught it. Add a rule only from a
+finding a reviewer made in this repository, after reading the commit that shows it.
 
-A statement that the owner decided, approved, or said something must point to a
-repository record that quotes the owner's words.
+## Descriptions of this repository's checks keep their boundaries
 
-Taught by: the Cursor review of #6 held the PR because `AGENTS.md` cited an owner
-answer that no repository file contained. Fixed in `9a5f61f`, which recorded it as
-DEC-014 in the decision register.
+Text that describes `scripts/check.sh` or its parts states what they cover and no
+more. The worktree guard covers tracked files, untracked files that are not
+gitignored, the index, and git status. `liong_facts.py check` covers registered
+claims, plus every number in a sentence about nodes or edges in LIONG-006 and
+LIONG-010. Figures in other documents are outside the sweep; a reviewer checks them
+against `python3 scripts/liong_facts.py figures`.
 
-## Restated rules match their authoritative wording
+Taught by: the Codex review of #7 found `AGENTS.md` said the guard caught any
+change while it skipped gitignored paths (fixed in `25ed2ec`). The Codex review of
+#8 found `AGENTS.md` promised ID lists the figures tool did not produce (fixed in
+`c2cd189`).
 
-When a document restates a rule owned elsewhere, the restatement keeps the
-original's conditions and exceptions. A stricter-sounding version is still wrong.
+## Changes to the figures sweep are tried against every spelling
 
-Taught by: the Codex review of #6 found "a merge approves nothing" contradicted
-the register, which lets a merge approve proposals when the owner records that
-intent. Fixed in `b7102f6`.
+A change to the patterns in `scripts/liong_facts.py` is tested with each form a
+writer could use for a node or edge figure: digits, number words, backticks,
+hyphenated compounds such as `17-node/31-edge`, zero padding, wrapped lines, and
+several words between the number and "nodes" or "edges".
 
-## A documented guarantee is no broader than its check
-
-Each claim a document or comment makes about a check ("fails if any change", "any
-shorthand is checked") must match what the code enforces. Narrow the claim or
-widen the check, and pin the boundary with a test.
-
-Taught by: the Codex review of #7 found the worktree guard skipped gitignored
-paths while `AGENTS.md` said it caught any change. Fixed in `25ed2ec`.
-
-## A check that reads prose is tried against other spellings
-
-When a check finds figures or terms in prose, try the forms a writer could use:
-number words, backticks, hyphenated compounds, wrapped lines, zero padding, and
-extra words between the number and its noun. When each fix exposes another
-spelling, change what the check reads, not just its pattern.
-
-Taught by: the Codex review of #8 found three rounds of escaping spellings
-("15 nodes" equal to another figure, "seventeen", a backticked number), redesigned
-in `d956bd2` and `afc3d7d`. The Cursor review of #8 then found `17-node/31-edge`
-in SCN-001, fixed in `55231c3`.
+Taught by: the Codex review of #8 found "15 nodes", "seventeen nodes", and a
+backticked number escaping the sweep (redesigned in `d956bd2` and `afc3d7d`). The
+Cursor review of #8 then found `17-node/31-edge` in SCN-001 escaping it (fixed in
+`55231c3`).
