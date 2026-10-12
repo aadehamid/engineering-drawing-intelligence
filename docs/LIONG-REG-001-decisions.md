@@ -43,6 +43,26 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-012 | Exclude authoring and assess modern extraction tools, including Hugging Face options | Backend and existing/synthetic drawing ingestion remain the scope; do not default to a hand-built OpenCV/Tesseract pipeline | LIONG-001, LIONG-007 |
 | DEC-013 | Allow assessment of proprietary parsing and model APIs | Comparison design and public-documentation research are allowed; provider selection, uploads, paid calls and custom model-license acceptance require explicit gates | Root REQUIREMENTS; LIONG-007/009 |
 | DEC-014 | A question the owner skips in a decision round counts as agreement with the recommendation | Asked on 2026-10-11: "When you don't answer a question in a decision round, should I treat that as agreement with my recommendation?" The owner answered "Q12: yes". A record of a skipped question quotes the round it was asked in | AGENTS.md; [record](decisions/DEC-014-skipped-question-convention.md) |
+| DEC-015 | The first generation work builds the R0 backend, its answer key, and one invalid variant | Owner accepted the Q1 recommendation | LIONG-006, LIONG-011; [record](decisions/DEC-015-first-generation-slice.md) |
+| DEC-016 | R0 is hand-authored, and seeds apply only to procedurally generated worlds | Owner accepted the Q2 recommendation | LIONG-006; [record](decisions/DEC-016-hand-authored-r0.md) |
+| DEC-017 | LIONG-011 calls MILESTONE-001's input the visible R0 development fixture | Owner accepted the Q3 recommendation | LIONG-011; [record](decisions/DEC-017-r0-is-the-visible-fixture.md) |
+| DEC-018 | A canonical world is a declarative data file checked against a JSON Schema | Owner accepted the Q4 recommendation | LIONG-006; [record](decisions/DEC-018-canonical-world-data-file.md) |
+| DEC-019 | The generator writes backend files, and a separate loader applies them | Owner accepted the Q5 recommendation | LIONG-006, LIONG-009; [record](decisions/DEC-019-generator-writes-files.md) |
+| DEC-020 | Two synthetic backends follow SmartPlant P&ID and AutoCAD Plant 3D storage closely, with original names | Owner's Q6 and Q9 answers: reverse engineer how each stores its objects, borrow the patterns very closely, and use the project's own names | ARCHITECTURE.md, LIONG-003, LIONG-006; [record](decisions/DEC-020-vendor-style-backends.md) |
+| DEC-021 | The glossary defines canonical world, source representation, and world lineage | Owner accepted the Q7 recommendation | GLOSSARY.md; [record](decisions/DEC-021-synthetic-world-terms.md) |
+| DEC-022 | PostgreSQL on Neon hosts the synthetic backend | Superseded by DEC-027 on 2026-10-11 | LIONG-007; [record](decisions/DEC-022-postgresql-on-neon.md) |
+| DEC-023 | The way-of-working guardrails land as five pull requests before the synthetic-data work | Owner accepted the Q10 recommendation | AGENTS.md; [record](decisions/DEC-023-guardrails-first.md) |
+| DEC-024 | Each decision has its own record, and the register stays the summary | Owner accepted the Q11 recommendation | docs/decisions; [record](decisions/DEC-024-decision-records.md) |
+| DEC-025 | The generator uses Python 3.12 with dependencies locked by uv | Owner accepted the Q13 recommendation | LIONG-007; [record](decisions/DEC-025-python-and-uv.md) |
+| DEC-026 | The backend database is reachable from any of the owner's machines and runs on the engine closest to both vendors | Owner's Q14 answer: Neon was chosen only for access from any machine; the engine follows the vendors unless that proves really difficult | LIONG-007; [record](decisions/DEC-026-reachable-backend-close-to-vendors.md) |
+| DEC-027 | Both backends run on SQL Server, hosted on an Azure SQL Database free-offer database | Owner accepted the Q21 recommendation | LIONG-007; [record](decisions/DEC-027-sql-server-on-azure.md) |
+| DEC-028 | Both vendor schemas live in one database | Owner's Q15 answer, in place of the recommended separate databases | LIONG-007; [record](decisions/DEC-028-one-database-two-schemas.md) |
+| DEC-029 | There are two canonical worlds, each generated into one vendor's schema | Owner's Q16 and Q22 answers. Which world is which is proposed in DEC-035 | LIONG-006; [record](decisions/DEC-029-two-canonical-worlds.md) |
+| DEC-030 | MILESTONE-001 builds the Plant 3D-style backend first | Owner accepted the Q17 recommendation | LIONG-011; [record](decisions/DEC-030-plant-3d-backend-first.md) |
+| DEC-031 | The backends copy each application's saved data, not its editing behaviour | Owner accepted the Q18 recommendation | LIONG-006; [record](decisions/DEC-031-stored-data-not-behaviour.md) |
+| DEC-032 | Each backend carries a minimal data dictionary for the classes R0 uses | Owner accepted the Q19 recommendation | LIONG-006; [record](decisions/DEC-032-minimal-data-dictionary.md) |
+| DEC-033 | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Owner accepted the Q20 recommendation | ARCHITECTURE.md, LIONG-003, LIONG-006; [record](decisions/DEC-033-architecture-wording.md) |
+| DEC-034 | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Owner's answer to Q23: keep the cross check | LIONG-006; [record](decisions/DEC-034-r0-smartplant-cross-check.md) |
 
 ## New proposals
 
@@ -59,6 +79,7 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-109 | Drawing-baseline acceptance versus engineering approval | Permit initial publication with engineering decision not applicable; require distinct source approval and a new approved baseline publication before engineering proposals use it as their base. Never relabel historical acceptance as approval | Project owner, LIONG-005/008 |
 | DEC-110 | Pluggable parsing and visual interpretation versus OCR-centric custom extraction | Compare LiteParse, hosted parsers, document models and a general vision-language model in their respective roles; treat SAM 3 as an optional segmentation experiment, not a parser or graph generator | Project owner, LIONG-005/007/010 |
 | DEC-111 | Evidence-based model admission versus adoption from general benchmarks | Require engineering fixtures, source-region checks, repeat-run records, hardware/cost cohorts and license/data-processing review before selection; no downstream publication authority for model outputs | Project owner, LIONG-007/009/010 |
+| DEC-035 | R0 as the Autodesk world and a new world W-SP for SmartPlant, versus R0 for SmartPlant | R0 keeps its Plant 3D-style backend, so MILESTONE-001 starts on the simpler connection model (DEC-030); [record](decisions/DEC-035-r0-is-the-autodesk-world.md) | Project owner, LIONG-006 |
 
 These are proposal groups. Document-local gate IDs retain finer-grained evidence
 requirements. Approval must identify which groups or sections it covers.

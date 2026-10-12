@@ -211,29 +211,29 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.RECORD, "## Context", f"{line}\n\n## Context")
 
     def add_successor(self, amends_line: str) -> None:
-        text = (self.root / self.RECORD).read_text().replace("DEC-014", "DEC-020")
-        text = text.replace("Status: Superseded", "Status: Decided").replace("Superseded by DEC-020 on 2026-11-01.\n\n", "")
+        text = (self.root / self.RECORD).read_text().replace("DEC-014", "DEC-098")
+        text = text.replace("Status: Superseded", "Status: Decided").replace("Superseded by DEC-098 on 2026-11-01.\n\n", "")
         text = text.replace("Date: 2026-10-11", "Date: 2026-11-01").replace("## Context", f"{amends_line}\n\n## Context", 1)
-        (self.root / "docs/decisions/DEC-020-successor.md").write_text(text, encoding="utf-8")
+        (self.root / "docs/decisions/DEC-098-successor.md").write_text(text, encoding="utf-8")
         title = "A skipped question in a decision round counts as agreement"
-        row = f"| [DEC-020](DEC-020-successor.md) | {title} | Decided | 2026-11-01 |\n"
+        row = f"| [DEC-098](DEC-098-successor.md) | {title} | Decided | 2026-11-01 |\n"
         self.edit(self.INDEX, "\n\n## Record format", f"\n{row}\n## Record format")
 
     def test_superseded_needs_dated_successor_line(self) -> None:
-        self.supersede("Superseded by DEC-020")
+        self.supersede("Superseded by DEC-098")
         self.assertTrue(any("Superseded by DEC-NNN on YYYY-MM-DD" in e for e in self.errors()))
 
     def test_successor_must_exist(self) -> None:
-        self.supersede("Superseded by DEC-020 on 2026-11-01.")
-        self.assertTrue(any("successor DEC-020 has no record" in e for e in self.errors()))
+        self.supersede("Superseded by DEC-098 on 2026-11-01.")
+        self.assertTrue(any("successor DEC-098 has no record" in e for e in self.errors()))
 
     def test_successor_must_say_it_amends(self) -> None:
-        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.supersede("Superseded by DEC-098 on 2026-11-01.")
         self.add_successor("Follows DEC-014")
         self.assertTrue(any("does not say 'Amends DEC-014'" in e for e in self.errors()))
 
     def test_valid_supersession_passes(self) -> None:
-        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.supersede("Superseded by DEC-098 on 2026-11-01.")
         self.add_successor("Amends DEC-014")
         self.assertEqual(self.errors(), [])
 
