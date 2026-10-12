@@ -30,6 +30,17 @@ state; a register row links here when its decision has a record.
 | [DEC-033](DEC-033-architecture-wording.md) | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Decided | 2026-10-11 |
 | [DEC-034](DEC-034-r0-smartplant-cross-check.md) | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Decided | 2026-10-11 |
 | [DEC-035](DEC-035-r0-is-the-autodesk-world.md) | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Decided | 2026-10-12 |
+| [DEC-036](DEC-036-w-sp-new-plant.md) | W-SP is a new hand-authored plant about R0's size, built around what SmartPlant stores differently | Decided | 2026-10-12 |
+| [DEC-037](DEC-037-revision-snapshots.md) | Each source revision is one complete backend snapshot that fills in the vendor's own revision fields | Decided | 2026-10-12 |
+| [DEC-038](DEC-038-moc-outside-vendor-schemas.md) | MOC records stay a separate source representation, outside both vendor schemas | Decided | 2026-10-12 |
+| [DEC-039](DEC-039-approval-in-vendor-fields.md) | Each backend stores the source approval in its vendor's own fields | Decided | 2026-10-12 |
+| [DEC-040](DEC-040-plant-3d-patterns.md) | The Plant 3D-style schema borrows six patterns from the vendor research, renamed and cited | Decided | 2026-10-12 |
+| [DEC-041](DEC-041-vendor-style-backend-term.md) | The glossary defines vendor-style backend | Decided | 2026-10-12 |
+| [DEC-042](DEC-042-w-sp-scn-001-first.md) | W-SP starts with only the SCN-001 equivalent | Decided | 2026-10-12 |
+| [DEC-043](DEC-043-no-foreign-keys.md) | The vendor-style relationship tables have no foreign-key constraints | Decided | 2026-10-12 |
+| [DEC-044](DEC-044-stable-separate-keys.md) | Keys stay the same across a world's snapshots, and the backends never share keys | Decided | 2026-10-12 |
+| [DEC-045](DEC-045-revision-time-sources.md) | Each revision time comes from the system that records it | Decided | 2026-10-12 |
+| [DEC-046](DEC-046-next-pr-order.md) | The next pull requests land in a set order | Decided | 2026-10-12 |
 
 ## Record format
 

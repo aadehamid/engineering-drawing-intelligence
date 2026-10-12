@@ -64,6 +64,17 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-033 | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Owner accepted the Q20 recommendation | ARCHITECTURE.md, LIONG-003, LIONG-006; [record](decisions/DEC-033-architecture-wording.md) |
 | DEC-034 | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Owner's answer to Q23: keep the cross check | LIONG-006; [record](decisions/DEC-034-r0-smartplant-cross-check.md) |
 | DEC-035 | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Owner's answer on 2026-10-12: "yes, R0 is Autodesk and W-SP is SmartPlant" | LIONG-006; [record](decisions/DEC-035-r0-is-the-autodesk-world.md) |
+| DEC-036 | W-SP is a new hand-authored plant about R0's size, built around what SmartPlant stores differently | Owner accepted the Q24 recommendation | [record](decisions/DEC-036-w-sp-new-plant.md) |
+| DEC-037 | Each source revision is one complete backend snapshot that fills in the vendor's own revision fields | Owner accepted the Q25 recommendation | [record](decisions/DEC-037-revision-snapshots.md) |
+| DEC-038 | MOC records stay a separate source representation, outside both vendor schemas | Owner accepted the Q26 recommendation | [record](decisions/DEC-038-moc-outside-vendor-schemas.md) |
+| DEC-039 | Each backend stores the source approval in its vendor's own fields | Owner accepted the Q27 recommendation | [record](decisions/DEC-039-approval-in-vendor-fields.md) |
+| DEC-040 | The Plant 3D-style schema borrows six patterns from the vendor research, renamed and cited | Owner accepted the Q28 recommendation | [record](decisions/DEC-040-plant-3d-patterns.md) |
+| DEC-041 | The glossary defines vendor-style backend | Owner accepted the Q29 recommendation | [record](decisions/DEC-041-vendor-style-backend-term.md) |
+| DEC-042 | W-SP starts with only the SCN-001 equivalent | Owner accepted the Q30 recommendation | [record](decisions/DEC-042-w-sp-scn-001-first.md) |
+| DEC-043 | The vendor-style relationship tables have no foreign-key constraints | Owner accepted the Q31 recommendation | [record](decisions/DEC-043-no-foreign-keys.md) |
+| DEC-044 | Keys stay the same across a world's snapshots, and the backends never share keys | Owner accepted the Q32 recommendation | [record](decisions/DEC-044-stable-separate-keys.md) |
+| DEC-045 | Each revision time comes from the system that records it | Owner accepted the Q33 recommendation | [record](decisions/DEC-045-revision-time-sources.md) |
+| DEC-046 | The next pull requests land in a set order | Owner accepted the Q34 recommendation | [record](decisions/DEC-046-next-pr-order.md) |
 
 ## New proposals
 
