@@ -432,6 +432,32 @@ def owner_answer_is_plain(body: str) -> bool:
     )
 
 
+def quote_blocks(body: str) -> list[str]:
+    """Each '>' block in a section, as flat text (see flat_quote)."""
+    blocks, current = [], []
+    for line in body.splitlines() + [""]:
+        if re.match(r" {0,3}>", line):
+            current.append(line)
+        elif current:
+            blocks.append(flat_quote("\n".join(current)))
+            current = []
+    return blocks
+
+
+def flat_quote(text: str) -> str:
+    """Words and punctuation only: quote and list markers, emphasis, code marks, and line breaks removed.
+
+    Records quote with Markdown formatting removed, so a quote and its source compare equal
+    when only their formatting differs.
+    """
+    lines = []
+    for line in text.splitlines():
+        while re.match(CONTAINER_MARKER, line):
+            line = re.sub(CONTAINER_MARKER, "", line, count=1)
+        lines.append(line)
+    return " ".join(re.sub(r"[`*_]", "", " ".join(lines)).split())
+
+
 def parse_record(text: str) -> Record | None:
     raw = re.search(r"^## Owner's words\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
     raw_owner_words = raw.group(1) if raw else ""
@@ -488,6 +514,10 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
+    sources = flat_quote(bodies["## Owner's words"] + "\n" + bodies["## Evidence"])
+    for quote in quote_blocks(bodies["## Decision"]):
+        if not re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", sources):
+            errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word under Owner's words or Evidence")
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
@@ -567,7 +597,7 @@ def find(root: Path, pattern: str) -> list[str]:
     """Search documents; spaces in the pattern also match line breaks."""
     regex = re.compile(r"\s+".join(map(re.escape, pattern.split())), re.IGNORECASE)
     results = []
-    for path in sorted([*root.glob("*.md"), *(root / "docs").glob("*.md")]):
+    for path in sorted([*root.glob("*.md"), *(root / "docs").glob("*.md"), *(root / DECISIONS).glob("*.md")]):
         text = path.read_text(encoding="utf-8")
         for match in regex.finditer(text):
             line = text.count("\n", 0, match.start()) + 1

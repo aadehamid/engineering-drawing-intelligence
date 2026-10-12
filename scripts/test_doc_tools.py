@@ -78,6 +78,20 @@ class DocumentationToolsTests(unittest.TestCase):
                 self.assertEqual(hashlib.sha256(archive.read(name)).hexdigest(), digest)
             self.assertNotIn(bundle_docs.OUTPUT.as_posix(), archive.namelist())
 
+    def test_archive_links_resolve_inside_the_archive(self):
+        self.assertEqual(bundle_docs.broken_links(bundle_docs.payload(self.root)), [])
+
+    def test_link_to_a_file_outside_the_archive_is_reported(self):
+        path = self.root / "docs/LIONG-REG-001-decisions.md"
+        path.write_text(path.read_text() + "\n[World](../scripts/world.py)\n", encoding="utf-8")
+        self.assertEqual(bundle_docs.broken_links(bundle_docs.payload(self.root)),
+                         ["docs/LIONG-REG-001-decisions.md: links to ../scripts/world.py, which is not in the archive"])
+
+    def test_register_links_need_the_decision_records_in_the_archive(self):
+        contents = bundle_docs.payload(self.root)
+        without = {name: data for name, data in contents.items() if not name.startswith("docs/decisions/")}
+        self.assertTrue(any("decisions/DEC-014-" in e for e in bundle_docs.broken_links(without)))
+
     def test_stale_and_corrupt_archive_rejected(self):
         contents = bundle_docs.payload(self.root)
         output = self.root / "test.zip"

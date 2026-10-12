@@ -147,6 +147,9 @@ class FiguresTest(CopiedDocsTestCase):
         self.edit(facts.FIXTURES, "baseline therefore contains 31 edges", "baseline therefore\ncontains 31 edges")
         self.assertTrue(any(r.endswith(": therefore contains 31") for r in facts.find(self.root, "therefore contains 31")))
 
+    def test_find_searches_decision_records(self) -> None:
+        self.assertTrue(any(r.startswith("docs/decisions/DEC-014-") for r in facts.find(self.root, "Q12: yes")))
+
     def test_tool_never_writes_to_the_repository(self) -> None:
         before = guard.snapshot(facts.ROOT)
         script = str(facts.ROOT / "scripts" / "liong_facts.py")
@@ -196,6 +199,27 @@ class DecisionRecordsTest(CopiedDocsTestCase):
     def test_decided_needs_owner_quote(self) -> None:
         self.edit(self.RECORD, "> Q12: yes", "Q12: yes")
         self.assertTrue(any("quotes the owner" in e for e in self.errors()))
+
+    QUOTED = Path("docs/decisions/DEC-015-first-generation-slice.md")
+    DECISION_QUOTE = "> Yes. Build only what MILESTONE-001 needs, and add the other representations at\n"
+
+    def test_reworded_decision_quote_fails(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE, self.DECISION_QUOTE.replace("only", "first"))
+        self.assertTrue(any(e.startswith(f"{self.QUOTED}: the Decision quote \"Yes. Build first") for e in self.errors()))
+
+    def test_decision_quote_must_match_whole_words(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n",
+                  "> Yes. Build only what MILESTONE-001 need\n")
+        self.assertTrue(any("the Decision quote \"Yes. Build only what MILESTONE-001 need\"" in e for e in self.errors()))
+
+    def test_decision_quote_may_differ_in_formatting_only(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE, "> *Yes.* Build `only` what MILESTONE-001 needs,\n> and add the other representations at\n")
+        self.assertEqual(self.errors(), [])
+
+    def test_decision_quote_may_come_from_evidence(self) -> None:
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n- The recommendation, repeated: \"Build only what MILESTONE-001 needs.\"\n")
+        self.edit(self.QUOTED, "## Alternatives considered", "> Build only what MILESTONE-001 needs.\n\n## Alternatives considered")
+        self.assertEqual(self.errors(), [])
 
     def test_missing_section_fails(self) -> None:
         self.edit(self.RECORD, "## Alternatives considered", "## Other options")

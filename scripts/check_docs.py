@@ -15,6 +15,8 @@ BASELINE = (
     "GLOSSARY.md",
 )
 
+LINK = r"\[[^\]\n]+\]\(([^)\n]+)\)"  # a Markdown link; the group is its target
+
 
 def heading_ids(text: str) -> set[str]:
     """Support the plain ATX headings used in this documentation package."""
@@ -61,7 +63,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"{label}: missing explicit draft status")
 
     for path, text in texts.items():
-        for target in re.findall(r"\[[^\]\n]+\]\(([^)\n]+)\)", text):
+        for target in re.findall(LINK, text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc:
                 continue  # External source availability is a separate research check.

@@ -29,8 +29,9 @@ and the pre-push hook runs it before every push. It fails if any check changes a
 tracked file, an untracked file that is not gitignored, the index, or git status.
 
 The review archive in `docs/releases/` contains the root baseline files, every
-`docs/*.md` file, and the three scripts. A change to any of them needs
-`python3 scripts/bundle_docs.py` to rebuild the archive in the same commit.
+`docs/*.md` and `docs/decisions/*.md` file, and the three scripts. A change to any
+of them needs `python3 scripts/bundle_docs.py` to rebuild the archive in the same
+commit. Every relative link in an archived file must point to another archived file.
 
 ## Review
 
