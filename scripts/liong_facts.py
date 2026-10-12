@@ -111,23 +111,41 @@ def simple_paths(edges: list[Edge], start: str, goal: str) -> list[list[str]]:
     return walk([start])
 
 
+class Baseline(NamedTuple):
+    """R0 as LIONG-006 states it, and the two objects its R2 revision deletes."""
+
+    nodes: set[str]
+    drawings: set[str]
+    flow: list[Edge]
+    edges: list[Edge]
+    r2_deleted: set[str]
+
+
+def baseline(root: Path) -> Baseline:
+    fixtures = (root / FIXTURES).read_text(encoding="utf-8")
+    text = section(fixtures, "## Exact baseline R0")
+    aliases = table_aliases(text, "| Alias | Type |")
+    flow_block, other_block = code_blocks(text)[:2]
+    flow = parse_edges(flow_block, FLOW)
+    return Baseline(
+        {alias for alias, _ in aliases},
+        {alias for alias, kind in aliases if kind.startswith("Drawing document")},
+        flow,
+        flow + parse_edges(other_block),
+        set(re.search(r"delete (\w+) and (\w+);", table_row(fixtures, "R2")).groups()),
+    )
+
+
 def compute(root: Path) -> dict[str, int]:
     fixtures = (root / FIXTURES).read_text(encoding="utf-8")
     evaluation = (root / EVALUATION).read_text(encoding="utf-8")
 
-    baseline = section(fixtures, "## Exact baseline R0")
-    aliases = table_aliases(baseline, "| Alias | Type |")
-    nodes = {alias for alias, _ in aliases}
-    drawings = {alias for alias, kind in aliases if kind.startswith("Drawing document")}
+    nodes, drawings, flow, r0_edges, deleted = baseline(root)
     objects = nodes - drawings
-    flow_block, other_block = code_blocks(baseline)[:2]
-    flow = parse_edges(flow_block, FLOW)
-    r0_edges = flow + parse_edges(other_block)
     r0_paths = simple_paths(flow, "E1", "E2")
     export_nodes = {node for path in r0_paths for node in path}
     export_edges = [e for e in flow if e.source in export_nodes and e.target in export_nodes]
 
-    deleted = set(re.search(r"delete (\w+) and (\w+);", table_row(fixtures, "R2")).groups())
     r2_nodes = nodes - deleted
     r2_edges = [e for e in r0_edges if not touches(e, deleted)]
 
