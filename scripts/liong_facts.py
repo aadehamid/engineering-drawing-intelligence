@@ -294,13 +294,16 @@ class IndexRow(NamedTuple):
     date: str
 
 
+INDEX_HEADER = ("| ID | Decision | Status | Date |", "| --- | --- | --- | --- |")
+
+
 def read_index(text: str, label: str, errors: list[str]) -> dict[str, IndexRow]:
-    """Parse the Index table; any row that is not the header or a well-formed entry is an error."""
+    """Parse the Index table: the exact header once, then only well-formed entries."""
     indexed: dict[str, IndexRow] = {}
-    table = section(text, "## Index")
-    for line in table.splitlines():
-        if not line.startswith("|") or line.startswith("| ID |") or line.startswith("| ---"):
-            continue
+    lines = [line for line in section(text, "## Index").splitlines() if line.startswith("|")]
+    if tuple(lines[:2]) != INDEX_HEADER:
+        errors.append(f"{label}: the Index table must start with {INDEX_HEADER[0]}")
+    for line in lines[2:]:
         row = re.match(INDEX_ROW, line)
         if not row:
             errors.append(f"{label}: malformed index row: {line}")
@@ -327,7 +330,7 @@ def check_record_shape(text: str, record_id: str, label: str, files: dict[str, P
         errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)} in that order")
         return errors
     bodies = {
-        heading: text[start + len(heading) + 2:end].strip()
+        heading: re.sub(r"<!--.*?-->", "", text[start + len(heading) + 2:end], flags=re.DOTALL).strip()
         for heading, start, end in zip(RECORD_SECTIONS, positions, positions[1:] + [len(text)])
     }
     for heading, body in bodies.items():
@@ -371,6 +374,15 @@ def check_decisions(root: Path) -> list[str]:
             continue
         record_id, title = heading.groups()
         errors += check_record_shape(text, record_id, label, files)
+        for earlier in re.findall(r"^Amends (DEC-\d{3})\b", text, re.MULTILINE):
+            target = [p for n, p in files.items() if n.startswith(earlier + "-")]
+            if not target:
+                errors.append(f"{label}: amends {earlier}, which has no record")
+            elif not (
+                re.search(r"^Status: Superseded$", earlier_text := target[0].read_text(encoding="utf-8"), re.MULTILINE)
+                and re.search(rf"^Superseded by {record_id} on \d{{4}}-\d{{2}}-\d{{2}}\.?$", earlier_text, re.MULTILINE)
+            ):
+                errors.append(f"{label}: amends {earlier}, which is not marked 'Superseded by {record_id} on YYYY-MM-DD'")
 
         if record_id not in indexed:
             errors.append(f"{label}: {record_id} has no index row")

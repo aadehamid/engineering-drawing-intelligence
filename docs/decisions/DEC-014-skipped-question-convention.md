@@ -6,8 +6,8 @@ Date: 2026-10-11
 ## Context
 
 Decision interviews in this repository ask the owner several numbered questions
-per round, each with a recommended answer. The way-of-working standard says how
-an unanswered question is read must be agreed with the owner once, not assumed.
+per round, each with a recommended answer. The way-of-working standard
+(`references/deciding.md`) asks for this convention to be agreed with the owner.
 
 ## Decision
 

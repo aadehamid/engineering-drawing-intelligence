@@ -252,5 +252,19 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.assertTrue(any("malformed index row: | DEC-099 | Ghost" in e for e in self.errors()))
 
 
+    def test_amends_requires_superseded_predecessor(self) -> None:
+        self.add_successor("Amends DEC-014")
+        self.assertTrue(any("amends DEC-014, which is not marked" in e for e in self.errors()))
+
+    def test_header_like_row_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format", "\n| ID | Ghost | Decided | 2026-10-11 |\n\n## Record format")
+        self.assertTrue(any("malformed index row: | ID | Ghost" in e for e in self.errors()))
+
+    def test_comment_only_section_is_empty(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start] + "\n<!-- empty -->\n", encoding="utf-8")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
 if __name__ == "__main__":
     unittest.main()
