@@ -294,5 +294,32 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.assertTrue(any("DEC-099 links to DEC-014-skipped-question-convention.md, which is not the DEC-099 record" in e
                             for e in self.errors()))
 
+    def test_unclosed_fence_hides_what_follows(self) -> None:
+        self.edit(self.RECORD, "## Owner's words", "```markdown\n## Owner's words")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_longer_fence_hides_inner_fences(self) -> None:
+        self.edit(self.RECORD, "## Context", "````markdown\n```\n## Context")
+        (self.root / self.RECORD).write_text((self.root / self.RECORD).read_text() + "```\n````\n", encoding="utf-8")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_repeated_section_fails(self) -> None:
+        (self.root / self.RECORD).write_text((self.root / self.RECORD).read_text() + "\n## Decision\n\n", encoding="utf-8")
+        self.assertTrue(any("each once, in that order" in e for e in self.errors()))
+
+    def test_duplicate_record_id_fails(self) -> None:
+        (self.root / "docs/decisions/DEC-014-aaa-duplicate.md").write_text(
+            "# DEC-014: A different decision\n\nStatus: Proposed\nDate: 2026-10-12\n", encoding="utf-8"
+        )
+        self.assertTrue(any("DEC-014 is already used by DEC-014-aaa-duplicate.md" in e for e in self.errors()))
+
+    def test_issue_reference_prose_is_content(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(
+            text[:start] + "\n#6 requested that this repository record the convention.\n", encoding="utf-8"
+        )
+        self.assertEqual(self.errors(), [])
+
 if __name__ == "__main__":
     unittest.main()

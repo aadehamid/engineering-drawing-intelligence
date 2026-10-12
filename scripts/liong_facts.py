@@ -302,21 +302,37 @@ class Record(NamedTuple):
     title: str
     statuses: list[str]
     dates: list[str]
-    sections: dict[str, str]
+    sections: list[tuple[str, str]]
     amends: list[str]
     superseded_by: list[str]
 
 
 def rendered(text: str) -> str:
-    """The text a reader sees: HTML comments and fenced code blocks removed."""
+    """The text a reader sees outside code: HTML comments and fenced code blocks removed.
+
+    A fence closes only on the same character repeated at least as many times; an
+    unclosed fence runs to the end of the document, as Markdown renders it.
+    """
     text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
-    return re.sub(r"^ {0,3}(```|~~~).*?^ {0,3}\1[^\n]*$", "", text, flags=re.DOTALL | re.MULTILINE)
+    kept: list[str] = []
+    fence = None
+    for line in text.splitlines():
+        marker = re.match(r" {0,3}(`{3,}|~{3,})", line)
+        if fence is None and marker:
+            fence = marker.group(1)
+        elif fence is not None:
+            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence) \
+                    and not line.strip()[len(marker.group(1)):].strip():
+                fence = None
+        else:
+            kept.append(line)
+    return "\n".join(kept) + "\n"
 
 
 def has_content(body: str) -> bool:
     """True when a line holds something other than a heading or a horizontal rule."""
     return any(
-        line.strip() and not re.match(r"\s*#", line) and not re.fullmatch(r"\s*([-*_])(\s*\1){2,}\s*", line)
+        line.strip() and not re.match(r" {0,3}#{1,6}(\s|$)", line) and not re.fullmatch(r"\s*([-*_])(\s*\1){2,}\s*", line)
         for line in body.splitlines()
     )
 
@@ -326,14 +342,13 @@ def parse_record(text: str) -> Record | None:
     heading = re.match(r"\s*# (DEC-\d{3}): (.+)\n", text)
     if not heading:
         return None
-    sections: dict[str, str] = {}
-    current = None
+    sections: list[tuple[str, str]] = []
     for line in text.splitlines():
         if re.match(r"## \S", line):
-            current = line.strip()
-            sections.setdefault(current, "")
-        elif current:
-            sections[current] += line + "\n"
+            sections.append((line.strip(), ""))
+        elif sections:
+            title_line, body = sections[-1]
+            sections[-1] = (title_line, body + line + "\n")
     return Record(
         heading.group(1),
         heading.group(2),
@@ -368,15 +383,16 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
         errors.append(f"{label}: needs exactly one Status line, one of {', '.join(STATUSES)}")
     if len(record.dates) != 1:
         errors.append(f"{label}: needs exactly one 'Date: YYYY-MM-DD' line")
-    if [h for h in record.sections if h in RECORD_SECTIONS] != list(RECORD_SECTIONS):
-        errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)} in that order")
+    if [h for h, _ in record.sections if h in RECORD_SECTIONS] != list(RECORD_SECTIONS):
+        errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)}, each once, in that order")
         return errors
+    bodies = {h: body for h, body in record.sections if h in RECORD_SECTIONS}
     for heading in RECORD_SECTIONS:
-        if not has_content(record.sections[heading]):
+        if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
     status = record.statuses[0] if record.statuses else None
     if status == "Decided" and not re.search(
-        r"^The owner (?:answered|said|wrote):\n+> \S", record.sections["## Owner's words"], re.MULTILINE
+        r"^The owner (?:answered|said|wrote):\n+> \S", bodies["## Owner's words"], re.MULTILINE
     ):
         errors.append(f"{label}: a Decided record quotes the owner after 'The owner answered:' in a '>' block")
     if status == "Superseded":
@@ -407,6 +423,9 @@ def check_decisions(root: Path) -> list[str]:
         record = parse_record(path.read_text(encoding="utf-8"))
         if not record or not name.startswith(record.record_id + "-"):
             errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")
+            continue
+        if record.record_id in records:
+            errors.append(f"{DECISIONS}/{name}: {record.record_id} is already used by {names[record.record_id]}")
             continue
         records[record.record_id] = record
         names[record.record_id] = name
