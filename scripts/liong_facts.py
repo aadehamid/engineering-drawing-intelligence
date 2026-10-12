@@ -348,12 +348,17 @@ def rendered(text: str) -> str:
     return "\n".join(kept) + "\n"
 
 
+INVISIBLE_LINE = (
+    r" {0,3}#{1,6}(\s.*)?"                 # a heading
+    r"| {0,3}([-*_])(\s*\2){2,}\s*"          # a horizontal rule
+    r"| {0,3}\[[^\]]+\]:\s*\S.*"            # a link reference definition, which renders nothing
+    r"|\s*(<[^>]+>\s*)+"                    # only HTML tags
+)
+
+
 def has_content(body: str) -> bool:
-    """True when a line holds something other than a heading or a horizontal rule."""
-    return any(
-        line.strip() and not re.match(r" {0,3}#{1,6}(\s|$)", line) and not re.fullmatch(r"\s*([-*_])(\s*\1){2,}\s*", line)
-        for line in body.splitlines()
-    )
+    """True when some line renders text a reader sees, beyond headings, rules, and markup."""
+    return any(line.strip() and not re.fullmatch(INVISIBLE_LINE, line) for line in body.splitlines())
 
 
 def parse_record(text: str) -> Record | None:

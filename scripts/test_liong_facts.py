@@ -329,5 +329,22 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.RECORD, "## Owner's words", "```html\n<!--\n```\n\n## Owner's words")
         self.assertEqual(self.errors(), [])
 
+    def replace_evidence(self, body: str) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start] + body, encoding="utf-8")
+
+    def test_reference_definition_alone_is_empty(self) -> None:
+        self.replace_evidence("\n[register]: ../LIONG-REG-001-decisions.md\n")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_html_tags_alone_are_empty(self) -> None:
+        self.replace_evidence("\n<br>\n<div></div>\n")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_visible_reference_is_content(self) -> None:
+        self.replace_evidence("\nSee [register].\n\n[register]: ../LIONG-REG-001-decisions.md\n")
+        self.assertEqual(self.errors(), [])
+
 if __name__ == "__main__":
     unittest.main()
