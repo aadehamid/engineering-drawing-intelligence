@@ -88,3 +88,8 @@ The family of artifacts derived from one canonical world: every rendering, sourc
 representation, revision, crop, and perturbation. The canonical world's truth is
 not a member. Data is partitioned by whole lineage; splitting only pages, tags,
 file names, revisions, or raster variants does not make data independent.
+
+**Vendor-style backend**:
+A source representation whose schema follows one authoring product's storage
+patterns, using original names. The SmartPlant-style and Plant 3D-style backends
+are the two in this project.
