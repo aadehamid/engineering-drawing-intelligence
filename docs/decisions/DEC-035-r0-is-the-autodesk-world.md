@@ -1,23 +1,21 @@
 # DEC-035: R0 is the Autodesk world, and a new world W-SP is the SmartPlant world
 
-Status: Proposed
+Status: Decided
 Date: 2026-10-12
 
 ## Context
 
 [DEC-029](DEC-029-two-canonical-worlds.md) gives the project two canonical worlds,
 one per vendor schema, without saying which is which. Q22 proposed R0 as the
-Autodesk world and a new world, W-SP, for SmartPlant. The owner's answer kept the
-two-world idea and did not name the worlds. Because Q22 was answered, the
-skipped-question rule in [DEC-014](DEC-014-skipped-question-convention.md) does not
-apply.
+Autodesk world and a new world, W-SP, for SmartPlant. The owner's Q22 answer kept
+the two-world idea and did not name the worlds, so this record stayed Proposed in
+#13 until the owner confirmed it.
 
 ## Decision
 
-Proposed: R0 is the Autodesk world, and its backend uses the Plant 3D-style schema.
-W-SP is the SmartPlant world, and its backend uses the SmartPlant-style schema. W-SP
-is built to exercise what only SmartPlant has, such as connectors split at inline
-valves and pipelines derived from matching properties.
+R0 is the Autodesk world, and its backend uses the Plant 3D-style schema. W-SP is
+the SmartPlant world, and its backend uses the SmartPlant-style schema. What W-SP
+contains is still open in the interview.
 
 ## Alternatives considered
 
@@ -27,8 +25,16 @@ valves and pipelines derived from matching properties.
 
 ## Owner's words
 
-Not yet confirmed. The owner's Q22 answer, quoted in DEC-029, asks for two worlds
-and does not name them.
+Asked on 2026-10-12, while #13 was open:
+
+> The one decision waiting on you is DEC-035: R0 is the Autodesk world, and the new
+> world W-SP is the SmartPlant world. It's marked Proposed because your Q22 answer
+> didn't say which world is which. Reply "yes" to confirm, or tell me to swap them,
+> and I'll record your words.
+
+The owner answered:
+
+> yes, R0 is Autodesk and W-SP is SmartPlant
 
 ## Evidence
 

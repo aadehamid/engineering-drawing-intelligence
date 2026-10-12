@@ -21,7 +21,7 @@ record does not decide it.
 ## Decision
 
 The project has two canonical worlds: one in the SmartPlant-style schema and the
-other in the Plant 3D-style schema. Which world is which is proposed in
+other in the Plant 3D-style schema. Which world is which is decided in
 [DEC-035](DEC-035-r0-is-the-autodesk-world.md). What the second world contains is
 still open in the interview. [DEC-034](DEC-034-r0-smartplant-cross-check.md) keeps
 R0 in SmartPlant form as a cross-check fixture.
@@ -58,7 +58,7 @@ The owner wrote:
 > the other in Autodesk schema.
 
 The owner's words do not name which world is which, so this record does not
-decide it. DEC-035 proposes the assignment.
+decide it. DEC-035 records the owner's later answer.
 
 ## Evidence
 

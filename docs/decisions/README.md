@@ -29,7 +29,7 @@ state; a register row links here when its decision has a record.
 | [DEC-032](DEC-032-minimal-data-dictionary.md) | Each backend carries a minimal data dictionary for the classes R0 uses | Decided | 2026-10-11 |
 | [DEC-033](DEC-033-architecture-wording.md) | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Decided | 2026-10-11 |
 | [DEC-034](DEC-034-r0-smartplant-cross-check.md) | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Decided | 2026-10-11 |
-| [DEC-035](DEC-035-r0-is-the-autodesk-world.md) | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Proposed | 2026-10-12 |
+| [DEC-035](DEC-035-r0-is-the-autodesk-world.md) | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Decided | 2026-10-12 |
 
 ## Record format
 
