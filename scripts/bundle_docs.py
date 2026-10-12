@@ -10,7 +10,7 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, link_targets
+from check_docs import BASELINE, link_targets, raw_html
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,15 +42,18 @@ def payload(root: Path) -> dict[str, bytes]:
 
 
 def broken_links(contents: dict[str, bytes]) -> list[str]:
-    """Relative links in archived Markdown that point at a file the archive lacks.
+    """Raw HTML in archived Markdown, and relative links that point at a file the archive lacks.
 
+    Raw HTML is refused outright, so every link is a Markdown link this check reads.
     A link to the archive itself is allowed: it cannot be inside itself.
     """
     errors = []
     for name, data in sorted(contents.items()):
         if not name.endswith(".md"):
             continue
-        for target in link_targets(data.decode("utf-8")):
+        text = data.decode("utf-8")
+        errors += [f"{name}: raw HTML is not allowed outside code: {tag[:60]}" for tag in raw_html(text)]
+        for target in link_targets(text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc or not parsed.path:
                 continue

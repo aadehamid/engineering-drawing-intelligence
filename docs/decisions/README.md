@@ -60,8 +60,10 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
   digits, spaces and ordinary punctuation. The whole section holds no HTML,
   entities, or code.
 - **Decision quotes**: each `>` block under Decision starts its line, ends at a
-  blank line, and appears word for word under Owner's words or Evidence. Only line
-  breaks and list markers may differ, so a quote carries no other formatting.
+  blank line, and appears word for word inside one `>` block under Owner's words or
+  Evidence. That source block holds no `[`, `]`, `<` or backslash, the characters
+  that links, images, reference definitions, HTML and escapes need to hide text.
+  Only line breaks and list markers may differ.
 - **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,
   and the later record has a line `Amends DEC-NNN`.
 - **Index**: one row per record, with the link, decision, status and date matching

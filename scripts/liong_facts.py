@@ -19,6 +19,9 @@ import subprocess
 import sys
 from typing import NamedTuple
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_docs import FENCE_OPEN, raw_html  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
 EVALUATION = Path("docs/LIONG-010-evaluation.md")
@@ -327,9 +330,6 @@ class Record(NamedTuple):
     raw_owner_words: str
 
 
-# A fence opens on three backticks or tildes. A backtick fence's info string holds no
-# backtick; a line like "``` `" is ordinary text in CommonMark.
-FENCE_OPEN = r"^ {0,3}(`{3,}(?=[^`\n]*$)|~{3,})"
 HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNORECASE)
 
 
@@ -436,7 +436,7 @@ def owner_answer_is_plain(body: str) -> bool:
 
 
 def quote_blocks(body: str) -> tuple[list[str], list[str]]:
-    """Each '>' block in a section as flat text, and the layout errors that would hide a quote.
+    """Each '>' block in a section, and the layout errors that would hide a quote.
 
     Only a top-level '>' block that ends at a blank line is compared. A quote nested in a
     list, or a line that runs on from a quote without its own '>', would show text the
@@ -452,7 +452,7 @@ def quote_blocks(body: str) -> tuple[list[str], list[str]]:
         if current:
             if line.strip():
                 errors.append(f"end each quote with a blank line before: {line.strip()[:60]}")
-            blocks.append(flat_quote("\n".join(current)))
+            blocks.append("\n".join(current))
             current = []
     return blocks, errors
 
@@ -523,12 +523,15 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
-    sources = [flat_quote("\n".join(visible_lines(bodies[h]))) for h in ("## Owner's words", "## Evidence")]
-    quotes, layout = quote_blocks(bodies["## Decision"])
+    # A source is a '>' block under Owner's words or Evidence with no character that can
+    # hide text: links, images, reference definitions, HTML and escapes all need one.
+    sources = [flat_quote(block) for heading in ("## Owner's words", "## Evidence")
+               for block in quote_blocks(bodies[heading])[0] if not re.search(r"[\[\]<\\]", block)]
+    blocks, layout = quote_blocks(bodies["## Decision"])
     errors += [f"{label}: Decision: {error}" for error in layout]
-    for quote in quotes:
+    for quote in map(flat_quote, blocks):
         if not any(re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", source) for source in sources):
-            errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word under Owner's words or Evidence")
+            errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word in a plain quote under Owner's words or Evidence")
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
@@ -562,9 +565,7 @@ def check_decisions(root: Path) -> list[str]:
     names: dict[str, str] = {}
     for name, path in sorted(files.items()):
         raw = path.read_text(encoding="utf-8")
-        outside_code = re.sub(r"`[^`\n]*`", "", re.sub(FENCE_OPEN + r".*?(^ {0,3}\1|\Z)", "", raw,
-                                                         flags=re.DOTALL | re.MULTILINE))
-        if re.search(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?]", outside_code):  # an autolink <https://...> is text
+        if raw_html(raw):
             errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
         record = parse_record(raw)
         if not record or not name.startswith(record.record_id + "-"):

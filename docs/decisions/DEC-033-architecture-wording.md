@@ -51,9 +51,10 @@ as PID. Evidence gives the question exactly as asked.
 ## Evidence
 
 - `ARCHITECTURE.md:17`.
-- The Q20 question exactly as asked: "ARCHITECTURE.md says the backend "is a
-  synthetic test source, not a replica of an undisclosed engineering platform."
-  Should that sentence change to say: "Two synthetic backends follow the documented
-  storage patterns of SmartPlant P&ID and AutoCAD Plant 3D, using original names.
-  Neither copies a vendor schema."? LIONG-003 and LIONG-006 would be updated to
-  match."
+- The Q20 question exactly as asked:
+
+> ARCHITECTURE.md says the backend "is a synthetic test source, not a replica of
+> an undisclosed engineering platform." Should that sentence change to say: "Two
+> synthetic backends follow the documented storage patterns of SmartPlant P&ID and
+> AutoCAD Plant 3D, using original names. Neither copies a vendor schema."?
+> LIONG-003 and LIONG-006 would be updated to match.

@@ -93,12 +93,29 @@ class DocumentationToolsTests(unittest.TestCase):
         path = self.root / "docs/LIONG-REG-001-decisions.md"
         for link in ("[missing][ref]\n\n[ref]: ../absent-1.md\n", "[bad](\n../absent-2.md\n)\n",
                      "[angle](<../absent-3.md>)\n", "[q][r4]\n\n> [r4]: ../absent-4.md\n",
-                     "[l][r5]\n\n- [r5]: ../absent-5.md\n", "[e][r6\\]]\n\n[r6\\]]: ../absent-6.md\n",
-                     '<a href="../absent-7.md">a</a>\n', "<img src='../absent-8.md'>\n"):
+                     "[l][r5]\n\n- [r5]: ../absent-5.md\n", "[e][r6\\]]\n\n[r6\\]]: ../absent-6.md\n"):
             path.write_text(path.read_text() + "\n" + link, encoding="utf-8")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for name in [f"absent-{n}.md" for n in range(1, 9)]:
+        for name in [f"absent-{n}.md" for n in range(1, 7)]:
             self.assertTrue(any(f"../{name}, which is not in the archive" in e for e in errors), name)
+
+    def test_raw_html_in_archived_markdown_is_refused(self):
+        path = self.root / "docs/LIONG-000-index.md"
+        html = ('<a href="\n../scripts/world.py">world</a>', '<img srcset="../scripts/world.py 1x">',
+                '<video poster="../scripts/world.py"></video>', '<object data="../scripts/world.py"></object>',
+                '<form action="../scripts/world.py"></form>', '<!-- hidden -->')
+        path.write_text(path.read_text() + "\n" + "\n\n".join(html) + "\n", encoding="utf-8")
+        errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
+        for tag in html:
+            first_line = tag.splitlines()[0]
+            self.assertTrue(any(e.startswith("docs/LIONG-000-index.md: raw HTML") and first_line[:20] in e
+                                for e in errors), tag)
+
+    def test_html_inside_code_is_allowed(self):
+        path = self.root / "docs/LIONG-000-index.md"
+        path.write_text(path.read_text() + "\nUse `<a href=\"x\">` here.\n\n```\n<img src=\"y\">\n```\n",
+                        encoding="utf-8")
+        self.assertEqual(bundle_docs.broken_links(bundle_docs.payload(self.root)), [])
 
     def test_bundler_refuses_a_broken_link_and_writes_nothing(self):
         archive = self.root / bundle_docs.OUTPUT

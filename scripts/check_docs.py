@@ -21,13 +21,24 @@ INLINE_LINK = r"\]\(\s*(<[^>\n]*>|[^)\s]+)"   # [text](target), even split acros
 REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:\s*(<[^>\n]*>|\S+)"
 
 
-HTML_TARGET = r"""\b(?:href|src)\s*=\s*["']?([^"'\s>]+)"""  # <a href>, <img src>
+# A fence opens on three backticks or tildes. A backtick fence's info string holds no
+# backtick; a line like "``` `" is ordinary text in CommonMark.
+FENCE_OPEN = r"^ {0,3}(`{3,}(?=[^`\n]*$)|~{3,})"
+
+
+def raw_html(text: str) -> list[str]:
+    """Raw HTML tags and comments outside code. An autolink such as <https://...> is text."""
+    outside = re.sub(FENCE_OPEN + r".*?(^ {0,3}\1|\Z)", "", text, flags=re.DOTALL | re.MULTILINE)
+    outside = re.sub(r"`[^`\n]*`", "", outside)
+    return re.findall(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?][^>\n]*>?", outside)
 
 
 def link_targets(text: str) -> list[str]:
-    """Every link and image target in a Markdown file: inline, reference definitions, and raw HTML."""
-    found = (re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
-             + re.findall(HTML_TARGET, text, re.IGNORECASE))
+    """Every Markdown link and image target: inline ones and reference definitions.
+
+    Raw HTML links are not read; archived Markdown holds no raw HTML (see raw_html).
+    """
+    found = re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
     return [target.strip("<>") for target in found]
 
 

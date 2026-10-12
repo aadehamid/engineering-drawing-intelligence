@@ -231,16 +231,28 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.QUOTED, "## Alternatives considered", "``` `\n" + self.INVENTED + "\n## Alternatives considered")
         self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
 
-    def test_source_text_a_reader_cannot_see_does_not_count(self) -> None:
-        hidden = ("[Ship nothing and delete the fixture.]: https://example.com\n",
-                  "[see this](https://example.com \"Ship nothing and delete the fixture.\")\n",
-                  "![Ship nothing and delete the fixture.](https://example.com/logo.png)\n")
+    def assertInventedQuoteFails(self, source: str) -> None:
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
+        self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+
+    def test_unquoted_source_text_does_not_count(self) -> None:
+        self.assertInventedQuoteFails("Ship nothing and delete the fixture.\n")
+
+    def test_source_quote_with_a_character_that_can_hide_text_does_not_count(self) -> None:
+        sentence = "Ship nothing and delete the fixture."
+        hidden = (f"[{sentence}]: https://example.com\n",
+                  f"[see]: https://example.com\n\"{sentence}\"\n",
+                  f"[{sentence}\\]]: https://example.com\n",
+                  f"[see this](https://example.com \"{sentence}\")\n",
+                  f"[see this](<https://example.com> \") {sentence}\")\n",
+                  f"![{sentence}](https://example.com/logo.png)\n",
+                  f"<!-- {sentence} -->\n",
+                  f"\\{sentence}\n")
         for source in hidden:
             with self.subTest(source=source):
                 self.setUp()
-                self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source)
-                self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
-                self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+                self.assertInventedQuoteFails("".join("> " + line + "\n" for line in source.splitlines()))
 
     def test_quote_inside_a_list_fails(self) -> None:
         for nested in ("- Approval:\n    > Invented approval.\n", "- > Invented approval.\n"):
@@ -254,7 +266,7 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.assertTrue(any("end each quote with a blank line before: and delete" in e for e in self.errors()))
 
     def test_decision_quote_may_come_from_evidence(self) -> None:
-        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n- The recommendation, repeated: \"Build only what MILESTONE-001 needs.\"\n")
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n> Build only what MILESTONE-001 needs.\n\n")
         self.edit(self.QUOTED, "## Alternatives considered", "> Build only what MILESTONE-001 needs.\n\n## Alternatives considered")
         self.assertEqual(self.errors(), [])
 
