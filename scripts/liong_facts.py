@@ -279,7 +279,7 @@ def check(root: Path) -> list[str]:
                 start, end = sentence.start() + found.start(), sentence.start() + found.end()
                 if not any(a <= start and end <= b for a, b in covered):
                     errors.append(f"{name}: unregistered figure: {found.group(0)} in \"{sentence.group(0).strip()[:80]}\"")
-    return errors + check_decisions(root)
+    return errors
 
 
 RECORD_SECTIONS = ("## Context", "## Decision", "## Alternatives considered", "## Owner's words", "## Evidence")
@@ -287,21 +287,28 @@ STATUSES = ("Proposed", "Decided", "Superseded")
 INDEX_ROW = r"^\| \[(DEC-\d{3})\]\(([^)]+)\) \| (.+?) \| (\w+) \| (\d{4}-\d{2}-\d{2}) \|$"
 
 
+class IndexRow(NamedTuple):
+    link: str
+    title: str
+    status: str
+    date: str
+
+
 def check_decisions(root: Path) -> list[str]:
     """Each decision record has the documented shape and matches its index row."""
     folder = root / DECISIONS
     index_label = f"{DECISIONS}/README.md"
     errors: list[str] = []
-    indexed: dict[str, tuple[str, str, str, str]] = {}
+    indexed: dict[str, IndexRow] = {}
     index = (folder / "README.md").read_text(encoding="utf-8")
     for record_id, link, title, status, date in re.findall(INDEX_ROW, index, re.MULTILINE):
         if record_id in indexed:
             errors.append(f"{index_label}: {record_id} is indexed twice")
-        indexed[record_id] = (link, title, status, date)
+        indexed[record_id] = IndexRow(link, title, status, date)
     files = {path.name: path for path in folder.glob("DEC-*.md")}
-    for record_id, (link, _, _, _) in indexed.items():
-        if link not in files:
-            errors.append(f"{index_label}: {record_id} links to missing file {link}")
+    for record_id, row in indexed.items():
+        if row.link not in files:
+            errors.append(f"{index_label}: {record_id} links to missing file {row.link}")
 
     for name, path in sorted(files.items()):
         text = path.read_text(encoding="utf-8")
@@ -329,15 +336,15 @@ def check_decisions(root: Path) -> list[str]:
         if record_id not in indexed:
             errors.append(f"{label}: {record_id} has no index row")
             continue
-        link, index_title, index_status, index_date = indexed[record_id]
-        if link != name:
-            errors.append(f"{index_label}: {record_id} links to {link}, not {name}")
-        if index_title != title:
+        row = indexed[record_id]
+        if row.link != name:
+            errors.append(f"{index_label}: {record_id} links to {row.link}, not {name}")
+        if row.title != title:
             errors.append(f"{index_label}: {record_id} title differs from its record")
-        if status and index_status != status:
-            errors.append(f"{index_label}: {record_id} status {index_status}; the record says {status}")
-        if date_line and index_date != date_line.group(1):
-            errors.append(f"{index_label}: {record_id} date {index_date}; the record says {date_line.group(1)}")
+        if status and row.status != status:
+            errors.append(f"{index_label}: {record_id} status {row.status}; the record says {status}")
+        if date_line and row.date != date_line.group(1):
+            errors.append(f"{index_label}: {record_id} date {row.date}; the record says {date_line.group(1)}")
     return errors
 
 
@@ -384,9 +391,8 @@ def main(argv: list[str]) -> int:
                 print(f"{key} = {value}")
         return 0
     elif args.command == "check":
-        errors = check(ROOT)
-        records = len(list((ROOT / DECISIONS).glob("DEC-*.md")))
-        summary = f"Figures match the fixtures in {len(CLAIMS)} claims; decision records match the index ({records})."
+        errors = check(ROOT) + check_decisions(ROOT)
+        summary = f"Figures match the fixtures in {len(CLAIMS)} claims; decision records match their index."
         print("\n".join(errors) if errors else summary)
         return 1 if errors else 0
     else:

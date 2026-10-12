@@ -26,7 +26,9 @@ EXPECTED = {
 }
 
 
-class FiguresTest(unittest.TestCase):
+class CopiedDocsTestCase(unittest.TestCase):
+    """Each test edits its own copy of README.md and docs/."""
+
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
@@ -39,6 +41,10 @@ class FiguresTest(unittest.TestCase):
         text = file.read_text(encoding="utf-8")
         self.assertIn(old, text)
         file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+
+class FiguresTest(CopiedDocsTestCase):
+
 
     def test_figures_match_today(self) -> None:
         self.assertEqual(facts.compute(facts.ROOT), EXPECTED)
@@ -149,21 +155,10 @@ class FiguresTest(unittest.TestCase):
         self.assertEqual(guard.differences(before, guard.snapshot(facts.ROOT)), [])
 
 
-class DecisionRecordsTest(unittest.TestCase):
+class DecisionRecordsTest(CopiedDocsTestCase):
     RECORD = Path("docs/decisions/DEC-014-skipped-question-convention.md")
     INDEX = Path("docs/decisions/README.md")
 
-    def setUp(self) -> None:
-        self.temp = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp.name)
-        shutil.copytree(facts.ROOT / "docs", self.root / "docs")
-        self.addCleanup(self.temp.cleanup)
-
-    def edit(self, path: Path, old: str, new: str) -> None:
-        file = self.root / path
-        text = file.read_text(encoding="utf-8")
-        self.assertIn(old, text)
-        file.write_text(text.replace(old, new, 1), encoding="utf-8")
 
     def errors(self) -> list[str]:
         return facts.check_decisions(self.root)
