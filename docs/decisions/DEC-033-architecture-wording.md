@@ -23,7 +23,8 @@ The sentence it proposed reads:
 
 ## Alternatives considered
 
-- Keep the sentence. It would contradict DEC-020.
+- Keep the sentence. It would leave the two named vendor backends of DEC-020
+  unstated.
 
 ## Owner's words
 

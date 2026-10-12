@@ -18,8 +18,8 @@ The owner accepted the recommendation given with Q3:
 
 ## Alternatives considered
 
-- Make R0 private. This contradicts LIONG-006, which publishes R0 as the
-  development oracle every document's expected results are written against.
+- Make R0 private. This contradicts LIONG-006, which publishes R0 as the public
+  development oracle.
 
 ## Owner's words
 
