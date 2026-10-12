@@ -185,6 +185,7 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (FIXTURES, r"The other (\d+) edges are", ("r0.other_edges",)),
     (FIXTURES, r"baseline therefore contains (\d+) edges", ("r0.edges",)),
     (FIXTURES, r"\| Baseline above \| (\d+) nodes, (\d+) edges", ("r0.nodes", "r0.edges")),
+    (FIXTURES, r"equals the (\d+)-node/(\d+)-edge R0 set", ("r0.nodes", "r0.edges")),
     (FIXTURES, r"Same (\d+) identities and (\d+) edges", ("r0.nodes", "r0.edges")),
     (FIXTURES, r"their (\w+) `ON_SHEET` edges", ("r2.on_sheet_removed",)),
     (FIXTURES, r"\| (\d+) nodes, (\d+) edges\. No bypass", ("r2.nodes", "r2.edges")),
@@ -198,6 +199,7 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (FIXTURES, r"current state has (\d+) nodes, (\d+) edges, and tag", ("r0.nodes", "r0.edges")),
     (FIXTURES, r"and all (\d+) FLOW edges, with identifiers", ("scn012.export_flow_edges",)),
     (EVALUATION, r"(\d+) nodes and (\d+) edges, not merely", ("r0.nodes", "r0.edges")),
+    (EVALUATION, r"(\w+)-node/(\w+)-edge contextual diff", ("scn011.contextual_nodes", "scn011.contextual_edges")),
     (EVALUATION, r"entity recall has (\d+) expected nodes", ("r0.nodes",)),
     (EVALUATION, r"edge recall has (\d+) expected edges", ("r0.edges",)),
     (EVALUATION, r"node recall with denominator (\d+) as", ("r0.engineering_objects",)),
@@ -230,8 +232,10 @@ PAIR = r"(?<![\w/-])(\d+)/(\d+)(?![\d/])"
 _ONES = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
          "fifteen sixteen seventeen eighteen nineteen").split()
 _TENS = "twenty thirty forty fifty sixty seventy eighty ninety hundred thousand".split()
-NUMBER = (rf"(?<![\w./-])(?:\d[\d,]*(?:\.\d+)?|(?:{'|'.join(_ONES + _TENS)})"
-          rf"(?:-(?:{'|'.join(_ONES)}))?)(?![\w/-])")
+# A number may be joined to "node" or "edge" by a hyphen ("17-node/31-edge"); a slash before a
+# number counts as a boundary only after a letter, so ID ranges such as 009/010 stay skipped.
+NUMBER = (rf"(?<![\w.-])(?<!\d/)(?:\d[\d,]*(?:\.\d+)?|(?:{'|'.join(_ONES + _TENS)})"
+          rf"(?:-(?:{'|'.join(_ONES)}))?)(?![\w/]|-(?!(?:node|edge)s?\b))")
 SENTENCE = r"(?:[^.|!?]|(?<=\d)\.(?=\d))+"
 # Numbers near "nodes" or "edges" that are not node or edge figures.
 EXEMPT: list[tuple[Path, str]] = [

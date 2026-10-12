@@ -104,6 +104,16 @@ class FiguresTest(unittest.TestCase):
                 self.edit(facts.FIXTURES, "## Revision and time rules", f"{sentence}\n\n## Revision and time rules")
                 self.assertTrue(any(f"unregistered figure: {number} in" in e for e in facts.check(self.root)))
 
+    def test_hyphenated_figure_is_checked(self) -> None:
+        self.edit(facts.FIXTURES, "equals the 17-node/31-edge R0 set", "equals the 16-node/30-edge R0 set")
+        errors = facts.check(self.root)
+        self.assertIn(f"{facts.FIXTURES}: states 16 for r0.nodes; the fixture gives 17", errors)
+        self.assertIn(f"{facts.FIXTURES}: states 30 for r0.edges; the fixture gives 31", errors)
+
+    def test_unregistered_hyphenated_figure_fails(self) -> None:
+        self.edit(facts.FIXTURES, "## Revision and time rules", "The view is a 16-node graph.\n\n## Revision and time rules")
+        self.assertTrue(any("unregistered figure: 16 in" in e for e in facts.check(self.root)))
+
     def test_leading_zero_pair_fails(self) -> None:
         self.edit(facts.FIXTURES, "Published R0 stays at 17/31", "Published R0 stays at 018/031")
         self.assertIn(f"{facts.FIXTURES}: 018/031 matches no known graph state", facts.check(self.root))
