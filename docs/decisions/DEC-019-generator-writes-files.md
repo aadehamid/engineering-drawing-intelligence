@@ -8,8 +8,8 @@ Date: 2026-10-11
 LIONG-006 requires a SHA-256 of every emitted file. LIONG-009 gives the generator
 its own identity, which writes input and truth packages and nothing else. The
 question named PostgreSQL as the target. [DEC-027](DEC-027-sql-server-on-azure.md)
-later replaced that engine. Whether files and a loader carry over to SQL Server is
-not recorded; the owner has not said.
+later replaced that engine. [DEC-037](DEC-037-revision-snapshots.md), agreed after
+DEC-027, has the generator write each source revision as "a full file set".
 
 ## Decision
 
