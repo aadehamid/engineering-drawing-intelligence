@@ -26,7 +26,9 @@ EXPECTED = {
 }
 
 
-class FiguresTest(unittest.TestCase):
+class CopiedDocsTestCase(unittest.TestCase):
+    """Each test edits its own copy of README.md and docs/."""
+
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
@@ -39,6 +41,10 @@ class FiguresTest(unittest.TestCase):
         text = file.read_text(encoding="utf-8")
         self.assertIn(old, text)
         file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+
+class FiguresTest(CopiedDocsTestCase):
+
 
     def test_figures_match_today(self) -> None:
         self.assertEqual(facts.compute(facts.ROOT), EXPECTED)
@@ -148,6 +154,261 @@ class FiguresTest(unittest.TestCase):
             subprocess.run([sys.executable, script, *args], check=True, capture_output=True)
         self.assertEqual(guard.differences(before, guard.snapshot(facts.ROOT)), [])
 
+
+class DecisionRecordsTest(CopiedDocsTestCase):
+    RECORD = Path("docs/decisions/DEC-014-skipped-question-convention.md")
+    INDEX = Path("docs/decisions/README.md")
+
+
+    def errors(self) -> list[str]:
+        return facts.check_decisions(self.root)
+
+    def test_records_match_today(self) -> None:
+        self.assertEqual(facts.check_decisions(facts.ROOT), [])
+
+    def test_status_differs_from_index(self) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+        self.assertIn(f"{self.INDEX}: DEC-014 status Decided; the record says Proposed", self.errors())
+
+    def test_date_differs_from_index(self) -> None:
+        self.edit(self.RECORD, "Date: 2026-10-11", "Date: 2026-10-12")
+        self.assertTrue(any("DEC-014 date 2026-10-11" in e for e in self.errors()))
+
+    def test_title_differs_from_index(self) -> None:
+        self.edit(self.RECORD, "# DEC-014: A skipped question", "# DEC-014: An unanswered question")
+        self.assertIn(f"{self.INDEX}: DEC-014 title differs from its record", self.errors())
+
+    def test_record_without_index_row(self) -> None:
+        (self.root / "docs/decisions/DEC-099-orphan.md").write_text(
+            (self.root / self.RECORD).read_text().replace("DEC-014", "DEC-099"), encoding="utf-8"
+        )
+        self.assertIn("docs/decisions/DEC-099-orphan.md: DEC-099 has no index row", self.errors())
+
+    def test_index_row_without_record(self) -> None:
+        (self.root / self.RECORD).unlink()
+        self.assertTrue(any("links to missing file" in e for e in self.errors()))
+
+    def test_duplicate_index_row(self) -> None:
+        row = "| [DEC-014](DEC-014-skipped-question-convention.md) | A skipped question in a decision round counts as agreement | Decided | 2026-10-11 |\n"
+        self.edit(self.INDEX, row, row + row)
+        self.assertIn(f"{self.INDEX}: DEC-014 is indexed twice", self.errors())
+
+    def test_decided_needs_owner_quote(self) -> None:
+        self.edit(self.RECORD, "> Q12: yes", "Q12: yes")
+        self.assertTrue(any("quotes the owner" in e for e in self.errors()))
+
+    def test_missing_section_fails(self) -> None:
+        self.edit(self.RECORD, "## Alternatives considered", "## Other options")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_unknown_status_fails(self) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Approved")
+        self.assertTrue(any("needs exactly one Status line" in e for e in self.errors()))
+
+    def supersede(self, line: str) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Superseded")
+        self.edit(self.INDEX, "| Decided | 2026-10-11 |", "| Superseded | 2026-10-11 |")
+        self.edit(self.RECORD, "## Context", f"{line}\n\n## Context")
+
+    def add_successor(self, amends_line: str) -> None:
+        text = (self.root / self.RECORD).read_text().replace("DEC-014", "DEC-020")
+        text = text.replace("Status: Superseded", "Status: Decided").replace("Superseded by DEC-020 on 2026-11-01.\n\n", "")
+        text = text.replace("Date: 2026-10-11", "Date: 2026-11-01").replace("## Context", f"{amends_line}\n\n## Context", 1)
+        (self.root / "docs/decisions/DEC-020-successor.md").write_text(text, encoding="utf-8")
+        title = "A skipped question in a decision round counts as agreement"
+        row = f"| [DEC-020](DEC-020-successor.md) | {title} | Decided | 2026-11-01 |\n"
+        self.edit(self.INDEX, "\n\n## Record format", f"\n{row}\n## Record format")
+
+    def test_superseded_needs_dated_successor_line(self) -> None:
+        self.supersede("Superseded by DEC-020")
+        self.assertTrue(any("Superseded by DEC-NNN on YYYY-MM-DD" in e for e in self.errors()))
+
+    def test_successor_must_exist(self) -> None:
+        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.assertTrue(any("successor DEC-020 has no record" in e for e in self.errors()))
+
+    def test_successor_must_say_it_amends(self) -> None:
+        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.add_successor("Follows DEC-014")
+        self.assertTrue(any("does not say 'Amends DEC-014'" in e for e in self.errors()))
+
+    def test_valid_supersession_passes(self) -> None:
+        self.supersede("Superseded by DEC-020 on 2026-11-01.")
+        self.add_successor("Amends DEC-014")
+        self.assertEqual(self.errors(), [])
+
+    def test_empty_section_fails(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start], encoding="utf-8")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_question_without_owner_answer_fails(self) -> None:
+        self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n", "")
+        self.assertTrue(any("after 'The owner answered:'" in e for e in self.errors()))
+
+    def test_malformed_index_row_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format", "\n| DEC-099 | Ghost | Decided | 2026-10-11 |\n\n## Record format")
+        self.assertTrue(any("malformed index row: | DEC-099 | Ghost" in e for e in self.errors()))
+
+
+    def test_amends_requires_superseded_predecessor(self) -> None:
+        self.add_successor("Amends DEC-014")
+        self.assertTrue(any("amends DEC-014, which is not marked" in e for e in self.errors()))
+
+    def test_header_like_row_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format", "\n| ID | Ghost | Decided | 2026-10-11 |\n\n## Record format")
+        self.assertTrue(any("malformed index row: | ID | Ghost" in e for e in self.errors()))
+
+    def test_comment_only_section_is_empty(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start] + "\n<!-- empty -->\n", encoding="utf-8")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_indented_index_row_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format", "\n | DEC-099 | Ghost | Decided | 2026-10-11 |\n\n## Record format")
+        self.assertTrue(any("malformed index row: | DEC-099 | Ghost" in e for e in self.errors()))
+
+    def test_comment_spanning_sections_hides_them(self) -> None:
+        self.edit(self.RECORD, "## Context", "<!--\n## Context")
+        (self.root / self.RECORD).write_text((self.root / self.RECORD).read_text() + "-->\n", encoding="utf-8")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_hidden_metadata_is_ignored(self) -> None:
+        self.edit(self.RECORD, "Status: Decided\nDate: 2026-10-11",
+                  "<!--\nStatus: Decided\nDate: 2026-10-11\n-->\nStatus: Proposed\nDate: 2026-10-12")
+        errors = self.errors()
+        self.assertIn(f"{self.INDEX}: DEC-014 status Decided; the record says Proposed", errors)
+        self.assertIn(f"{self.INDEX}: DEC-014 date 2026-10-11; the record says 2026-10-12", errors)
+
+    def test_heading_only_section_is_empty(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start] + "\n### Pending evidence\n", encoding="utf-8")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_row_aliasing_another_record_fails(self) -> None:
+        self.edit(self.INDEX, "\n\n## Record format",
+                  "\n| [DEC-099](DEC-014-skipped-question-convention.md) | Ghost | Proposed | 2026-10-12 |\n\n## Record format")
+        self.assertTrue(any("DEC-099 links to DEC-014-skipped-question-convention.md, which is not the DEC-099 record" in e
+                            for e in self.errors()))
+
+    def test_unclosed_fence_hides_what_follows(self) -> None:
+        self.edit(self.RECORD, "## Owner's words", "```markdown\n## Owner's words")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_longer_fence_hides_inner_fences(self) -> None:
+        self.edit(self.RECORD, "## Context", "````markdown\n```\n## Context")
+        (self.root / self.RECORD).write_text((self.root / self.RECORD).read_text() + "```\n````\n", encoding="utf-8")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_repeated_section_fails(self) -> None:
+        (self.root / self.RECORD).write_text((self.root / self.RECORD).read_text() + "\n## Decision\n\n", encoding="utf-8")
+        self.assertTrue(any("each once, in that order" in e for e in self.errors()))
+
+    def test_duplicate_record_id_fails(self) -> None:
+        (self.root / "docs/decisions/DEC-014-aaa-duplicate.md").write_text(
+            "# DEC-014: A different decision\n\nStatus: Proposed\nDate: 2026-10-12\n", encoding="utf-8"
+        )
+        self.assertTrue(any("DEC-014 is already used by DEC-014-aaa-duplicate.md" in e for e in self.errors()))
+
+    def test_issue_reference_prose_is_content(self) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(
+            text[:start] + "\n#6 requested that this repository record the convention.\n", encoding="utf-8"
+        )
+        self.assertEqual(self.errors(), [])
+
+    def test_unclosed_comment_hides_what_follows(self) -> None:
+        self.edit(self.RECORD, "## Owner's words", "<!--\n## Owner's words")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_comment_opener_inside_code_is_code(self) -> None:
+        self.edit(self.RECORD, "## Owner's words", "```html\n<!--\n```\n\n## Owner's words")
+        self.assertEqual(self.errors(), [])
+
+    def replace_evidence(self, body: str) -> None:
+        text = (self.root / self.RECORD).read_text()
+        start = text.index("## Evidence\n") + len("## Evidence\n")
+        (self.root / self.RECORD).write_text(text[:start] + body, encoding="utf-8")
+
+    def test_reference_definition_alone_is_empty(self) -> None:
+        self.replace_evidence("\n[register]: ../LIONG-REG-001-decisions.md\n")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_html_tags_alone_are_empty(self) -> None:
+        self.replace_evidence("\n<br>\n<div></div>\n")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_visible_reference_is_content(self) -> None:
+        self.replace_evidence("\nSee [register].\n\n[register]: ../LIONG-REG-001-decisions.md\n")
+        self.assertEqual(self.errors(), [])
+
+    def test_markup_only_owner_answer_fails(self) -> None:
+        for answer in ("> <br>", "> [approval]: ../LIONG-REG-001-decisions.md", "> >", "> -", "> 1.",
+                       "> ```\n> ```", "> > ---", "> **  **", "> [](../LIONG-REG-001-decisions.md)",
+                       "> &nbsp;", "> &#32;", "> ![](logo.png)"):
+            with self.subTest(answer=answer):
+                self.setUp()
+                self.edit(self.RECORD, "> Q12: yes", answer)
+                self.assertTrue(any("quotes the owner" in e for e in self.errors()))
+
+
+    def test_autolink_is_content(self) -> None:
+        self.replace_evidence("\n<https://github.com/aadehamid/Engineering_Drawing_to_Graph/pull/6>\n")
+        self.assertEqual(self.errors(), [])
+
+    def test_markup_in_owner_answer_fails_even_with_words(self) -> None:
+        for answer in ("> - Q12: yes", "> > Q12: yes", "> [Q12: yes](../LIONG-REG-001-decisions.md)",
+                       "> Q12&#58; yes", "> `<approved>`", "> [](https://example.com/Approval_(signed).pdf)"):
+            with self.subTest(answer=answer):
+                self.setUp()
+                self.edit(self.RECORD, "> Q12: yes", answer)
+                self.assertTrue(any("plain-text" in e for e in self.errors()))
+
+    def test_plain_owner_answers_pass(self) -> None:
+        for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon."):
+            with self.subTest(answer=answer):
+                self.setUp()
+                self.edit(self.RECORD, "> Q12: yes", answer)
+                self.assertEqual(self.errors(), [])
+
+    def test_empty_list_or_rule_section_is_empty(self) -> None:
+        for body in ("\n-\n", "\n---\n", "\n> \n", "\n```\n```\n"):
+            with self.subTest(body=body):
+                self.setUp()
+                self.replace_evidence(body)
+                self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_owner_words_inside_raw_html_block_fail(self) -> None:
+        for tag in ("script", "style"):
+            with self.subTest(tag=tag):
+                self.setUp()
+                self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                          f"<{tag}>\nThe owner answered:\n\n> Q12: yes\n</{tag}>\n")
+                self.assertTrue(any("plain text only" in e for e in self.errors()))
+
+    def test_html_block_opened_earlier_hides_owner_words(self) -> None:
+        self.edit(self.RECORD, "## Alternatives considered", "<script>\n\n## Alternatives considered")
+        self.edit(self.RECORD, "## Evidence", "</script>\n\n## Evidence")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_words_only_inside_style_are_empty(self) -> None:
+        self.replace_evidence("\n<style>\nRecorded in the register.\n</style>\n")
+        self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
+
+    def test_any_raw_html_fails(self) -> None:
+        for wrapper in ("<div hidden>", "<details>", "<span style=\"display:none\">"):
+            with self.subTest(wrapper=wrapper):
+                self.setUp()
+                self.edit(self.RECORD, "## Owner's words", f"{wrapper}\n\n## Owner's words")
+                self.assertTrue(any("no raw HTML" in e for e in self.errors()))
+
+    def test_html_inside_code_is_allowed(self) -> None:
+        self.replace_evidence("\nThe tag `<approved>` is literal.\n\n```html\n<div hidden>\n```\n")
+        self.assertEqual(self.errors(), [])
 
 if __name__ == "__main__":
     unittest.main()

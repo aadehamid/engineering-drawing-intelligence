@@ -42,7 +42,7 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-011 | Produce the document sequence in a batch, commit it, and open a PR | Owner will review later; permission to draft is not approval of new technical proposals | LIONG-000 |
 | DEC-012 | Exclude authoring and assess modern extraction tools, including Hugging Face options | Backend and existing/synthetic drawing ingestion remain the scope; do not default to a hand-built OpenCV/Tesseract pipeline | LIONG-001, LIONG-007 |
 | DEC-013 | Allow assessment of proprietary parsing and model APIs | Comparison design and public-documentation research are allowed; provider selection, uploads, paid calls and custom model-license acceptance require explicit gates | Root REQUIREMENTS; LIONG-007/009 |
-| DEC-014 | A question the owner skips in a decision round counts as agreement with the recommendation | Asked on 2026-10-11: "When you don't answer a question in a decision round, should I treat that as agreement with my recommendation?" The owner answered "Q12: yes". A record of a skipped question quotes the round it was asked in | AGENTS.md |
+| DEC-014 | A question the owner skips in a decision round counts as agreement with the recommendation | Asked on 2026-10-11: "When you don't answer a question in a decision round, should I treat that as agreement with my recommendation?" The owner answered "Q12: yes". A record of a skipped question quotes the round it was asked in | AGENTS.md; [record](decisions/DEC-014-skipped-question-convention.md) |
 
 ## New proposals
 

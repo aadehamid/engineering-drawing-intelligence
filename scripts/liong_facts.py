@@ -2,7 +2,8 @@
 
 Usage:
   python3 scripts/liong_facts.py figures [--json]   every figure, the files read, and the commit
-  python3 scripts/liong_facts.py check              fail if a registered claim or swept count disagrees
+  python3 scripts/liong_facts.py check              fail if a registered claim or swept count disagrees,
+                                                    or a decision record disagrees with its index
   python3 scripts/liong_facts.py find PATTERN       search the documents, matching across line breaks
 
 Figures are computed from the R0 fixture tables and edge lists in LIONG-006 and the
@@ -10,6 +11,7 @@ workload table in LIONG-010. The tool reads files only; it never writes to the r
 """
 
 import argparse
+import html
 import json
 from pathlib import Path
 import re
@@ -21,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
 EVALUATION = Path("docs/LIONG-010-evaluation.md")
 README = Path("README.md")
+DECISIONS = Path("docs/decisions")
 INDEX = Path("docs/LIONG-000-index.md")
 WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
@@ -280,6 +283,268 @@ def check(root: Path) -> list[str]:
     return errors
 
 
+RECORD_SECTIONS = ("## Context", "## Decision", "## Alternatives considered", "## Owner's words", "## Evidence")
+STATUSES = ("Proposed", "Decided", "Superseded")
+INDEX_ROW = r"^\| \[(DEC-\d{3})\]\(([^)]+)\) \| (.+?) \| (\w+) \| (\d{4}-\d{2}-\d{2}) \|$"
+
+
+class IndexRow(NamedTuple):
+    link: str
+    title: str
+    status: str
+    date: str
+
+
+INDEX_HEADER = ("| ID | Decision | Status | Date |", "| --- | --- | --- | --- |")
+
+
+class Record(NamedTuple):
+    record_id: str
+    title: str
+    statuses: list[str]
+    dates: list[str]
+    sections: list[tuple[str, str]]
+    amends: list[str]
+    superseded_by: list[str]
+    raw_owner_words: str
+
+
+HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNORECASE)
+
+
+def rendered(text: str) -> str:
+    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences removed.
+
+    One pass tracks all three, so a comment marker inside code and a fence inside a
+    comment are left alone. Comments and script, style, textarea, and title blocks hide
+    their contents and run to the end of the document if unclosed. A fence closes only
+    on the same character repeated at least as many times.
+    """
+    kept: list[str] = []
+    fence = None
+    hidden_close = None  # the closing marker of the comment or HTML block we are inside
+    for line in text.splitlines():
+        if fence is not None:
+            marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
+            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
+                fence = None
+            continue
+        visible = ""
+        rest = line
+        while rest:
+            if hidden_close:
+                end = re.search(hidden_close, rest, re.IGNORECASE)
+                if not end:
+                    rest = ""
+                else:
+                    hidden_close, rest = None, rest[end.end():]
+            else:
+                start = HIDDEN_OPEN.search(rest)
+                if not start:
+                    visible, rest = visible + rest, ""
+                else:
+                    tag = start.group(1)
+                    hidden_close = rf"</{tag}\s*>" if tag else "-->"
+                    visible, rest = visible + rest[:start.start()], rest[start.end():]
+        if hidden_close and not visible.strip():
+            continue
+        opening = re.match(r" {0,3}(`{3,}|~{3,})", visible)
+        if opening:
+            fence = opening.group(1)
+            continue
+        kept.append(visible)
+    return "\n".join(kept) + "\n"
+
+
+CONTAINER_MARKER = r"^\s*(?:>|[-*+]|\d+[.)])(?:\s+|$)"
+INVISIBLE_LINE = (
+    r" {0,3}#{1,6}(\s.*)?"                 # a heading
+    r"| {0,3}\[[^\]]+\]:\s*\S.*"            # a link reference definition, which renders nothing
+)
+HTML_TAG = r"</?[A-Za-z][\w-]*(\s[^>]*)?/?>"  # an autolink such as <https://...> is text, not a tag
+
+
+def visible_lines(body: str) -> list[str]:
+    """Lines as a reader sees them: quote and list markers removed, then code, comments, and tags.
+
+    Containers are unwrapped before fences and comments are removed, so a fence or comment
+    inside a quote or list item is hidden the same way as one at the top level.
+    """
+    unwrapped = []
+    for line in body.splitlines():
+        while re.match(CONTAINER_MARKER, line):
+            line = re.sub(CONTAINER_MARKER, "", line, count=1)
+        unwrapped.append(line)
+    return [
+        visible_inline(line)
+        for line in rendered("\n".join(unwrapped)).splitlines()
+        if not re.fullmatch(INVISIBLE_LINE, line)
+    ]
+
+
+def visible_inline(line: str) -> str:
+    """One line's displayed text: images dropped, links reduced to labels, tags removed, entities decoded."""
+    line = re.sub(r"!\[[^\]]*\](\([^)]*\)|\[[^\]]*\])", "", line)
+    line = re.sub(r"\[([^\]]*)\](\([^)]*\)|\[[^\]]*\])", r"\1", line)
+    line = re.sub(HTML_TAG, "", line)
+    return html.unescape(line).replace("\xa0", " ")
+
+
+def has_content(body: str) -> bool:
+    """True when a reader sees at least one letter or digit outside headings and markup."""
+    return any(re.search(r"[^\W_]", line) for line in visible_lines(body))
+
+
+PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*"
+
+
+def owner_answer_is_plain(body: str) -> bool:
+    """The quote after 'The owner answered:' (or said/wrote) is plain text: words and punctuation only.
+
+    An allow-list, not a Markdown parser: no link, tag, entity, code, or nested container
+    can stand in for the owner's words, because none of their characters are allowed.
+    """
+    answer = re.search(r"^The owner (?:answered|said|wrote):\n+((?:>.*\n?)+)", body, re.MULTILINE)
+    if not answer:
+        return False
+    lines = [line for line in answer.group(1).splitlines() if line.strip() != ">"]
+    list_item = r"> (?:[-+]|\d+[.)])(\s|$)"
+    return bool(lines) and all(
+        re.fullmatch(PLAIN_QUOTE_LINE, line) and not re.match(list_item, line) for line in lines
+    )
+
+
+def parse_record(text: str) -> Record | None:
+    raw = re.search(r"^## Owner's words\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+    raw_owner_words = raw.group(1) if raw else ""
+    text = rendered(text)
+    heading = re.match(r"\s*# (DEC-\d{3}): (.+)\n", text)
+    if not heading:
+        return None
+    sections: list[tuple[str, str]] = []
+    for line in text.splitlines():
+        if re.match(r"## \S", line):
+            sections.append((line.strip(), ""))
+        elif sections:
+            title_line, body = sections[-1]
+            sections[-1] = (title_line, body + line + "\n")
+    return Record(
+        heading.group(1),
+        heading.group(2),
+        re.findall(r"^Status: (\w+)$", text, re.MULTILINE),
+        re.findall(r"^Date: (\d{4}-\d{2}-\d{2})$", text, re.MULTILINE),
+        sections,
+        re.findall(r"^Amends (DEC-\d{3})\b", text, re.MULTILINE),
+        re.findall(r"^Superseded by (DEC-\d{3}) on \d{4}-\d{2}-\d{2}\.?$", text, re.MULTILINE),
+        raw_owner_words,
+    )
+
+
+def read_index(text: str, label: str, errors: list[str]) -> list[tuple[str, IndexRow]]:
+    """Every table row a reader sees in the Index: the exact header, then well-formed entries."""
+    lines = [line.strip() for line in section(rendered(text), "## Index").splitlines() if re.match(r" {0,3}\|", line)]
+    if tuple(lines[:2]) != INDEX_HEADER:
+        errors.append(f"{label}: the Index table must start with {INDEX_HEADER[0]}")
+    rows = []
+    for line in lines[2:]:
+        row = re.match(INDEX_ROW, line)
+        if not row:
+            errors.append(f"{label}: malformed index row: {line}")
+            continue
+        record_id, link, title, status, date = row.groups()
+        rows.append((record_id, IndexRow(link, title, status, date)))
+    return rows
+
+
+def check_record(record: Record, label: str, records: dict[str, Record]) -> list[str]:
+    """One status and date, non-empty sections in order, the owner's answer, and two-way amendments."""
+    errors: list[str] = []
+    if len(record.statuses) != 1 or record.statuses[0] not in STATUSES:
+        errors.append(f"{label}: needs exactly one Status line, one of {', '.join(STATUSES)}")
+    if len(record.dates) != 1:
+        errors.append(f"{label}: needs exactly one 'Date: YYYY-MM-DD' line")
+    if [h for h, _ in record.sections if h in RECORD_SECTIONS] != list(RECORD_SECTIONS):
+        errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)}, each once, in that order")
+        return errors
+    bodies = {h: body for h, body in record.sections if h in RECORD_SECTIONS}
+    for heading in RECORD_SECTIONS:
+        if not has_content(bodies[heading]):
+            errors.append(f"{label}: section {heading} is empty")
+    status = record.statuses[0] if record.statuses else None
+    if re.search(r"[<&`]|~~~", record.raw_owner_words):
+        errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
+    if status == "Decided" and not owner_answer_is_plain(bodies["## Owner's words"]):
+        errors.append(
+            f"{label}: a Decided record quotes the owner after 'The owner answered:' in a plain-text '>' block"
+        )
+    if status == "Superseded":
+        if len(record.superseded_by) != 1:
+            errors.append(f"{label}: a Superseded record says 'Superseded by DEC-NNN on YYYY-MM-DD'")
+        elif record.superseded_by[0] not in records:
+            errors.append(f"{label}: successor {record.superseded_by[0]} has no record")
+        elif record.record_id not in records[record.superseded_by[0]].amends:
+            errors.append(f"{label}: successor {record.superseded_by[0]} does not say 'Amends {record.record_id}'")
+    for earlier in record.amends:
+        target = records.get(earlier)
+        if not target:
+            errors.append(f"{label}: amends {earlier}, which has no record")
+        elif target.statuses != ["Superseded"] or target.superseded_by != [record.record_id]:
+            errors.append(f"{label}: amends {earlier}, which is not marked 'Superseded by {record.record_id} on YYYY-MM-DD'")
+    return errors
+
+
+def check_decisions(root: Path) -> list[str]:
+    """Each decision record has the documented shape and matches its index row."""
+    folder = root / DECISIONS
+    index_label = f"{DECISIONS}/README.md"
+    errors: list[str] = []
+    files = {path.name: path for path in folder.glob("DEC-*.md")}
+    records: dict[str, Record] = {}
+    names: dict[str, str] = {}
+    for name, path in sorted(files.items()):
+        raw = path.read_text(encoding="utf-8")
+        outside_code = re.sub(r"`[^`\n]*`", "", re.sub(r"^ {0,3}(`{3,}|~{3,}).*?(^ {0,3}\1|\Z)", "", raw,
+                                                         flags=re.DOTALL | re.MULTILINE))
+        if re.search(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?]", outside_code):  # an autolink <https://...> is text
+            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
+        record = parse_record(raw)
+        if not record or not name.startswith(record.record_id + "-"):
+            errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")
+            continue
+        if record.record_id in records:
+            errors.append(f"{DECISIONS}/{name}: {record.record_id} is already used by {names[record.record_id]}")
+            continue
+        records[record.record_id] = record
+        names[record.record_id] = name
+
+    rows = read_index((folder / "README.md").read_text(encoding="utf-8"), index_label, errors)
+    seen: set[str] = set()
+    for record_id, row in rows:
+        if record_id in seen:
+            errors.append(f"{index_label}: {record_id} is indexed twice")
+        seen.add(record_id)
+        if row.link not in files:
+            errors.append(f"{index_label}: {record_id} links to missing file {row.link}")
+            continue
+        if names.get(record_id) != row.link:
+            errors.append(f"{index_label}: {record_id} links to {row.link}, which is not the {record_id} record")
+            continue
+        record = records[record_id]
+        if row.title != record.title:
+            errors.append(f"{index_label}: {record_id} title differs from its record")
+        if record.statuses and row.status != record.statuses[0]:
+            errors.append(f"{index_label}: {record_id} status {row.status}; the record says {record.statuses[0]}")
+        if record.dates and row.date != record.dates[0]:
+            errors.append(f"{index_label}: {record_id} date {row.date}; the record says {record.dates[0]}")
+
+    for record_id, record in sorted(records.items()):
+        label = f"{DECISIONS}/{names[record_id]}"
+        errors += check_record(record, label, records)
+        if record_id not in seen:
+            errors.append(f"{label}: {record_id} has no index row")
+    return errors
+
+
 def find(root: Path, pattern: str) -> list[str]:
     """Search documents; spaces in the pattern also match line breaks."""
     regex = re.compile(r"\s+".join(map(re.escape, pattern.split())), re.IGNORECASE)
@@ -323,8 +588,9 @@ def main(argv: list[str]) -> int:
                 print(f"{key} = {value}")
         return 0
     elif args.command == "check":
-        errors = check(ROOT)
-        print("\n".join(errors) if errors else f"Figures match the fixtures in {len(CLAIMS)} claims.")
+        errors = check(ROOT) + check_decisions(ROOT)
+        summary = f"Figures match the fixtures in {len(CLAIMS)} claims; decision records match their index."
+        print("\n".join(errors) if errors else summary)
         return 1 if errors else 0
     else:
         results = find(ROOT, args.pattern)
