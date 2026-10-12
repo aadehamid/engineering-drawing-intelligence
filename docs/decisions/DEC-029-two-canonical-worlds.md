@@ -8,8 +8,8 @@ Date: 2026-10-11
 Q16 recommended generating every canonical world in both vendor schemas, so that
 the two mappings could be compared. The owner declined and asked for one world
 per vendor. The interview pushed back once: the same world in both schemas is the
-only automatic check that the two mappings agree, and every expected result in
-LIONG-006 is written against R0. Q22 then proposed R0 as the Autodesk world and a
+only automatic check that the two mappings agree, and a second world needs its
+own expected results written by hand. Q22 then proposed R0 as the Autodesk world and a
 new world, W-SP, for SmartPlant.
 
 A canonical world is vendor-neutral truth, and the vendor schema belongs to the
@@ -62,4 +62,4 @@ decide it. DEC-035 proposes the assignment.
 
 ## Evidence
 
-- LIONG-006, where every expected result is written against R0.
+- LIONG-006, which specifies R0 and the scenarios built on it.

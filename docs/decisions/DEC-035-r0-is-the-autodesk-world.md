@@ -34,4 +34,4 @@ and does not name them.
 
 - [DEC-015](DEC-015-first-generation-slice.md) builds MILESTONE-001 on R0, and
   DEC-030 builds the Plant 3D-style backend first for MILESTONE-001.
-- LIONG-006 writes every expected result against R0.
+- LIONG-006 specifies R0 and the scenarios built on it.
