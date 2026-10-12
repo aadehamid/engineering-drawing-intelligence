@@ -30,9 +30,7 @@ class FiguresTest(unittest.TestCase):
         self.root = Path(self.temp.name)
         shutil.copyfile(facts.ROOT / "README.md", self.root / "README.md")
         shutil.copytree(facts.ROOT / "docs", self.root / "docs")
-
-    def tearDown(self) -> None:
-        self.temp.cleanup()
+        self.addCleanup(self.temp.cleanup)
 
     def edit(self, path: Path, old: str, new: str) -> None:
         file = self.root / path
@@ -42,6 +40,17 @@ class FiguresTest(unittest.TestCase):
 
     def test_figures_match_today(self) -> None:
         self.assertEqual(facts.compute(facts.ROOT), EXPECTED)
+
+    def test_every_claim_names_a_figure(self) -> None:
+        figures = facts.compute(facts.ROOT)
+        for _, _, keys in facts.CLAIMS:
+            for key in keys:
+                self.assertIn(key, figures)
+
+    def test_missing_table_row_names_the_row(self) -> None:
+        self.edit(facts.FIXTURES, "| R2 |", "| R2b |")
+        with self.assertRaisesRegex(ValueError, "no table row labelled R2"):
+            facts.compute(self.root)
 
     def test_documents_agree(self) -> None:
         self.assertEqual(facts.check(facts.ROOT), [])
@@ -53,7 +62,7 @@ class FiguresTest(unittest.TestCase):
         )
 
     def test_wrong_word_figure_fails(self) -> None:
-        self.edit(Path("README.md"), "eleven draft documents", "twelve draft documents")
+        self.edit(facts.README, "eleven draft documents", "twelve draft documents")
         self.assertTrue(any("documents.substantive" in e for e in facts.check(self.root)))
 
     def test_reworded_claim_fails(self) -> None:
