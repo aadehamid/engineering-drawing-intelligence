@@ -12,10 +12,10 @@ finding a reviewer made in this repository, after reading the commit that shows 
 ## Descriptions of this repository's checks keep their boundaries
 
 Text that describes `scripts/check.sh` or its parts claims no more than the
-boundaries stated in `AGENTS.md` ("Checks") and in the docstrings of
-`scripts/worktree_guard.py` and `scripts/liong_facts.py`. A figure in a document
-the figures sweep does not cover is checked by hand against
-`python3 scripts/liong_facts.py figures`.
+boundaries stated in `AGENTS.md` ("Checks"), the docstring of
+`scripts/worktree_guard.py`, and `CLAIMS` and `SWEPT_FILES` in
+`scripts/liong_facts.py`. A figure in a document outside `SWEPT_FILES` and not in a
+claim is checked by hand against `python3 scripts/liong_facts.py figures`.
 
 Taught by: the Codex review of #7 found `AGENTS.md` said the guard caught any
 change while it skipped gitignored paths (fixed in `25ed2ec`). The Codex review of
