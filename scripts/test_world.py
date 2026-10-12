@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Tests for scripts/world.py and worlds/R0.yaml.
 
-`fidelity_errors` compares R0.yaml with LIONG-006 fact by fact: every node's class,
-role, tag or drawing name, sheet and attributes (and nothing more), the tag context,
-every edge, and each revision's base, MOC, changes and resulting state. The tests
-below break each kind of fact on purpose and assert the error it produces.
+`fidelity_errors` compares R0.yaml with the facts its parsers read from LIONG-006:
+every node's class, role, tag or drawing name, sheet, diameter and unit (and nothing
+more), the tag context, every edge, and each revision's base, MOC and changes. The
+parsers read only those facts. So the R0 text of LIONG-006 is also pinned by hash:
+any edit to it fails `test_liong006_r0_text_is_the_reviewed_text` until someone
+reviews R0.yaml against the new text and updates REVIEWED_SOURCE_SHA256.
 """
 from __future__ import annotations
 
 import copy
+import hashlib
 import re
 import sys
 import unittest
@@ -20,10 +23,18 @@ import liong_facts  # noqa: E402
 import world  # noqa: E402
 
 R0 = world.ROOT / "worlds" / "R0.yaml"
+# SHA-256 of r0_source() when R0.yaml was last reviewed against it.
+REVIEWED_SOURCE_SHA256 = "032eb9c44aaadd1a66d7882ff5c115de2b86180beac4160466fccea937e1bf78"
 CLASSES = {
     "Equipment": "equipment", "Valve": "valve", "Instrument": "instrument",
     "Connection point": "connection_point", "Pipe segment": "pipe_segment", "Drawing document": "drawing",
 }
+
+
+def r0_source(fixtures: str) -> str:
+    """The LIONG-006 text R0.yaml encodes: the baseline section and the R1, R2 and Rbad rows."""
+    rows = "".join(liong_facts.table_row(fixtures, r) + "\n" for r in ("R1", "R2", "Rbad"))
+    return liong_facts.section(fixtures, "## Exact baseline R0") + rows
 
 
 def documented_nodes(text: str) -> dict[str, dict]:
@@ -109,6 +120,22 @@ class R0MatchesLiong006(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(len(notes), 1)
         self.assertIn("Rbad is rejected as expected: FLOW P6->VB has missing endpoint VB", notes[0])
+
+    def test_liong006_r0_text_is_the_reviewed_text(self):
+        fixtures = (world.ROOT / liong_facts.FIXTURES).read_text(encoding="utf-8")
+        digest = hashlib.sha256(r0_source(fixtures).encode("utf-8")).hexdigest()
+        self.assertEqual(digest, REVIEWED_SOURCE_SHA256,
+                         "LIONG-006's R0 text changed: review worlds/R0.yaml against it, "
+                         "then set REVIEWED_SOURCE_SHA256 in scripts/test_world.py")
+
+    def test_any_edit_to_the_r0_text_changes_the_digest(self):
+        fixtures = (world.ROOT / liong_facts.FIXTURES).read_text(encoding="utf-8")
+        before = hashlib.sha256(r0_source(fixtures).encode("utf-8")).hexdigest()
+        for old, new in (("record synthetic MOC-1", "record synthetic MOC-1-amended"),
+                         ("Pipe lengths, roughness", "Pipe segments have length `20 m`. Roughness")):
+            edited = fixtures.replace(old, new, 1)
+            self.assertNotEqual(edited, fixtures, old)
+            self.assertNotEqual(hashlib.sha256(r0_source(edited).encode("utf-8")).hexdigest(), before, old)
 
     def test_every_fact_matches_liong006(self):
         self.assertEqual(fidelity_errors(self.data), [])
