@@ -44,9 +44,15 @@ The owner answered:
 
 > Q20. Agreed.
 
-The question named SmartPlant P and ID with an ampersand, which this section cannot
-hold, so the quote above leaves it out.
+This section cannot hold an ampersand, so the quote above writes the product name
+as PID. Evidence gives the question exactly as asked.
 
 ## Evidence
 
 - `ARCHITECTURE.md:17`.
+- The Q20 question exactly as asked: "ARCHITECTURE.md says the backend "is a
+  synthetic test source, not a replica of an undisclosed engineering platform."
+  Should that sentence change to say: "Two synthetic backends follow the documented
+  storage patterns of SmartPlant P&ID and AutoCAD Plant 3D, using original names.
+  Neither copies a vendor schema."? LIONG-003 and LIONG-006 would be updated to
+  match."

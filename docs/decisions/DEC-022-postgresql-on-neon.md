@@ -24,8 +24,11 @@ that, so this record does not decide it.
 
 Asked as Q8 of the synthetic-data interview on 2026-10-11:
 
-> Should we confirm PostgreSQL for the backend now, and leave the graph database
-> choice until MILESTONE-001's graph step?
+> LIONG-007 proposes PostgreSQL for the synthetic backend, but that proposal
+> (DEC-106) is not approved. Because the generator writes SQL files, it has to
+> target one SQL dialect. Should we confirm PostgreSQL for the synthetic backend
+> now, and leave the graph database choice (Neo4j Community or Apache AGE,
+> GATE-TECH-001) until MILESTONE-001's graph step?
 
 The recommendation given with it:
 
