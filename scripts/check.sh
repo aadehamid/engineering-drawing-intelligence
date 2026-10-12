@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Every mechanical check for this repository. CI and the pre-push hook run this script.
-# The guard runs this same script with --checks and fails if any check changes the tree.
+# The guard runs this same script with --checks and fails if a check changes tracked
+# or non-ignored files, the index, or git status.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 

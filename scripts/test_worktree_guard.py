@@ -1,4 +1,4 @@
-"""Each test breaks one thing the guard claims to catch and expects it caught."""
+"""Tests break what the guard claims to catch, and pin what it deliberately ignores."""
 
 import contextlib
 import io
