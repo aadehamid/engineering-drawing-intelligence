@@ -18,17 +18,14 @@ the reading order and which document is authoritative for what.
 
 1. Read this file, then check for open pull requests and watch each one to merge
    before starting unrelated work.
-2. Run the checks below and confirm they pass on `main`.
+2. In a fresh clone, wire the pre-push hook once: `git config core.hooksPath scripts/hooks`.
+3. Run `scripts/check.sh` and confirm it passes on `main`.
 
 ## Checks
 
-Run these from the repository root before every push:
-
-```sh
-python3 scripts/bundle_docs.py --check
-python3 scripts/check_docs.py
-python3 scripts/test_doc_tools.py
-```
+`scripts/check.sh` runs every mechanical check. CI runs it on every pull request,
+and the pre-push hook runs it before every push. It fails if any check changes the
+working tree.
 
 The review archive in `docs/releases/` contains the root baseline files, every
 `docs/*.md` file, and the three scripts. A change to any of them needs
