@@ -33,9 +33,12 @@ The review archive in `docs/releases/` contains the root baseline files, every
 
 ## Figures and searches
 
-Take every count, total, and ID list a document quotes from `scripts/liong_facts.py`
-(`figures`, `check`, `find`), never from memory or a one-off script. When a figure is
-missing, extend that tool and its tests.
+Take every graph or document count a document quotes from
+`python3 scripts/liong_facts.py figures`, never from memory or a one-off script. Use its
+`find` command for repo-wide searches; it matches text split across lines.
+
+When you write a sentence that states a figure, register it in the tool's `CLAIMS` so
+`check` verifies it. When a figure is missing, extend the tool and its tests.
 
 ## Decisions
 

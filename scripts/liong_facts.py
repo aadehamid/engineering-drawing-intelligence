@@ -2,7 +2,7 @@
 
 Usage:
   python3 scripts/liong_facts.py figures [--json]   every figure, the files read, and the commit
-  python3 scripts/liong_facts.py check              fail if a document states a different figure
+  python3 scripts/liong_facts.py check              fail if a registered claim or swept count disagrees
   python3 scripts/liong_facts.py find PATTERN       search the documents, matching across line breaks
 
 Figures are computed from the R0 fixture tables and edge lists in LIONG-006 and the
@@ -94,17 +94,18 @@ def touches(edge: Edge, nodes: set[str]) -> bool:
     return edge.source in nodes or edge.target in nodes
 
 
-def simple_paths(edges: list[Edge], start: str, goal: str) -> int:
+def simple_paths(edges: list[Edge], start: str, goal: str) -> list[list[str]]:
+    """Every simple directed path from start to goal, as node lists."""
     graph: dict[str, list[str]] = {}
     for edge in edges:
         graph.setdefault(edge.source, []).append(edge.target)
 
-    def walk(node: str, seen: frozenset[str]) -> int:
-        if node == goal:
-            return 1
-        return sum(walk(n, seen | {n}) for n in graph.get(node, []) if n not in seen)
+    def walk(path: list[str]) -> list[list[str]]:
+        if path[-1] == goal:
+            return [path]
+        return [p for n in graph.get(path[-1], []) if n not in path for p in walk(path + [n])]
 
-    return walk(start, frozenset({start}))
+    return walk([start])
 
 
 def compute(root: Path) -> dict[str, int]:
@@ -119,6 +120,9 @@ def compute(root: Path) -> dict[str, int]:
     flow_block, other_block = code_blocks(baseline)[:2]
     flow = parse_edges(flow_block, FLOW)
     r0_edges = flow + parse_edges(other_block)
+    r0_paths = simple_paths(flow, "E1", "E2")
+    export_nodes = {node for path in r0_paths for node in path}
+    export_edges = [e for e in flow if e.source in export_nodes and e.target in export_nodes]
 
     deleted = set(re.search(r"delete (\w+) and (\w+);", table_row(fixtures, "R2")).groups())
     r2_nodes = nodes - deleted
@@ -144,12 +148,17 @@ def compute(root: Path) -> dict[str, int]:
         "r0.drawings": len(drawings),
         "r0.flow_edges": len(flow),
         "r0.other_edges": len(r0_edges) - len(flow),
+        "r0.on_sheet_edges": sum(1 for e in r0_edges if e.kind == ON_SHEET),
+        "r0.instrument_parent_edges": sum(1 for e in r0_edges if e.kind == "INSTRUMENT_PARENT"),
+        "r0.cross_sheet_edges": sum(1 for e in r0_edges if e.kind == "CROSS_SHEET_REFERENCE"),
         "r0.edges": len(r0_edges),
-        "r0.e1_e2_paths": simple_paths(flow, "E1", "E2"),
+        "r0.e1_e2_paths": len(r0_paths),
         "r2.nodes": len(r2_nodes),
         "r2.edges": len(r2_edges),
         "r2.on_sheet_removed": sum(1 for e in r0_edges if e.kind == ON_SHEET and touches(e, deleted)),
-        "r2.e1_e2_paths": simple_paths([e for e in r2_edges if e.kind == FLOW], "E1", "E2"),
+        "r2.e1_e2_paths": len(simple_paths([e for e in r2_edges if e.kind == FLOW], "E1", "E2")),
+        "scn012.export_nodes": len(export_nodes),
+        "scn012.export_flow_edges": len(export_edges),
         "scn010.nodes": len(nodes),
         "scn010.edges": len(scn010_edges),
         "scn011.contextual_nodes": len(context_nodes),
@@ -186,7 +195,19 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (FIXTURES, r"exactly these (\w+) contextual nodes", ("scn011.contextual_nodes",)),
     (FIXTURES, r"comparison view has (\d+) nodes and (\d+) edges", ("scn011.nodes", "scn011.edges")),
     (FIXTURES, r"current state has (\d+) nodes, (\d+) edges, and tag", ("r0.nodes", "r0.edges")),
+    (FIXTURES, r"and all (\d+) FLOW edges, with identifiers", ("scn012.export_flow_edges",)),
     (EVALUATION, r"(\d+) nodes and (\d+) edges, not merely", ("r0.nodes", "r0.edges")),
+    (EVALUATION, r"entity recall has (\d+) expected nodes", ("r0.nodes",)),
+    (EVALUATION, r"edge recall has (\d+) expected edges", ("r0.edges",)),
+    (EVALUATION, r"node recall with denominator (\d+) as", ("r0.engineering_objects",)),
+    (EVALUATION,
+     r"FLOW recall with denominator (\d+), ON_SHEET with (\d+), INSTRUMENT_PARENT with (\d+), "
+     r"and CROSS_SHEET_REFERENCE with (\d+)",
+     ("r0.flow_edges", "r0.on_sheet_edges", "r0.instrument_parent_edges", "r0.cross_sheet_edges")),
+    (EVALUATION, r"\| Selection manifest, (\d+) engineering nodes and (\d+) FLOW edges",
+     ("scn012.export_nodes", "scn012.export_flow_edges")),
+    (EVALUATION, r"contains (\d+) engineering nodes, excluding I1, plus all (\d+) FLOW edges",
+     ("scn012.export_nodes", "scn012.export_flow_edges")),
     (EVALUATION, r"(\d+) engineering objects, (\d+) total comparison nodes, (\d+) edges \|",
      ("r0.engineering_objects", "r0.nodes", "r0.edges")),
     (EVALUATION,
@@ -199,8 +220,12 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (INDEX, r"All (\w+) substantive documents", ("documents.substantive",)),
 ]
 
-# Any `nodes/edges` shorthand such as `17/31` in these files must name a known graph state.
-PAIR_FILES = (FIXTURES, EVALUATION)
+# In these files, any `nodes/edges` shorthand such as `17/31` must name a known graph state,
+# and any number written before "nodes" or "edges" must equal some computed figure.
+# Together they catch a wrong figure in a sentence that no claim above registers.
+SWEPT_FILES = (FIXTURES, EVALUATION)
+PAIR = r"(?<![\w/-])(\d+)/(\d+)(?![\d/])"
+COUNT = r"(?<![\w,.-])(\d[\d,]*) (?:[\w`-]+ ){0,3}?(?:nodes|edges)\b"
 
 
 def flat(text: str) -> str:
@@ -210,7 +235,7 @@ def flat(text: str) -> str:
 
 def check(root: Path) -> list[str]:
     figures = compute(root)
-    names = {name for name, _, _ in CLAIMS} | set(PAIR_FILES)
+    names = {name for name, _, _ in CLAIMS} | set(SWEPT_FILES)
     texts = {name: flat((root / name).read_text(encoding="utf-8")) for name in names}
     errors: list[str] = []
     for name, pattern, keys in CLAIMS:
@@ -222,10 +247,14 @@ def check(root: Path) -> list[str]:
                 if number(stated) != figures[key]:
                     errors.append(f"{name}: states {stated} for {key}; the fixture gives {figures[key]}")
     pairs = {(figures[f"{s}.nodes"], figures[f"{s}.edges"]) for s in STATE_PAIRS}
-    for name in PAIR_FILES:
-        for nodes, edges in re.findall(r"(?<![\d/])([1-9]\d*)/([1-9]\d*)(?![\d/])", texts[name]):
+    known = set(figures.values())
+    for name in SWEPT_FILES:
+        for nodes, edges in re.findall(PAIR, texts[name]):
             if (int(nodes), int(edges)) not in pairs:
                 errors.append(f"{name}: {nodes}/{edges} matches no known graph state")
+        for stated in re.findall(COUNT, texts[name]):
+            if number(stated) not in known:
+                errors.append(f"{name}: {stated} nodes or edges matches no computed figure")
     return errors
 
 

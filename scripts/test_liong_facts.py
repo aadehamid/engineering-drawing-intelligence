@@ -14,7 +14,9 @@ import worktree_guard as guard
 EXPECTED = {
     "r0.nodes": 17, "r0.engineering_objects": 15, "r0.drawings": 2,
     "r0.flow_edges": 14, "r0.other_edges": 17, "r0.edges": 31, "r0.e1_e2_paths": 2,
+    "r0.on_sheet_edges": 15, "r0.instrument_parent_edges": 1, "r0.cross_sheet_edges": 1,
     "r2.nodes": 15, "r2.edges": 26, "r2.on_sheet_removed": 2, "r2.e1_e2_paths": 1,
+    "scn012.export_nodes": 14, "scn012.export_flow_edges": 14,
     "scn010.nodes": 17, "scn010.edges": 29,
     "scn011.contextual_nodes": 5, "scn011.contextual_edges": 4,
     "scn011.nodes": 22, "scn011.edges": 35,
@@ -72,6 +74,23 @@ class FiguresTest(unittest.TestCase):
     def test_unknown_pair_fails(self) -> None:
         self.edit(facts.FIXTURES, "Published R0 stays at 17/31", "Published R0 stays at 18/31")
         self.assertIn(f"{facts.FIXTURES}: 18/31 matches no known graph state", facts.check(self.root))
+
+    def test_wrong_denominator_fails(self) -> None:
+        self.edit(facts.EVALUATION, "FLOW recall with denominator 14", "FLOW recall with denominator 99")
+        errors = facts.check(self.root)
+        self.assertIn(f"{facts.EVALUATION}: states 99 for r0.flow_edges; the fixture gives 14", errors)
+
+    def test_unregistered_contradictory_sentence_fails(self) -> None:
+        self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has 99 edges.\n\n## Revision and time rules")
+        self.assertIn(f"{facts.FIXTURES}: 99 nodes or edges matches no computed figure", facts.check(self.root))
+
+    def test_leading_zero_pair_fails(self) -> None:
+        self.edit(facts.FIXTURES, "Published R0 stays at 17/31", "Published R0 stays at 018/031")
+        self.assertIn(f"{facts.FIXTURES}: 018/031 matches no known graph state", facts.check(self.root))
+
+    def test_id_ranges_are_not_pairs(self) -> None:
+        self.edit(facts.FIXTURES, "## Revision and time rules", "See SCN-002/009 and LIONG-007/009.\n\n## Revision and time rules")
+        self.assertEqual(facts.check(self.root), [])
 
     def test_fixture_change_moves_the_figures(self) -> None:
         self.edit(facts.FIXTURES, "J1 -> P6    P6 -> VB    VB -> J2", "J1 -> P6    P6 -> VB    VB -> J2    V1 -> J2")
