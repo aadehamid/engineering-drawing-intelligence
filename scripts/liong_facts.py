@@ -2,7 +2,8 @@
 
 Usage:
   python3 scripts/liong_facts.py figures [--json]   every figure, the files read, and the commit
-  python3 scripts/liong_facts.py check              fail if a registered claim or swept count disagrees
+  python3 scripts/liong_facts.py check              fail if a registered claim or swept count disagrees,
+                                                    or a decision record disagrees with its index
   python3 scripts/liong_facts.py find PATTERN       search the documents, matching across line breaks
 
 Figures are computed from the R0 fixture tables and edge lists in LIONG-006 and the
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
 EVALUATION = Path("docs/LIONG-010-evaluation.md")
 README = Path("README.md")
+DECISIONS = Path("docs/decisions")
 INDEX = Path("docs/LIONG-000-index.md")
 WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
@@ -277,6 +279,65 @@ def check(root: Path) -> list[str]:
                 start, end = sentence.start() + found.start(), sentence.start() + found.end()
                 if not any(a <= start and end <= b for a, b in covered):
                     errors.append(f"{name}: unregistered figure: {found.group(0)} in \"{sentence.group(0).strip()[:80]}\"")
+    return errors + check_decisions(root)
+
+
+RECORD_SECTIONS = ("## Context", "## Decision", "## Alternatives considered", "## Owner's words", "## Evidence")
+STATUSES = ("Proposed", "Decided", "Superseded")
+INDEX_ROW = r"^\| \[(DEC-\d{3})\]\(([^)]+)\) \| (.+?) \| (\w+) \| (\d{4}-\d{2}-\d{2}) \|$"
+
+
+def check_decisions(root: Path) -> list[str]:
+    """Each decision record has the documented shape and matches its index row."""
+    folder = root / DECISIONS
+    index_label = f"{DECISIONS}/README.md"
+    errors: list[str] = []
+    indexed: dict[str, tuple[str, str, str, str]] = {}
+    index = (folder / "README.md").read_text(encoding="utf-8")
+    for record_id, link, title, status, date in re.findall(INDEX_ROW, index, re.MULTILINE):
+        if record_id in indexed:
+            errors.append(f"{index_label}: {record_id} is indexed twice")
+        indexed[record_id] = (link, title, status, date)
+    files = {path.name: path for path in folder.glob("DEC-*.md")}
+    for record_id, (link, _, _, _) in indexed.items():
+        if link not in files:
+            errors.append(f"{index_label}: {record_id} links to missing file {link}")
+
+    for name, path in sorted(files.items()):
+        text = path.read_text(encoding="utf-8")
+        label = f"{DECISIONS}/{name}"
+        heading = re.match(r"# (DEC-\d{3}): (.+)\n", text)
+        if not heading or not name.startswith(heading.group(1) + "-"):
+            errors.append(f"{label}: first line must be '# DEC-NNN: <decision>' matching the file name")
+            continue
+        record_id, title = heading.groups()
+        status_line = re.search(r"^Status: (\w+)$", text, re.MULTILINE)
+        date_line = re.search(r"^Date: (\d{4}-\d{2}-\d{2})$", text, re.MULTILINE)
+        status = status_line.group(1) if status_line else None
+        if status not in STATUSES:
+            errors.append(f"{label}: Status must be one of {', '.join(STATUSES)}")
+        if not date_line:
+            errors.append(f"{label}: missing 'Date: YYYY-MM-DD' line")
+        positions = [text.find(f"\n{section}\n") for section in RECORD_SECTIONS]
+        if -1 in positions or positions != sorted(positions):
+            errors.append(f"{label}: needs sections {', '.join(RECORD_SECTIONS)} in that order")
+        elif status == "Decided" and not re.search(r"^> \S", text[positions[3]:positions[4]], re.MULTILINE):
+            errors.append(f"{label}: a Decided record quotes the owner in a '>' block")
+        if status == "Superseded" and not re.search(r"^Superseded by DEC-\d{3}", text, re.MULTILINE):
+            errors.append(f"{label}: a Superseded record names its successor ('Superseded by DEC-NNN')")
+
+        if record_id not in indexed:
+            errors.append(f"{label}: {record_id} has no index row")
+            continue
+        link, index_title, index_status, index_date = indexed[record_id]
+        if link != name:
+            errors.append(f"{index_label}: {record_id} links to {link}, not {name}")
+        if index_title != title:
+            errors.append(f"{index_label}: {record_id} title differs from its record")
+        if status and index_status != status:
+            errors.append(f"{index_label}: {record_id} status {index_status}; the record says {status}")
+        if date_line and index_date != date_line.group(1):
+            errors.append(f"{index_label}: {record_id} date {index_date}; the record says {date_line.group(1)}")
     return errors
 
 
@@ -324,7 +385,9 @@ def main(argv: list[str]) -> int:
         return 0
     elif args.command == "check":
         errors = check(ROOT)
-        print("\n".join(errors) if errors else f"Figures match the fixtures in {len(CLAIMS)} claims.")
+        records = len(list((ROOT / DECISIONS).glob("DEC-*.md")))
+        summary = f"Figures match the fixtures in {len(CLAIMS)} claims; decision records match the index ({records})."
+        print("\n".join(errors) if errors else summary)
         return 1 if errors else 0
     else:
         results = find(ROOT, args.pattern)

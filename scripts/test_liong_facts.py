@@ -149,5 +149,76 @@ class FiguresTest(unittest.TestCase):
         self.assertEqual(guard.differences(before, guard.snapshot(facts.ROOT)), [])
 
 
+class DecisionRecordsTest(unittest.TestCase):
+    RECORD = Path("docs/decisions/DEC-014-skipped-question-convention.md")
+    INDEX = Path("docs/decisions/README.md")
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        shutil.copytree(facts.ROOT / "docs", self.root / "docs")
+        self.addCleanup(self.temp.cleanup)
+
+    def edit(self, path: Path, old: str, new: str) -> None:
+        file = self.root / path
+        text = file.read_text(encoding="utf-8")
+        self.assertIn(old, text)
+        file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+    def errors(self) -> list[str]:
+        return facts.check_decisions(self.root)
+
+    def test_records_match_today(self) -> None:
+        self.assertEqual(facts.check_decisions(facts.ROOT), [])
+
+    def test_status_differs_from_index(self) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+        self.assertIn(f"{self.INDEX}: DEC-014 status Decided; the record says Proposed", self.errors())
+
+    def test_date_differs_from_index(self) -> None:
+        self.edit(self.RECORD, "Date: 2026-10-11", "Date: 2026-10-12")
+        self.assertTrue(any("DEC-014 date 2026-10-11" in e for e in self.errors()))
+
+    def test_title_differs_from_index(self) -> None:
+        self.edit(self.RECORD, "# DEC-014: A skipped question", "# DEC-014: An unanswered question")
+        self.assertIn(f"{self.INDEX}: DEC-014 title differs from its record", self.errors())
+
+    def test_record_without_index_row(self) -> None:
+        (self.root / "docs/decisions/DEC-099-orphan.md").write_text(
+            (self.root / self.RECORD).read_text().replace("DEC-014", "DEC-099"), encoding="utf-8"
+        )
+        self.assertIn("docs/decisions/DEC-099-orphan.md: DEC-099 has no index row", self.errors())
+
+    def test_index_row_without_record(self) -> None:
+        (self.root / self.RECORD).unlink()
+        self.assertTrue(any("links to missing file" in e for e in self.errors()))
+
+    def test_duplicate_index_row(self) -> None:
+        row = "| [DEC-014](DEC-014-skipped-question-convention.md) | A skipped question in a decision round counts as agreement | Decided | 2026-10-11 |\n"
+        self.edit(self.INDEX, row, row + row)
+        self.assertIn(f"{self.INDEX}: DEC-014 is indexed twice", self.errors())
+
+    def test_decided_needs_owner_quote(self) -> None:
+        self.edit(self.RECORD, "> Q12: yes", "Q12: yes")
+        self.edit(self.RECORD, "> When you don't answer", "When you don't answer")
+        self.edit(self.RECORD, "> agreement with my recommendation?", "agreement with my recommendation?")
+        self.assertTrue(any("quotes the owner" in e for e in self.errors()))
+
+    def test_missing_section_fails(self) -> None:
+        self.edit(self.RECORD, "## Alternatives considered", "## Other options")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
+    def test_unknown_status_fails(self) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Approved")
+        self.assertTrue(any("Status must be one of" in e for e in self.errors()))
+
+    def test_superseded_names_successor(self) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Superseded")
+        self.edit(self.INDEX, "| Decided | 2026-10-11 |", "| Superseded | 2026-10-11 |")
+        self.assertTrue(any("names its successor" in e for e in self.errors()))
+        self.edit(self.RECORD, "## Context", "Superseded by DEC-020 on 2026-11-01.\n\n## Context")
+        self.assertEqual(self.errors(), [])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -49,12 +49,14 @@ When a figure is missing, extend the tool and its tests.
 ## Decisions
 
 The owner is Hamid (`aadehamid`). Decisions are proposals until his words are
-recorded; [the decision register](docs/LIONG-REG-001-decisions.md) holds their state.
+recorded. [The decision register](docs/LIONG-REG-001-decisions.md) summarizes
+approval state; [decision records](docs/decisions/README.md) hold one decision each,
+with the owner's words quoted, in the format that index defines.
 
 - Decision interviews use `/grill-with-docs`, which the owner starts.
 - A question the owner skips in a decision round counts as agreement with the
-  recommendation, and the record quotes the round. The owner's words are in
-  DEC-014 of the decision register.
+  recommendation, and the record quotes the round
+  ([DEC-014](docs/decisions/DEC-014-skipped-question-convention.md)).
 - A pull request merge alone does not approve draft proposals, unless the owner
   records that approval is the merge's intent and names its scope. A newer file is
   not more authoritative than an approved one.
