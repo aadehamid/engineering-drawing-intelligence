@@ -310,22 +310,41 @@ class Record(NamedTuple):
 def rendered(text: str) -> str:
     """The text a reader sees outside code: HTML comments and fenced code blocks removed.
 
-    A fence closes only on the same character repeated at least as many times; an
-    unclosed fence runs to the end of the document, as Markdown renders it.
+    One pass tracks both, so a comment marker inside code and a fence inside a comment
+    are left alone. A fence closes only on the same character repeated at least as
+    many times; an unclosed fence or comment runs to the end of the document.
     """
-    text = re.sub(r"<!--.*?(?:-->|\Z)", "", text, flags=re.DOTALL)  # an unclosed comment runs to the end
     kept: list[str] = []
     fence = None
+    in_comment = False
     for line in text.splitlines():
-        marker = re.match(r" {0,3}(`{3,}|~{3,})", line)
-        if fence is None and marker:
-            fence = marker.group(1)
-        elif fence is not None:
-            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence) \
-                    and not line.strip()[len(marker.group(1)):].strip():
+        if fence is not None:
+            marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
+            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
                 fence = None
-        else:
-            kept.append(line)
+            continue
+        visible = ""
+        rest = line
+        while rest:
+            if in_comment:
+                end = rest.find("-->")
+                if end == -1:
+                    rest = ""
+                else:
+                    in_comment, rest = False, rest[end + 3:]
+            else:
+                start = rest.find("<!--")
+                if start == -1:
+                    visible, rest = visible + rest, ""
+                else:
+                    visible, in_comment, rest = visible + rest[:start], True, rest[start + 4:]
+        if in_comment and not visible.strip():
+            continue
+        opening = re.match(r" {0,3}(`{3,}|~{3,})", visible)
+        if opening:
+            fence = opening.group(1)
+            continue
+        kept.append(visible)
     return "\n".join(kept) + "\n"
 
 

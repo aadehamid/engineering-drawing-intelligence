@@ -325,5 +325,9 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.RECORD, "## Owner's words", "<!--\n## Owner's words")
         self.assertTrue(any("needs sections" in e for e in self.errors()))
 
+    def test_comment_opener_inside_code_is_code(self) -> None:
+        self.edit(self.RECORD, "## Owner's words", "```html\n<!--\n```\n\n## Owner's words")
+        self.assertEqual(self.errors(), [])
+
 if __name__ == "__main__":
     unittest.main()
