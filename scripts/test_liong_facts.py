@@ -82,7 +82,15 @@ class FiguresTest(unittest.TestCase):
 
     def test_unregistered_contradictory_sentence_fails(self) -> None:
         self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has 99 edges.\n\n## Revision and time rules")
-        self.assertIn(f"{facts.FIXTURES}: 99 nodes or edges matches no computed figure", facts.check(self.root))
+        self.assertIn(f"{facts.FIXTURES}: unregistered figure: 99 edges", facts.check(self.root))
+
+    def test_wrong_count_equal_to_another_figure_fails(self) -> None:
+        self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has 15 nodes.\n\n## Revision and time rules")
+        self.assertIn(f"{facts.FIXTURES}: unregistered figure: 15 nodes", facts.check(self.root))
+
+    def test_number_word_count_fails(self) -> None:
+        self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has twelve nodes.\n\n## Revision and time rules")
+        self.assertIn(f"{facts.FIXTURES}: unregistered figure: twelve nodes", facts.check(self.root))
 
     def test_leading_zero_pair_fails(self) -> None:
         self.edit(facts.FIXTURES, "Published R0 stays at 17/31", "Published R0 stays at 018/031")

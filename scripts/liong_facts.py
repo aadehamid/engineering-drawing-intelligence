@@ -185,6 +185,7 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (FIXTURES, r"The other (\d+) edges are", ("r0.other_edges",)),
     (FIXTURES, r"baseline therefore contains (\d+) edges", ("r0.edges",)),
     (FIXTURES, r"\| Baseline above \| (\d+) nodes, (\d+) edges", ("r0.nodes", "r0.edges")),
+    (FIXTURES, r"Same (\d+) identities and (\d+) edges", ("r0.nodes", "r0.edges")),
     (FIXTURES, r"their (\w+) `ON_SHEET` edges", ("r2.on_sheet_removed",)),
     (FIXTURES, r"\| (\d+) nodes, (\d+) edges\. No bypass", ("r2.nodes", "r2.edges")),
     (FIXTURES, r"R0 has exactly (\w+) simple directed E1-to-E2 paths", ("r0.e1_e2_paths",)),
@@ -221,11 +222,11 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
 ]
 
 # In these files, any `nodes/edges` shorthand such as `17/31` must name a known graph state,
-# and any number written before "nodes" or "edges" must equal some computed figure.
-# Together they catch a wrong figure in a sentence that no claim above registers.
+# and every count written before "nodes" or "edges" must sit inside a registered claim.
+# A figure sentence nobody registered therefore fails, even when its number is right.
 SWEPT_FILES = (FIXTURES, EVALUATION)
 PAIR = r"(?<![\w/-])(\d+)/(\d+)(?![\d/])"
-COUNT = r"(?<![\w,.-])(\d[\d,]*) (?:[\w`-]+ ){0,3}?(?:nodes|edges)\b"
+COUNT = rf"(?<![\w,.-])(\d[\d,]*|{'|'.join(WORDS)}) (?:[\w`-]+ ){{0,3}}?(?:nodes|edges)\b"
 
 
 def flat(text: str) -> str:
@@ -247,14 +248,14 @@ def check(root: Path) -> list[str]:
                 if number(stated) != figures[key]:
                     errors.append(f"{name}: states {stated} for {key}; the fixture gives {figures[key]}")
     pairs = {(figures[f"{s}.nodes"], figures[f"{s}.edges"]) for s in STATE_PAIRS}
-    known = set(figures.values())
     for name in SWEPT_FILES:
         for nodes, edges in re.findall(PAIR, texts[name]):
             if (int(nodes), int(edges)) not in pairs:
                 errors.append(f"{name}: {nodes}/{edges} matches no known graph state")
-        for stated in re.findall(COUNT, texts[name]):
-            if number(stated) not in known:
-                errors.append(f"{name}: {stated} nodes or edges matches no computed figure")
+        spans = [m.span() for n, pattern, _ in CLAIMS if n == name for m in re.finditer(pattern, texts[name])]
+        for count in re.finditer(COUNT, texts[name], re.IGNORECASE):
+            if not any(start <= count.start() and count.end() <= end for start, end in spans):
+                errors.append(f"{name}: unregistered figure: {count.group(0)}")
     return errors
 
 
