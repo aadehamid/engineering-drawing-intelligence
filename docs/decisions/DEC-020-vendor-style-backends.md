@@ -51,6 +51,11 @@ Asked as Q9 on 2026-10-11:
 > Should we design an original, documented schema that borrows the commercial
 > tools' structural patterns without copying their table or column names?
 
+The recommendation given with it:
+
+> Yes. Borrow the patterns, write our own names, and cite the public source for
+> each pattern we borrow.
+
 The owner wrote:
 
 > Q9:Borrow the pattersn very closesly and write our names. I do want us to have

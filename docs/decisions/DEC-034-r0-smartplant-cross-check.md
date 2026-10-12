@@ -27,7 +27,12 @@ Asked as Q23 of the synthetic-data interview on 2026-10-11:
 > Should we drop that fixture and keep exactly two worlds, each in one schema? We
 > can add a cross-check later if the two mappings start to disagree.
 
-The recommendation was to keep it, as test data only.
+The recommendation given with it:
+
+> Keep it, but as test data only. It costs one extra run of the generator, needs
+> no new expected results, and is the only automatic check that the SmartPlant
+> mapping gets R0's bypass right. If you'd rather keep things simple, dropping it
+> is fine.
 
 The owner answered:
 

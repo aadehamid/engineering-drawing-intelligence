@@ -30,7 +30,7 @@ Asked as Q11 of the synthetic-data interview on 2026-10-11:
 The recommendation given with it:
 
 > Yes. Keep the register as the summary and put the evidence in per-decision
-> records. Today's answers (Q1 to Q9) would become the first records.
+> records. Today's answers (Q1–Q9) would become the first records.
 
 The owner answered:
 
