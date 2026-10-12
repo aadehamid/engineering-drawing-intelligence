@@ -34,7 +34,8 @@ data only.
 ## Alternatives considered
 
 - Generate every world in both schemas, which Q16 recommended. The owner chose one
-  world per vendor, because a real plant is authored in one tool.
+  world per vendor. The interviewer later noted that a real plant is authored in
+  one tool, which supports that choice.
 - Exactly two worlds with no cross-check fixture. DEC-034 keeps the fixture.
 
 ## Owner's words
