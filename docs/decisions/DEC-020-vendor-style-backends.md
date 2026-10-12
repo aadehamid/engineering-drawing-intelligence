@@ -12,19 +12,22 @@ research agent then read public sources on both products. Q9 asked how closely t
 follow them, because vendor schemas are proprietary and `ARCHITECTURE.md` said the
 backend was "not a replica of an undisclosed engineering platform".
 
+The research reported patterns such as these. They are findings, not part of this
+decision; the schema documentation decides which to borrow and cites each one.
+
+- **SmartPlant P&ID:** model items kept apart from their drawing representations,
+  connectors split at inline components, pipelines derived from matching
+  properties, tags stored as parts, and a data dictionary.
+- **AutoCAD Plant 3D:** class tables, link tables between objects and drawings,
+  line rows that name their start and end assets, and tag formats built from
+  subparts.
+
 ## Decision
 
 The project has two backend schemas. One follows how SmartPlant P&ID stores its
 data, and the other follows AutoCAD Plant 3D, each as closely as public sources
 allow. Some synthetic data is generated in each schema
 ([DEC-029](DEC-029-two-canonical-worlds.md)).
-
-- **SmartPlant-style** patterns include model items kept apart from their drawing
-  representations, connectors split at inline components, pipelines derived from
-  matching properties, tags stored as parts, and a data dictionary.
-- **Plant 3D-style** patterns include class tables, link tables between objects
-  and drawings, line rows that name their start and end assets, and tag formats
-  built from subparts.
 
 Every table and column uses an original name. Each borrowed pattern cites the
 public source it comes from.

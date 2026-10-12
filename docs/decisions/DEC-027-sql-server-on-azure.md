@@ -19,10 +19,8 @@ deciding test. It replaces PostgreSQL from
 - **Tests and CI.** A local SQL Server container.
 - **Open-source condition.** SQL Server and Azure become a new exception, alongside
   Cloudflare and Databricks Free Edition (DEC-009).
-- **Graph database.** Unchanged from DEC-022: the choice waits for MILESTONE-001's
-  graph step.
 
-LIONG-007 still proposes PostgreSQL. Its update lands in a later pull request.
+The graph database is not decided. LIONG-007 still proposes PostgreSQL. Its update lands in a later pull request.
 
 ## Alternatives considered
 

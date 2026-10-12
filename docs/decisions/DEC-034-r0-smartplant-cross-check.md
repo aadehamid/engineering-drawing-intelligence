@@ -11,9 +11,10 @@ fixture that keeps that comparison.
 
 ## Decision
 
-R0 is also generated in the SmartPlant-style schema, as test data only. Both
-mappings must publish the same graph from R0, and any difference is a defect. The
-fixture is not a project anyone works in, and it needs no new expected results.
+R0 is also emitted in SmartPlant form, purely as a mapping test fixture that
+checks whether the two mappings agree. Q22 and Q23 described the fixture in those
+words. What counts as agreement, and what the fixture adds to the expected results,
+is decided when the SmartPlant mapping is built.
 
 ## Alternatives considered
 
@@ -24,6 +25,9 @@ fixture is not a project anyone works in, and it needs no new expected results.
 
 Asked as Q23 of the synthetic-data interview on 2026-10-11:
 
+> The one thing your answer leaves open is the extra test fixture I suggested: R0
+> also emitted in SmartPlant form, only to check that the two mappings agree.
+>
 > Should we drop that fixture and keep exactly two worlds, each in one schema? We
 > can add a cross-check later if the two mappings start to disagree.
 

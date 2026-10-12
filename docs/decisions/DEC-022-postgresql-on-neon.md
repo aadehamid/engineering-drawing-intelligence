@@ -12,8 +12,9 @@ LIONG-007 proposes PostgreSQL for the synthetic backend, and that proposal
 
 ## Decision
 
-PostgreSQL is the synthetic backend engine, hosted on Neon. The graph database
-choice waits for MILESTONE-001's graph step.
+PostgreSQL is the synthetic backend engine, hosted on Neon. The question also
+proposed deciding the graph database later; the owner's answer did not address
+that, so this record does not decide it.
 
 ## Alternatives considered
 

@@ -23,9 +23,17 @@ and revisions as changes from a named base.
 
 ## Owner's words
 
-Asked as Q4 of the synthetic-data interview on 2026-10-11, with three options: a
-declarative data file checked against a JSON Schema, Python code that builds the
-world, or rows in a database.
+Asked as Q4 of the synthetic-data interview on 2026-10-11:
+
+> How should the canonical world be written down?
+>
+> (a) A declarative data file, such as YAML, checked against a JSON Schema in
+> schemas/. It would list aliases, typed objects, attributes, edges, and revisions
+> as changes from a named base.
+>
+> (b) Python code that builds the world.
+>
+> (c) Rows in a database.
 
 The recommendation given with it:
 

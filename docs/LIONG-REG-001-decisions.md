@@ -62,7 +62,7 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-031 | The backends copy each application's saved data, not its editing behaviour | The pipeline reads only saved data; simulating editing would be authoring, which DEC-012 excludes | LIONG-006; [record](decisions/DEC-031-stored-data-not-behaviour.md) |
 | DEC-032 | Each backend carries a minimal data dictionary for the classes R0 uses | The DEXPI mapping must read each product's metadata layer, as it would on real data | LIONG-006; [record](decisions/DEC-032-minimal-data-dictionary.md) |
 | DEC-033 | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Changes an approved baseline document, so the edit lands in its own PR | ARCHITECTURE.md, LIONG-003, LIONG-006; [record](decisions/DEC-033-architecture-wording.md) |
-| DEC-034 | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Both mappings must publish the same graph from R0; test data only | LIONG-006; [record](decisions/DEC-034-r0-smartplant-cross-check.md) |
+| DEC-034 | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Keeps an automatic check that the two mappings agree, as a test fixture only | LIONG-006; [record](decisions/DEC-034-r0-smartplant-cross-check.md) |
 
 ## New proposals
 
