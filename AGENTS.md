@@ -31,6 +31,11 @@ The review archive in `docs/releases/` contains the root baseline files, every
 `docs/*.md` file, and the three scripts. A change to any of them needs
 `python3 scripts/bundle_docs.py` to rebuild the archive in the same commit.
 
+## Review
+
+Reviewers apply [REVIEW_STANDARDS.md](REVIEW_STANDARDS.md) to every pull request,
+alongside the way-of-working independent review.
+
 ## Figures and searches
 
 Take every graph or document count a document quotes from
