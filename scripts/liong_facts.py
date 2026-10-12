@@ -313,7 +313,7 @@ def rendered(text: str) -> str:
     A fence closes only on the same character repeated at least as many times; an
     unclosed fence runs to the end of the document, as Markdown renders it.
     """
-    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    text = re.sub(r"<!--.*?(?:-->|\Z)", "", text, flags=re.DOTALL)  # an unclosed comment runs to the end
     kept: list[str] = []
     fence = None
     for line in text.splitlines():

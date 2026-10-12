@@ -321,5 +321,9 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         )
         self.assertEqual(self.errors(), [])
 
+    def test_unclosed_comment_hides_what_follows(self) -> None:
+        self.edit(self.RECORD, "## Owner's words", "<!--\n## Owner's words")
+        self.assertTrue(any("needs sections" in e for e in self.errors()))
+
 if __name__ == "__main__":
     unittest.main()
