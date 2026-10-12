@@ -84,7 +84,7 @@ One view of a canonical world as a particular source presents it, such as the
 engineering backend, a drawing set, or a register. Each has its own record keys.
 
 **World lineage**:
-A canonical world together with every rendering, source representation, revision,
-crop, and perturbation derived from it. Data is partitioned by whole lineage;
-splitting only pages, tags, file names, revisions, or raster variants does not
-make data independent.
+The family of artifacts derived from one canonical world: every rendering, source
+representation, revision, crop, and perturbation. The canonical world's truth is
+not a member. Data is partitioned by whole lineage; splitting only pages, tags,
+file names, revisions, or raster variants does not make data independent.
