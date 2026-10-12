@@ -82,15 +82,27 @@ class FiguresTest(unittest.TestCase):
 
     def test_unregistered_contradictory_sentence_fails(self) -> None:
         self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has 99 edges.\n\n## Revision and time rules")
-        self.assertIn(f"{facts.FIXTURES}: unregistered figure: 99 edges", facts.check(self.root))
+        self.assertTrue(any("unregistered figure: 99 in" in e for e in facts.check(self.root)))
 
     def test_wrong_count_equal_to_another_figure_fails(self) -> None:
         self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has 15 nodes.\n\n## Revision and time rules")
-        self.assertIn(f"{facts.FIXTURES}: unregistered figure: 15 nodes", facts.check(self.root))
+        self.assertTrue(any("unregistered figure: 15 in" in e for e in facts.check(self.root)))
 
     def test_number_word_count_fails(self) -> None:
         self.edit(facts.FIXTURES, "## Revision and time rules", "The R0 view has twelve nodes.\n\n## Revision and time rules")
-        self.assertIn(f"{facts.FIXTURES}: unregistered figure: twelve nodes", facts.check(self.root))
+        self.assertTrue(any("unregistered figure: twelve in" in e for e in facts.check(self.root)))
+
+    def test_any_spelling_of_an_unregistered_figure_fails(self) -> None:
+        for sentence, number in (
+            ("The R0 view has seventeen nodes.", "seventeen"),
+            ("The R0 view has `99` nodes.", "99"),
+            ("The R0 view has 99 total validated engineering comparison nodes.", "99"),
+            ("The R0 view has thirty-one edges.", "thirty-one"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.setUp()
+                self.edit(facts.FIXTURES, "## Revision and time rules", f"{sentence}\n\n## Revision and time rules")
+                self.assertTrue(any(f"unregistered figure: {number} in" in e for e in facts.check(self.root)))
 
     def test_leading_zero_pair_fails(self) -> None:
         self.edit(facts.FIXTURES, "Published R0 stays at 17/31", "Published R0 stays at 018/031")

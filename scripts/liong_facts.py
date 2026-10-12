@@ -221,12 +221,24 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (INDEX, r"All (\w+) substantive documents", ("documents.substantive",)),
 ]
 
-# In these files, any `nodes/edges` shorthand such as `17/31` must name a known graph state,
-# and every count written before "nodes" or "edges" must sit inside a registered claim.
-# A figure sentence nobody registered therefore fails, even when its number is right.
+# In these files, any `nodes/edges` shorthand such as `17/31` must name a known graph state.
+# Every number in a sentence that mentions nodes or edges, in digits or words, must sit inside
+# a registered claim or an exempt phrase. A figure sentence nobody registered therefore fails,
+# whatever its spelling.
 SWEPT_FILES = (FIXTURES, EVALUATION)
 PAIR = r"(?<![\w/-])(\d+)/(\d+)(?![\d/])"
-COUNT = rf"(?<![\w,.-])(\d[\d,]*|{'|'.join(WORDS)}) (?:[\w`-]+ ){{0,3}}?(?:nodes|edges)\b"
+_ONES = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
+         "fifteen sixteen seventeen eighteen nineteen").split()
+_TENS = "twenty thirty forty fifty sixty seventy eighty ninety hundred thousand".split()
+NUMBER = (rf"(?<![\w./-])(?:\d[\d,]*(?:\.\d+)?|(?:{'|'.join(_ONES + _TENS)})"
+          rf"(?:-(?:{'|'.join(_ONES)}))?)(?![\w/-])")
+SENTENCE = r"(?:[^.|!?]|(?<=\d)\.(?=\d))+"
+# Numbers near "nodes" or "edges" that are not node or edge figures.
+EXEMPT: list[tuple[Path, str]] = [
+    (FIXTURES, "expand into one edge per source"),
+    (EVALUATION, "One two-sheet R0 world"),
+    (EVALUATION, "equal 1.0"),
+]
 
 
 def flat(text: str) -> str:
@@ -252,10 +264,15 @@ def check(root: Path) -> list[str]:
         for nodes, edges in re.findall(PAIR, texts[name]):
             if (int(nodes), int(edges)) not in pairs:
                 errors.append(f"{name}: {nodes}/{edges} matches no known graph state")
-        spans = [m.span() for n, pattern, _ in CLAIMS if n == name for m in re.finditer(pattern, texts[name])]
-        for count in re.finditer(COUNT, texts[name], re.IGNORECASE):
-            if not any(start <= count.start() and count.end() <= end for start, end in spans):
-                errors.append(f"{name}: unregistered figure: {count.group(0)}")
+        covered = [m.span() for n, pattern, _ in CLAIMS if n == name for m in re.finditer(pattern, texts[name])]
+        covered += [m.span() for n, phrase in EXEMPT if n == name for m in re.finditer(re.escape(phrase), texts[name])]
+        for sentence in re.finditer(SENTENCE, texts[name]):
+            if not re.search(r"\b(?:nodes?|edges?)\b", sentence.group(0), re.IGNORECASE):
+                continue
+            for found in re.finditer(NUMBER, sentence.group(0), re.IGNORECASE):
+                start, end = sentence.start() + found.start(), sentence.start() + found.end()
+                if not any(a <= start and end <= b for a, b in covered):
+                    errors.append(f"{name}: unregistered figure: {found.group(0)} in \"{sentence.group(0).strip()[:80]}\"")
     return errors
 
 

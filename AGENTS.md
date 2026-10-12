@@ -38,7 +38,8 @@ Take every graph or document count a document quotes from
 `find` command for repo-wide searches; it matches text split across lines.
 
 When you write a sentence that states a figure, register it in the tool's `CLAIMS` so
-`check` verifies it. When a figure is missing, extend the tool and its tests.
+`check` verifies it; a number near "nodes" or "edges" that is not a figure goes in `EXEMPT`.
+When a figure is missing, extend the tool and its tests.
 
 ## Decisions
 
