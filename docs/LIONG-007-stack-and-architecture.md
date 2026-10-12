@@ -114,7 +114,7 @@ flowchart TB
 
 | Logical responsibility | Proposed owner | Failure boundary |
 | --- | --- | --- |
-| Source authority and approved backend revision | SQL Server synthetic backend (DEC-027) with immutable revision records. The loader writes each revision and its outbox event, in a non-vendor schema of the same database, in one transaction (DEC-047) | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
+| Source authority and approved backend revision | SQL Server synthetic backend (DEC-027) with immutable revision records. In one transaction, the loader writes each revision into its vendor schema and its event into an outbox in a non-vendor schema of the same database (DEC-047) | No committed approval means no approved-revision event; extraction must read that revision, not mutable current rows |
 | Raw evidence and replay | Local durable artifact directory, content hashes, manifests, and independent backup | A missing or mismatched artifact blocks publication; cloud availability must not decide whether the local demo works |
 | Delivery and execution | Persistent worker using the outbox; optional Dagster OSS sensor and scheduled reconciliation | At-least-once delivery is expected; retries use stable revision keys, not assumptions of exactly-once delivery |
 | Conversion and extraction | XML adapters plus interchangeable document parsers, visual interpretation, optional segmentation, and review screens | Every model result is a candidate; parse errors, unsupported content, and uncertain matches remain visible; no direct model publication |
