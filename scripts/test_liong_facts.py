@@ -347,7 +347,8 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.assertEqual(self.errors(), [])
 
     def test_markup_only_owner_answer_fails(self) -> None:
-        for answer in ("> <br>", "> [approval]: ../LIONG-REG-001-decisions.md"):
+        for answer in ("> <br>", "> [approval]: ../LIONG-REG-001-decisions.md", "> >", "> -", "> 1.",
+                       "> ```\n> ```", "> > ---", "> **  **"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)
@@ -360,6 +361,20 @@ class DecisionRecordsTest(CopiedDocsTestCase):
     def test_autolink_is_content(self) -> None:
         self.replace_evidence("\n<https://github.com/aadehamid/Engineering_Drawing_to_Graph/pull/6>\n")
         self.assertEqual(self.errors(), [])
+
+    def test_owner_words_in_containers_pass(self) -> None:
+        for answer in ("> - Q12: yes", "> > Q12: yes", "> 1. Q12: yes"):
+            with self.subTest(answer=answer):
+                self.setUp()
+                self.edit(self.RECORD, "> Q12: yes", answer)
+                self.assertEqual(self.errors(), [])
+
+    def test_empty_list_or_rule_section_is_empty(self) -> None:
+        for body in ("\n-\n", "\n---\n", "\n> \n", "\n```\n```\n"):
+            with self.subTest(body=body):
+                self.setUp()
+                self.replace_evidence(body)
+                self.assertIn(f"{self.RECORD}: section ## Evidence is empty", self.errors())
 
 if __name__ == "__main__":
     unittest.main()

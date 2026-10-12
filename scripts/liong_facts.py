@@ -348,26 +348,41 @@ def rendered(text: str) -> str:
     return "\n".join(kept) + "\n"
 
 
+CONTAINER_MARKER = r"^\s*(?:>|[-*+]|\d+[.)])(?:\s+|$)"
 INVISIBLE_LINE = (
     r" {0,3}#{1,6}(\s.*)?"                 # a heading
-    r"| {0,3}([-*_])(\s*\2){2,}\s*"          # a horizontal rule
     r"| {0,3}\[[^\]]+\]:\s*\S.*"            # a link reference definition, which renders nothing
-    r"|\s*(</?[A-Za-z][\w-]*(\s[^>]*)?/?>\s*)+"  # only HTML tags (an autolink such as <https://...> is text)
 )
+HTML_TAG = r"</?[A-Za-z][\w-]*(\s[^>]*)?/?>"  # an autolink such as <https://...> is text, not a tag
+
+
+def visible_lines(body: str) -> list[str]:
+    """Lines as a reader sees them: quote and list markers removed, then code, comments, and tags.
+
+    Containers are unwrapped before fences and comments are removed, so a fence or comment
+    inside a quote or list item is hidden the same way as one at the top level.
+    """
+    unwrapped = []
+    for line in body.splitlines():
+        while re.match(CONTAINER_MARKER, line):
+            line = re.sub(CONTAINER_MARKER, "", line, count=1)
+        unwrapped.append(line)
+    return [
+        re.sub(HTML_TAG, "", line)
+        for line in rendered("\n".join(unwrapped)).splitlines()
+        if not re.fullmatch(INVISIBLE_LINE, line)
+    ]
 
 
 def has_content(body: str) -> bool:
-    """True when some line renders text a reader sees, beyond headings, rules, and markup."""
-    return any(line.strip() and not re.fullmatch(INVISIBLE_LINE, line) for line in body.splitlines())
+    """True when a reader sees at least one letter or digit outside headings and markup."""
+    return any(re.search(r"[^\W_]", line) for line in visible_lines(body))
 
 
 def owner_answer_is_visible(body: str) -> bool:
-    """The quote block after 'The owner answered:' (or said/wrote) renders some text."""
+    """The quote block after 'The owner answered:' (or said/wrote) shows the reader some words."""
     answer = re.search(r"^The owner (?:answered|said|wrote):\n+((?:>.*\n?)+)", body, re.MULTILINE)
-    if not answer:
-        return False
-    quoted = "\n".join(re.sub(r"^> ?", "", line) for line in answer.group(1).splitlines())
-    return has_content(quoted)
+    return bool(answer) and has_content(answer.group(1))
 
 
 def parse_record(text: str) -> Record | None:
