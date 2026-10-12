@@ -346,5 +346,20 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.replace_evidence("\nSee [register].\n\n[register]: ../LIONG-REG-001-decisions.md\n")
         self.assertEqual(self.errors(), [])
 
+    def test_markup_only_owner_answer_fails(self) -> None:
+        for answer in ("> <br>", "> [approval]: ../LIONG-REG-001-decisions.md"):
+            with self.subTest(answer=answer):
+                self.setUp()
+                self.edit(self.RECORD, "> Q12: yes", answer)
+                self.assertTrue(any("quotes the owner" in e for e in self.errors()))
+
+    def test_formatted_owner_answer_passes(self) -> None:
+        self.edit(self.RECORD, "> Q12: yes", "> **Q12: yes**")
+        self.assertEqual(self.errors(), [])
+
+    def test_autolink_is_content(self) -> None:
+        self.replace_evidence("\n<https://github.com/aadehamid/Engineering_Drawing_to_Graph/pull/6>\n")
+        self.assertEqual(self.errors(), [])
+
 if __name__ == "__main__":
     unittest.main()

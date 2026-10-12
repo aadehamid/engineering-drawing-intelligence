@@ -352,13 +352,22 @@ INVISIBLE_LINE = (
     r" {0,3}#{1,6}(\s.*)?"                 # a heading
     r"| {0,3}([-*_])(\s*\2){2,}\s*"          # a horizontal rule
     r"| {0,3}\[[^\]]+\]:\s*\S.*"            # a link reference definition, which renders nothing
-    r"|\s*(<[^>]+>\s*)+"                    # only HTML tags
+    r"|\s*(</?[A-Za-z][\w-]*(\s[^>]*)?/?>\s*)+"  # only HTML tags (an autolink such as <https://...> is text)
 )
 
 
 def has_content(body: str) -> bool:
     """True when some line renders text a reader sees, beyond headings, rules, and markup."""
     return any(line.strip() and not re.fullmatch(INVISIBLE_LINE, line) for line in body.splitlines())
+
+
+def owner_answer_is_visible(body: str) -> bool:
+    """The quote block after 'The owner answered:' (or said/wrote) renders some text."""
+    answer = re.search(r"^The owner (?:answered|said|wrote):\n+((?:>.*\n?)+)", body, re.MULTILINE)
+    if not answer:
+        return False
+    quoted = "\n".join(re.sub(r"^> ?", "", line) for line in answer.group(1).splitlines())
+    return has_content(quoted)
 
 
 def parse_record(text: str) -> Record | None:
@@ -415,9 +424,7 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
     status = record.statuses[0] if record.statuses else None
-    if status == "Decided" and not re.search(
-        r"^The owner (?:answered|said|wrote):\n+> \S", bodies["## Owner's words"], re.MULTILINE
-    ):
+    if status == "Decided" and not owner_answer_is_visible(bodies["## Owner's words"]):
         errors.append(f"{label}: a Decided record quotes the owner after 'The owner answered:' in a '>' block")
     if status == "Superseded":
         if len(record.superseded_by) != 1:
