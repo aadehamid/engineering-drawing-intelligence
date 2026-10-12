@@ -1,0 +1,72 @@
+# R0: the hand-authored canonical world that the Autodesk backend is generated from
+# (DEC-035). It is the "Exact baseline R0" of docs/LIONG-006-synthetic-data.md, with
+# the R1, R2 and Rbad revisions. It has no seed (DEC-016). Each node's sheet gives
+# its ON_SHEET edge; every other edge is listed.
+schema_version: 1
+world: R0
+tag_context: DEMO-LEKKI/UNIT-A
+
+nodes:
+  E1: {class: equipment, role: supply vessel, tag: TK-101, sheet: S1}
+  E2: {class: equipment, role: receiving vessel, tag: TK-102, sheet: S2}
+  V1: {class: valve, tag: XV-101, sheet: S1}
+  VB: {class: valve, role: bypass branch, tag: XV-102, sheet: S1}
+  I1: {class: instrument, role: pressure indication, tag: PI-102, sheet: S2, attributes: {unit: bar}}
+  J1: {class: connection_point, role: branch junction, sheet: S1}
+  J2: {class: connection_point, role: branch junction, sheet: S1}
+  X1: {class: connection_point, role: outgoing sheet reference, tag: TO-S2/A, sheet: S1}
+  X2: {class: connection_point, role: incoming sheet reference, tag: FROM-S1/A, sheet: S2}
+  P1: {class: pipe_segment, tag: L-101-1, sheet: S1, attributes: {nominal_diameter_mm: 50}}
+  P2: {class: pipe_segment, tag: L-101-2, sheet: S1, attributes: {nominal_diameter_mm: 50}}
+  P3: {class: pipe_segment, tag: L-101-3, sheet: S1, attributes: {nominal_diameter_mm: 50}}
+  P4: {class: pipe_segment, tag: L-101-4, sheet: S1, attributes: {nominal_diameter_mm: 50}}
+  P6: {class: pipe_segment, tag: L-101-B, sheet: S1, attributes: {nominal_diameter_mm: 50}}
+  P5: {class: pipe_segment, tag: L-101-5, sheet: S2, attributes: {nominal_diameter_mm: 50}}
+  S1: {class: drawing, name: DEMO-PID-001}
+  S2: {class: drawing, name: DEMO-PID-002}
+
+edges:
+  FLOW:
+    - [E1, P1]
+    - [P1, J1]
+    - [J1, P2]
+    - [P2, V1]
+    - [V1, P3]
+    - [P3, J2]
+    - [J2, P4]
+    - [P4, X1]
+    - [X1, X2]
+    - [X2, P5]
+    - [P5, E2]
+    - [J1, P6]
+    - [P6, VB]
+    - [VB, J2]
+  INSTRUMENT_PARENT:
+    - [I1, E2]
+  CROSS_SHEET_REFERENCE:
+    - [X1, X2]
+
+revisions:
+  R0:
+    base: null
+    moc: null
+  R1:
+    base: R0
+    moc: MOC-1
+    changes:
+      - set_tag: {node: E2, tag: TK-202}
+  R2:
+    base: R1
+    moc: MOC-2
+    changes:
+      - delete_edge: [FLOW, J1, P6]
+      - delete_edge: [FLOW, P6, VB]
+      - delete_edge: [FLOW, VB, J2]
+      - delete_node: VB
+      - delete_node: P6
+  Rbad:
+    base: R0
+    moc: MOC-bad
+    expected: rejected
+    changes:
+      - delete_node: VB

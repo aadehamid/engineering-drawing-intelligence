@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aadehamid/Engineering_Drawing_to_Graph/schemas/canonical-world.schema.json",
+  "title": "Canonical world",
+  "description": "A hand-authored canonical world: nodes, edges, and revisions as changes from a named base (DEC-018).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "world", "tag_context", "nodes", "edges", "revisions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "world": {"$ref": "#/$defs/name"},
+    "tag_context": {"type": "string", "minLength": 1},
+    "nodes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/alias"},
+      "additionalProperties": {"$ref": "#/$defs/node"}
+    },
+    "edges": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "FLOW": {"$ref": "#/$defs/edge_list"},
+        "INSTRUMENT_PARENT": {"$ref": "#/$defs/edge_list"},
+        "CROSS_SHEET_REFERENCE": {"$ref": "#/$defs/edge_list"}
+      }
+    },
+    "revisions": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/name"},
+      "additionalProperties": {"$ref": "#/$defs/revision"}
+    }
+  },
+  "$defs": {
+    "alias": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*$"},
+    "name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*$"},
+    "edge_list": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "array",
+        "prefixItems": [{"$ref": "#/$defs/alias"}, {"$ref": "#/$defs/alias"}],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "node": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["class", "name"],
+          "properties": {
+            "class": {"const": "drawing"},
+            "name": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["class", "sheet"],
+          "properties": {
+            "class": {"enum": ["equipment", "valve", "instrument", "connection_point", "pipe_segment"]},
+            "role": {"type": "string", "minLength": 1},
+            "tag": {"type": "string", "minLength": 1},
+            "sheet": {"$ref": "#/$defs/alias"},
+            "attributes": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {"type": ["string", "number"]}
+            }
+          }
+        }
+      ]
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "moc"],
+      "properties": {
+        "base": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/name"}]},
+        "moc": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]},
+        "expected": {"const": "rejected"},
+        "changes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/change"}}
+      }
+    },
+    "change": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["set_tag"],
+          "properties": {
+            "set_tag": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["node", "tag"],
+              "properties": {"node": {"$ref": "#/$defs/alias"}, "tag": {"type": "string", "minLength": 1}}
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["delete_node"],
+          "properties": {"delete_node": {"$ref": "#/$defs/alias"}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["delete_edge"],
+          "properties": {
+            "delete_edge": {
+              "type": "array",
+              "prefixItems": [
+                {"enum": ["FLOW", "INSTRUMENT_PARENT", "CROSS_SHEET_REFERENCE"]},
+                {"$ref": "#/$defs/alias"},
+                {"$ref": "#/$defs/alias"}
+              ],
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -15,3 +15,5 @@ python3 scripts/test_doc_tools.py
 python3 scripts/test_worktree_guard.py
 python3 scripts/liong_facts.py check
 python3 scripts/test_liong_facts.py
+uv run --locked python scripts/world.py check
+uv run --locked python scripts/test_world.py

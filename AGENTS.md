@@ -19,6 +19,7 @@ the reading order and which document is authoritative for what.
 1. Read this file, then check for open pull requests and watch each one to merge
    before starting unrelated work.
 2. In a fresh clone, wire the pre-push hook once: `git config core.hooksPath scripts/hooks`.
+   The checks need Python 3.12 and `uv`, which installs the locked dependencies in `uv.lock`.
 3. Run `scripts/check.sh` and confirm it passes on `main`.
 
 ## Checks
