@@ -1,5 +1,8 @@
 """Run a command and fail if it changes the working tree, the index, or git status.
 
+The guard watches tracked files and untracked files that are not gitignored.
+Ignored paths, such as __pycache__, and empty directories are outside it.
+
 Usage: python3 scripts/worktree_guard.py -- <command> [args...]
 """
 

@@ -97,6 +97,18 @@ class WorktreeGuardTest(unittest.TestCase):
     def test_tracked_file_deleted(self) -> None:
         self.assertTrue(self.changes(lambda: (self.root / "tracked.txt").unlink()))
 
+    def test_ignored_paths_are_outside_the_guard(self) -> None:
+        (self.root / ".gitignore").write_text("cache/\n")
+        self.git("add", ".gitignore")
+        self.git("commit", "-q", "-m", "ignore")
+
+        def write_ignored() -> None:
+            (self.root / "cache").mkdir()
+            (self.root / "cache" / "x.pyc").write_text("bytecode\n")
+            (self.root / "empty").mkdir()
+
+        self.assertEqual(self.changes(write_ignored), [])
+
     @unittest.skipIf(os.geteuid() == 0, "root can read a mode-000 file")
     def test_unreadable_file_aborts(self) -> None:
         path = self.root / "secret.txt"

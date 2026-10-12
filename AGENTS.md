@@ -24,8 +24,8 @@ the reading order and which document is authoritative for what.
 ## Checks
 
 `scripts/check.sh` runs every mechanical check. CI runs it on every pull request,
-and the pre-push hook runs it before every push. It fails if any check changes the
-working tree.
+and the pre-push hook runs it before every push. It fails if any check changes a
+tracked file, an untracked file that is not gitignored, the index, or git status.
 
 The review archive in `docs/releases/` contains the root baseline files, every
 `docs/*.md` file, and the three scripts. A change to any of them needs
