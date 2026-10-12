@@ -20,13 +20,11 @@ record does not decide it.
 
 ## Decision
 
-The project has two canonical worlds, and each is generated into one vendor's
-schema: one world into the SmartPlant-style schema, the other into the Plant
-3D-style schema. Which world is which is proposed in
+The project has two canonical worlds: one in the SmartPlant-style schema and the
+other in the Plant 3D-style schema. Which world is which is proposed in
 [DEC-035](DEC-035-r0-is-the-autodesk-world.md). What the second world contains is
-still open in the interview.
-[DEC-034](DEC-034-r0-smartplant-cross-check.md) adds R0 in SmartPlant form as test
-data only.
+still open in the interview. [DEC-034](DEC-034-r0-smartplant-cross-check.md) keeps
+R0 in SmartPlant form as a cross-check fixture.
 
 ## Alternatives considered
 

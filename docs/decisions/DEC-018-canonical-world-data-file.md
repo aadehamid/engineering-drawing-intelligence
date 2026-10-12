@@ -10,9 +10,16 @@ the manifest can hash, and the scorer can read without running generator code.
 
 ## Decision
 
-Each canonical world is a declarative data file, such as YAML, checked against a
-JSON Schema in `schemas/`. The file lists aliases, typed objects, attributes, edges,
-and revisions as changes from a named base.
+The owner accepted the recommendation given with Q4:
+
+> (a). A data file is easy to review in a PR and easy to hash for the manifest. It
+> also lets the scorer read the truth without running generator code.
+
+The option it chose reads:
+
+> (a) A declarative data file, such as YAML, checked against a JSON Schema in
+> schemas/. It would list aliases, typed objects, attributes, edges, and revisions
+> as changes from a named base.
 
 ## Alternatives considered
 
@@ -37,8 +44,8 @@ Asked as Q4 of the synthetic-data interview on 2026-10-11:
 
 The recommendation given with it:
 
-> (a). A data file is easy to review in a PR and easy to hash for the manifest.
-> It also lets the scorer read the truth without running generator code.
+> (a). A data file is easy to review in a PR and easy to hash for the manifest. It
+> also lets the scorer read the truth without running generator code.
 
 The owner answered:
 

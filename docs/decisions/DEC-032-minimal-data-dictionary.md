@@ -10,8 +10,10 @@ dictionary with item types and select lists, and Plant 3D has class definitions.
 
 ## Decision
 
-Each backend includes a small version of its product's metadata layer, covering
-only the classes R0 uses. The DEXPI mapping has to read that layer.
+The owner accepted the recommendation given with Q19:
+
+> Yes, a minimal version. It's part of what makes these schemas awkward to read,
+> and the DEXPI mapping should have to deal with it.
 
 ## Alternatives considered
 
@@ -23,6 +25,8 @@ only the classes R0 uses. The DEXPI mapping has to read that layer.
 
 Asked as Q19 of the synthetic-data interview on 2026-10-11:
 
+> Both tools describe their own schema in metadata tables. SmartPlant has a data
+> dictionary with item types and select lists, and Plant 3D has class definitions.
 > Should each backend include a small version of that metadata, covering only the
 > classes R0 uses?
 
@@ -35,8 +39,8 @@ The owner answered:
 
 > Q19: Agreed.
 
-The question predates [DEC-029](DEC-029-two-canonical-worlds.md). Which classes the
-backend of the second world covers stays open until that world is specified.
+The question predates DEC-029. Which classes the backend of the second world covers
+stays open until that world is specified.
 
 ## Evidence
 

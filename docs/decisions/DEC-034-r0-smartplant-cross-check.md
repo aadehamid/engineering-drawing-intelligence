@@ -11,10 +11,8 @@ fixture that keeps that comparison.
 
 ## Decision
 
-R0 is also emitted in SmartPlant form, purely as a mapping test fixture that
-checks whether the two mappings agree. Q22 and Q23 described the fixture in those
-words. What counts as agreement, and what the fixture adds to the expected results,
-is decided when the SmartPlant mapping is built.
+The owner kept the cross-check fixture that Q22 and Q23 described: R0 also
+emitted in SmartPlant form, only to check that the two mappings agree.
 
 ## Alternatives considered
 

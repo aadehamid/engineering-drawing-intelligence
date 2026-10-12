@@ -24,13 +24,11 @@ decision; the schema documentation decides which to borrow and cites each one.
 
 ## Decision
 
-The project has two backend schemas. One follows how SmartPlant P&ID stores its
-data, and the other follows AutoCAD Plant 3D, each as closely as public sources
-allow. Some synthetic data is generated in each schema
-([DEC-029](DEC-029-two-canonical-worlds.md)).
-
-Every table and column uses an original name. Each borrowed pattern cites the
-public source it comes from.
+The project has two backend schemas: one modelled on how SmartPlant stores its
+objects in the backend, and one on how Autodesk does (Q6). Each borrows its
+application's patterns very closely and uses the project's own names. Some
+synthetic data is generated using the SmartPlant schema and others using the
+Autodesk schema (Q9).
 
 ## Alternatives considered
 

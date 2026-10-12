@@ -10,11 +10,10 @@ R0 is written out edge by edge in LIONG-006, so a seed has nothing to choose the
 
 ## Decision
 
-R0 is a hand-authored canonical world file. The generator turns that file into
-source representations deterministically. Seeds apply only when the generator
-creates worlds procedurally, such as held-out worlds or the scaled worlds for
-SCN-016. Seed `2701006` moves from R0 to the first procedural world. The edit to
-LIONG-006 lands in a later pull request.
+The owner accepted the recommendation given with Q2:
+
+> Yes. R0 stays deterministic and hand-authored. Seeds belong to procedural worlds
+> only.
 
 ## Alternatives considered
 
@@ -26,13 +25,17 @@ LIONG-006 lands in a later pull request.
 Asked as Q2 of the synthetic-data interview on 2026-10-11:
 
 > R0 is written out exactly in LIONG-006, so there is nothing for a seed to
-> choose. Should seed 2701006 be removed from the R0 description and kept for the
-> first procedural world?
+> choose. I propose this split. R0 is a hand-authored canonical world file. The
+> generator is a deterministic step that turns that file into source
+> representations. Seeds apply only when the generator later creates new worlds
+> procedurally, such as held-out worlds or scaled worlds for SCN-016. Should seed
+> 2701006 be removed from the R0 description and kept for the first procedural
+> world?
 
 The recommendation given with it:
 
-> Yes. R0 stays deterministic and hand-authored. Seeds belong to procedural
-> worlds only.
+> Yes. R0 stays deterministic and hand-authored. Seeds belong to procedural worlds
+> only.
 
 The owner answered:
 
@@ -42,3 +45,5 @@ The owner answered:
 
 - `docs/LIONG-006-synthetic-data.md:226` proposes the seed for the documented
   development world.
+- Not part of the decision: LIONG-006:226 still proposes the seed for R0. The author
+  plans to edit it in a later pull request.

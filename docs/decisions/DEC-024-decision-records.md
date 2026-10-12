@@ -10,9 +10,10 @@ words. The way-of-working standard asks for one record per decision.
 
 ## Decision
 
-`docs/decisions/` holds one record per decision with the owner's words quoted, and
-an index that the check script verifies. The register stays as the summary, and
-each of its rows links to the record behind it.
+The owner accepted the recommendation given with Q11:
+
+> Yes. Keep the register as the summary and put the evidence in per-decision
+> records. Today's answers (Q1–Q9) would become the first records.
 
 ## Alternatives considered
 
@@ -23,9 +24,12 @@ each of its rows links to the record behind it.
 
 Asked as Q11 of the synthetic-data interview on 2026-10-11:
 
+> Decisions currently live as rows in the LIONG-REG-001 table. They have no quoted
+> owner words and no one-record-per-decision files, which way-of-working asks for.
 > Should I add a docs/decisions/ folder with an index, one record per decision
 > quoting your words, and have the check script verify the records against the
-> index?
+> index? The register table would stay as the summary, with each row linking to
+> its record.
 
 The recommendation given with it:
 

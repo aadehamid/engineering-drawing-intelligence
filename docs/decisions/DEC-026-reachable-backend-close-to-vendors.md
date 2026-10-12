@@ -14,12 +14,11 @@ Oracle or SQL Server and AutoCAD Plant 3D on SQLite or SQL Server.
 
 The backend database meets two requirements:
 
-- It is hosted, so the owner can reach the data from any of the owner's
-  machines. No
-  particular host is required.
-- It runs on the engine closest to what SmartPlant P&ID and AutoCAD Plant 3D use,
-  unless that engine proves really difficult for this project. Either way, the two
-  schemas stay very close to each vendor's.
+- It is hosted, so the owner can reach the data from any of the owner's machines.
+  The host need not be Neon.
+- It runs on the engine closest to what SmartPlant and Autodesk use, unless that
+  engine proves really difficult for this project. Either way, the two schemas stay
+  very close to each vendor's.
 
 [DEC-027](DEC-027-sql-server-on-azure.md) applies both requirements.
 

@@ -10,9 +10,8 @@ and users, so that no key from one could leak into the other.
 
 ## Decision
 
-The SmartPlant-style and Plant 3D-style schemas are two schemas inside one SQL
-Server database ([DEC-027](DEC-027-sql-server-on-azure.md)). Each schema keeps its
-own source-local keys.
+The SmartPlant-style and Plant 3D-style schemas are two schemas inside one
+database. [DEC-027](DEC-027-sql-server-on-azure.md) sets the engine.
 
 ## Alternatives considered
 

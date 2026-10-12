@@ -12,9 +12,11 @@ later replaced that engine; this decision holds for any engine.
 
 ## Decision
 
-The generator emits the backend as files: a SQL schema, data scripts, and a
-manifest. A separate loader applies them to the backend database. The generator
-never writes into a live database.
+The owner accepted the recommendation given with Q5:
+
+> Yes, files. LIONG-006 requires a SHA-256 of every emitted file, and file output
+> keeps the generator and the source database as separate identities
+> (LIONG-009:57).
 
 ## Alternatives considered
 
@@ -31,13 +33,15 @@ Asked as Q5 of the synthetic-data interview on 2026-10-11:
 
 The recommendation given with it:
 
-> Yes, files. LIONG-006 requires a SHA-256 of every emitted file, and file
-> output keeps the generator and the source database as separate identities
+> Yes, files. LIONG-006 requires a SHA-256 of every emitted file, and file output
+> keeps the generator and the source database as separate identities
 > (LIONG-009:57).
 
 The owner answered:
 
 > Q5. Agreed
+
+DEC-027 later replaced PostgreSQL as the engine.
 
 ## Evidence
 

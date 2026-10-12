@@ -16,11 +16,10 @@ held-out worlds in M6; the stage table puts SCN-008 in M2 and SCN-015 in M5.
 
 ## Decision
 
-The first generation work builds three things: the R0 engineering backend, the R0
-answer key with its manifest, and one variant in which a connection points at a
-missing object. Each other source representation is built at the milestone that
-uses it. [DEC-030](DEC-030-plant-3d-backend-first.md) sets which vendor-style
-backend comes first.
+The owner accepted the recommendation given with Q1:
+
+> Yes. Build only what MILESTONE-001 needs, and add the other representations at
+> the milestones that use them.
 
 ## Alternatives considered
 

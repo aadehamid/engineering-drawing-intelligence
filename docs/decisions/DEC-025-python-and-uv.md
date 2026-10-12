@@ -11,7 +11,9 @@ tool.
 
 ## Decision
 
-The generator runs on Python 3.12, and `uv` locks its dependencies.
+The owner accepted the recommendation given with Q13:
+
+> Yes.
 
 ## Alternatives considered
 
@@ -22,7 +24,8 @@ The generator runs on Python 3.12, and `uv` locks its dependencies.
 
 Asked as Q13 of the synthetic-data interview on 2026-10-11:
 
-> Should the generator use Python 3.12 with dependencies locked by uv?
+> LIONG-007 proposes "a small Python application". Should the generator use Python
+> 3.12 with dependencies locked by uv?
 
 The recommendation given with it:
 

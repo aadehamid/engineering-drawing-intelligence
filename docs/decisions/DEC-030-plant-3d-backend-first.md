@@ -12,8 +12,10 @@ each inline valve, which is harder to map.
 
 ## Decision
 
-MILESTONE-001 builds the Plant 3D-style backend first to prove the route from
-backend to graph. The SmartPlant-style backend follows as MILESTONE-001b.
+The owner accepted the recommendation given with Q17:
+
+> Yes. Do Plant 3D-style first to prove the route, then add SmartPlant-style as
+> MILESTONE-001b.
 
 ## Alternatives considered
 
@@ -26,8 +28,11 @@ backend to graph. The SmartPlant-style backend follows as MILESTONE-001b.
 
 Asked as Q17 of the synthetic-data interview on 2026-10-11:
 
-> Should MILESTONE-001 build the Plant 3D-style backend first, with SmartPlant-style
-> as the next step?
+> Building both at once doubles the first slice. Plant 3D stores connections as
+> explicit rows, such as line-to-start-asset and line-to-end-asset. SmartPlant
+> stores them as graphic connectors that split around each inline valve, which is
+> harder to map. Should MILESTONE-001 build the Plant 3D-style backend first, with
+> SmartPlant-style as the next step?
 
 The recommendation given with it:
 
@@ -43,3 +48,5 @@ The owner answered:
 - The vendor research run during the interview, on how each product stores
   connections.
 - MILESTONE-001b is a new milestone ID. LIONG-011 does not define it yet.
+- Not part of the decision: MILESTONE-001b is a new milestone ID. LIONG-011 does not
+  define it yet.

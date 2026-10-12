@@ -11,8 +11,10 @@ decision records. The repository had none of them.
 
 ## Decision
 
-The five guardrails land first, one pull request each and in that order, before
-the glossary pull request and the generator work.
+The owner accepted the recommendation given with Q10:
+
+> Yes, in that order. Each PR is small, and the first two are mostly wiring around
+> the doc checks that already exist.
 
 ## Alternatives considered
 
@@ -28,12 +30,15 @@ Asked as Q10 of the synthetic-data interview on 2026-10-11:
 
 The recommendation given with it:
 
-> Yes, in that order. Each PR is small, and the first two are mostly wiring
-> around the doc checks that already exist.
+> Yes, in that order. Each PR is small, and the first two are mostly wiring around
+> the doc checks that already exist.
 
 The owner answered:
 
 > Q10: Agreed
+
+The five steps were: AGENTS.md; scripts/check.sh with CI and a pre-push hook; a
+shared figures tool; a review standards file; and decision records.
 
 ## Evidence
 

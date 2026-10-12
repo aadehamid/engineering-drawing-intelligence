@@ -11,10 +11,15 @@ makes the backends follow two named vendors closely.
 
 ## Decision
 
-The sentence becomes: "Two synthetic backends follow the documented storage
-patterns of SmartPlant P&ID and AutoCAD Plant 3D, using original names. Neither
-copies a vendor schema." LIONG-003 and LIONG-006 change to match. The edit changes
-an approved baseline document, so it lands in its own pull request.
+The owner accepted the recommendation given with Q20:
+
+> Yes. This changes an approved baseline document, so it goes in its own PR with a
+> decision record quoting your Q9 answer.
+
+The sentence it proposed reads:
+
+> Two synthetic backends follow the documented storage patterns of SmartPlant P&ID
+> and AutoCAD Plant 3D, using original names. Neither copies a vendor schema.
 
 ## Alternatives considered
 
@@ -22,18 +27,25 @@ an approved baseline document, so it lands in its own pull request.
 
 ## Owner's words
 
-Asked as Q20 of the synthetic-data interview on 2026-10-11: should the
-ARCHITECTURE.md sentence change to the wording quoted in the Decision section,
-with LIONG-003 and LIONG-006 updated to match?
+Asked as Q20 of the synthetic-data interview on 2026-10-11:
+
+> ARCHITECTURE.md says the backend "is a synthetic test source, not a replica of
+> an undisclosed engineering platform." Should that sentence change to say: "Two
+> synthetic backends follow the documented storage patterns of SmartPlant PID and
+> AutoCAD Plant 3D, using original names. Neither copies a vendor schema."?
+> LIONG-003 and LIONG-006 would be updated to match.
 
 The recommendation given with it:
 
-> Yes. This changes an approved baseline document, so it goes in its own PR with
-> a decision record quoting your Q9 answer.
+> Yes. This changes an approved baseline document, so it goes in its own PR with a
+> decision record quoting your Q9 answer.
 
 The owner answered:
 
 > Q20. Agreed.
+
+The question named SmartPlant P and ID with an ampersand, which this section cannot
+hold, so the quote above leaves it out.
 
 ## Evidence
 
