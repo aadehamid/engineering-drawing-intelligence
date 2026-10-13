@@ -94,10 +94,11 @@ class DocumentationToolsTests(unittest.TestCase):
         for link in ("[missing][ref]\n\n[ref]: ../absent-1.md\n", "[bad](\n../absent-2.md\n)\n",
                      "[angle](<../absent-3.md>)\n", "[q][r4]\n\n> [r4]: ../absent-4.md\n",
                      "[l][r5]\n\n- [r5]: ../absent-5.md\n", "[e][r6\\]]\n\n[r6\\]]: ../absent-6.md\n",
-                     "[n][r7]\n\n> [r7]:\n> ../absent-7.md\n", "> [m](\n> ../absent-8.md)\n"):
+                     "[n][r7]\n\n> [r7]:\n> ../absent-7.md\n", "> [m](\n> ../absent-8.md)\n",
+                     "[outer](https://example.com/[inner](../absent-9.md)\n"):
             path.write_text(path.read_text() + "\n" + link, encoding="utf-8")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for name in [f"absent-{n}.md" for n in range(1, 9)]:
+        for name in [f"absent-{n}.md" for n in range(1, 10)]:
             self.assertTrue(any(f"../{name}, which is not in the archive" in e for e in errors), name)
 
     def test_destination_is_read_as_written(self):

@@ -81,7 +81,8 @@ def link_targets(text: str) -> list[str]:
     Raw HTML links are not read; archived Markdown holds no raw HTML (see raw_html).
     """
     text = as_commonmark(text)
-    found = re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
+    # Overlapping matches: in "[a](x/[b](y.md)" Markdown links "b" to y.md, inside a's target
+    found = re.findall(f"(?={INLINE_LINK})", text) + re.findall(REFERENCE, text, re.MULTILINE)
     # Only a destination written as <...> loses its brackets; "a.md>" names a file "a.md>".
     return [target[1:-1] if target.startswith("<") else target for target in found]
 
