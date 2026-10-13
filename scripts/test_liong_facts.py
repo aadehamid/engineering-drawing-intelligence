@@ -538,8 +538,9 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                     self.assertTrue(any("invisible format character" in e for e in self.errors()))
 
     def test_inserted_blank_character_cannot_hide_the_answer_phrase(self) -> None:
-        for char in ("\ufe0e", "\u034f", "\u3164", "\u2800"):
-            for spot in ("The{c} owner answered:", "The owner {c}answered:", "The owner answered{c}:"):
+        for char in ("\ufe0e", "\u034f", "\u3164", "\u2800", "\x0b", "\x0c", "\x1c", "\x85", "\u2028"):
+            for spot in ("The{c} owner answered:", "The owner {c}answered:", "The owner answered{c}:",
+                         "T{c}he owner answered:", "The ow{c}ner answered:", "The owner answ{c}ered:"):
                 with self.subTest(char=hex(ord(char)), spot=spot):
                     self.setUp()
                     self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
