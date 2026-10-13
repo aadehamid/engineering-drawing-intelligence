@@ -10,12 +10,14 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, link_targets, names_a_directory, odd_target, raw_html, spaced_angle_targets
+from check_docs import BASELINE, link_targets, names_a_directory, odd_target, raw_html, spaced_targets
 
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = Path("docs/releases/LIONG-review-package-v0.1.zip")
 UTILITIES = ("check_docs.py", "bundle_docs.py", "test_doc_tools.py")
+# The checks import the locked CommonMark parser, so the archive carries the lock too.
+PROJECT_FILES = ("pyproject.toml", "uv.lock")
 
 
 def payload(root: Path) -> dict[str, bytes]:
@@ -23,6 +25,7 @@ def payload(root: Path) -> dict[str, bytes]:
     files += sorted((root / "docs").glob("*.md"))
     files += sorted((root / "docs" / "decisions").glob("*.md"))
     files += [root / "scripts" / name for name in UTILITIES]
+    files += [root / name for name in PROJECT_FILES]
     contents = {
         path.relative_to(root).as_posix(): path.read_bytes()
         for path in sorted(files)
@@ -54,7 +57,7 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
             continue
         text = data.decode("utf-8")
         errors += [f"{name}: raw HTML is not allowed outside code: {tag[:60]}" for tag in raw_html(text)]
-        errors += [f"{name}: link target holds whitespace: {target}" for target in spaced_angle_targets(text)]
+        errors += [f"{name}: link target holds whitespace: {target}" for target in spaced_targets(text)]
         for target in link_targets(text):
             parsed = urlsplit(target)
             path = unquote(parsed.path)

@@ -29,7 +29,8 @@ and the pre-push hook runs it before every push. It fails if any check changes a
 tracked file, an untracked file that is not gitignored, the index, or git status.
 
 The review archive in `docs/releases/` contains the root baseline files, every
-`docs/*.md` and `docs/decisions/*.md` file, and the three scripts. A change to any
+`docs/*.md` and `docs/decisions/*.md` file, the three scripts, `pyproject.toml` and
+`uv.lock`. A change to any
 of them needs `uv run python scripts/bundle_docs.py` to rebuild the archive in the same
 commit. The checks read Markdown with a CommonMark parser. Archived Markdown holds no
 raw HTML outside code. Every relative link in it must point to another archived file

@@ -48,7 +48,8 @@ SAM 3 also requires custom-license review. P&ID authoring remains out of scope.
 
 ## Check and rebuild the documentation package
 
-Requires Python 3.10 or later; no third-party Python packages are needed.
+Requires Python 3.12 and `uv`, which installs the locked dependencies in `uv.lock`,
+including the CommonMark parser the checks use.
 
 ```sh
 uv run python scripts/bundle_docs.py

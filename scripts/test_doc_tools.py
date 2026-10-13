@@ -19,7 +19,7 @@ class DocumentationToolsTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        for name in check_docs.BASELINE:
+        for name in (*check_docs.BASELINE, *bundle_docs.PROJECT_FILES):
             shutil.copyfile(check_docs.ROOT / name, self.root / name)
         shutil.copytree(check_docs.ROOT / "docs", self.root / "docs")
         shutil.copytree(check_docs.ROOT / "scripts", self.root / "scripts",
@@ -119,6 +119,18 @@ class DocumentationToolsTests(unittest.TestCase):
         self.assertTrue(any("../absent-11.md, which is not in the archive" in e
                             for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
+    def test_image_outside_the_archive_is_reported(self):
+        path = self.root / "docs/LIONG-REG-001-decisions.md"
+        path.write_text(path.read_text() + "\n![World](../scripts/world.py)\n\n![Ref][img]\n\n[img]: ../absent-image.png\n",
+                        encoding="utf-8")
+        errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
+        for target in ("../scripts/world.py", "../absent-image.png"):
+            self.assertTrue(any(f"links to {target}, which is not in the archive" in e for e in errors), target)
+
+    def test_archive_carries_the_lock_the_checks_need(self):
+        contents = bundle_docs.payload(self.root)
+        self.assertTrue({"pyproject.toml", "uv.lock"} <= set(contents))
+
     def test_link_naming_a_directory_is_refused(self):
         path = self.root / "docs/LIONG-REG-001-decisions.md"
         path.write_text(path.read_text() + "\n[a](../README.md/)\n\n[b](../README.md/.)\n", encoding="utf-8")
@@ -136,9 +148,10 @@ class DocumentationToolsTests(unittest.TestCase):
     def test_link_target_with_a_space_or_control_character_is_refused(self):
         # Parsers disagree on a space inside <...>, so any whitespace there is refused
         path = self.root / "README.md"
-        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n\n[c]: <./READ ME.md>\n\nSee [c].\n", encoding="utf-8")
+        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n\n[c]: <./READ ME.md>\n\nSee [c].\n"
+                        "\n[d](\u2003README.md)\n\n[e]: \u00a0README.md\n\nSee [e].\n", encoding="utf-8")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for target in ("< ./README.md>", "<./READ\tME.md>", "<./READ ME.md>"):
+        for target in ("< ./README.md>", "<./READ\tME.md>", "<./READ ME.md>", "\u2003README.md", "\u00a0README.md"):
             self.assertTrue(any(f"link target holds whitespace: {target}" in e for e in errors), target)
 
     def test_raw_html_in_archived_markdown_is_refused(self):

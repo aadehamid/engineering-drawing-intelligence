@@ -39,13 +39,23 @@ def odd_target(target: str) -> bool:
     return any(ch.isspace() or ch < " " or ch == "\x7f" for ch in target)
 
 
-def spaced_angle_targets(text: str) -> list[str]:
-    """Every '<...>' link target that holds whitespace.
+UNICODE_SPACE = r"[^\S\x00-\x7f]"  # whitespace outside ASCII, such as U+00A0 or U+2003
 
-    Parsers disagree on these: markdown-it trims a leading space that GitHub keeps.
-    Refusing them keeps the link check from depending on which parser is right.
+
+def spaced_targets(text: str) -> list[str]:
+    """Every link target, as written, that parsers may read differently because of whitespace.
+
+    A '<...>' target holding any whitespace, and a bare target holding a Unicode space:
+    markdown-it trims a leading U+2003 that GitHub keeps, so the check and a reader's
+    click would reach different files. Refusing them keeps the check independent of
+    which parser is right.
     """
-    return re.findall(r"\]\(\s*(<[^<>\n]*\s[^<>\n]*>)", text) + re.findall(r"\]:\s*(<[^<>\n]*\s[^<>\n]*>)", text)
+    found = re.findall(r"\]\(\s*(<[^<>\n]*\s[^<>\n]*>)", text)
+    found += re.findall(r"\]:\s*(<[^<>\n]*\s[^<>\n]*>)", text)
+    found += [m for m in re.findall(r"\]\(([^()\n]*)\)", text) if re.search(UNICODE_SPACE, m)]
+    found += [m for m in re.findall(r"^[ \t>*+\-\d.)]*\[[^\]\n]+\]:[ \t]*([^\n]*)$", text, re.MULTILINE)
+              if re.search(UNICODE_SPACE, m)]
+    return found
 
 
 def names_a_directory(path: str) -> bool:
@@ -113,7 +123,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"{label}: missing explicit draft status")
 
     for path, text in texts.items():
-        errors += [f"{path.name}: link target holds whitespace: {target}" for target in spaced_angle_targets(text)]
+        errors += [f"{path.name}: link target holds whitespace: {target}" for target in spaced_targets(text)]
         for target in link_targets(text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc:
