@@ -6,7 +6,7 @@ Date: 2026-10-13
 ## Context
 
 No Python library reads or writes DEXPI 2.0. pyDEXPI v1.2.0 supports DEXPI 1.3
-only, under AGPL-3.0, and its maintainer gives no date for 2.0. The other Python
+only, under AGPL-3.0-or-later, and its maintainer gives no date for 2.0. The other Python
 tools found are also 1.x.
 
 ## Decision

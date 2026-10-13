@@ -70,8 +70,8 @@ model files from their published host.
    file, stop and escalate. A file you wrote yourself is not the standard.
 
 Worked example: the standard's example files import their model files from a host
-that first failed certificate checks and later did not respond. The team keeps
-pinned copies and validates offline.
+that first failed certificate checks and later did not respond. The team decided
+to keep pinned copies and validate offline.
 
 ## 3. Validate in named stages
 
