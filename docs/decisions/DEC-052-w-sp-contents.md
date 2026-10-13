@@ -28,8 +28,8 @@ The agent decided under the owner's delegation:
   HV-302, and run B carries HV-303.
 - **One cross-sheet pair.** TO-S2/B on the first sheet and FROM-S1/B on the second.
 - **One instrument with a parent.** LT-302, level transmission, on vessel TK-302.
-- **Size and scope.** 15 nodes and 26 edges in one baseline revision, W0. Flow runs
-  as one path from TK-301 to TK-302.
+- **Size and scope.** About R0's size, in one baseline revision, W0. Flow runs as one
+  path from TK-301 to TK-302.
 
 Line number and run are node attributes, so the world schema needs no change.
 
@@ -53,5 +53,6 @@ The owner said:
 
 ## Evidence
 
-- `scripts/test_world.py`, class `WspHasWhatSmartPlantStoresDifferently`, checks
-  each feature above.
+- `scripts/test_world.py`, class `WspHasWhatSmartPlantStoresDifferently`, checks the
+  facility and drawing names, the line number and runs, each run's sheet and valves,
+  the cross-sheet pair, the instrument's parent, the size and the single flow path.

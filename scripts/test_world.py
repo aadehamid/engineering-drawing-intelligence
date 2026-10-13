@@ -198,12 +198,42 @@ class WspHasWhatSmartPlantStoresDifferently(unittest.TestCase):
         self.assertEqual((len(self.base.nodes), len(self.base.all_edges())), (15, 26))
 
     def test_flow_is_one_path_from_supply_to_receiving_vessel(self):
-        path, node = ["E1"], "E1"
         nexts = dict(self.flows())
+        self.assertEqual(len(nexts), len(self.flows()), "a node has two outgoing flows")
+        path, node = ["E1"], "E1"
         while node in nexts:
             node = nexts[node]
+            self.assertNotIn(node, path, f"flow returns to {node}")  # a cycle fails instead of hanging
             path.append(node)
         self.assertEqual((path[-1], len(path) - 1), ("E2", len(self.flows())))
+
+    def test_facility_and_drawings(self):
+        self.assertEqual(self.w["tag_context"], "DEMO-LEKKI/UNIT-B")
+        drawings = {a: n["name"] for a, n in self.base.nodes.items() if n["class"] == "drawing"}
+        self.assertEqual(drawings, {"S1": "DEMO-PID-101", "S2": "DEMO-PID-102"})
+
+    def test_each_run_sits_on_one_sheet_with_its_valves(self):
+        # Run A on the first sheet with two valves, run B on the second with one (DEC-052)
+        sheets, valves = {}, {}
+        for alias, node in self.base.nodes.items():
+            if node["class"] == "pipe_segment":
+                sheets.setdefault(node["attributes"]["run"], set()).add(node["sheet"])
+        for alias, node in self.base.nodes.items():
+            if node["class"] == "valve":
+                ends = {s for s, t in self.flows() if t == alias} | {t for s, t in self.flows() if s == alias}
+                run = {self.base.nodes[e]["attributes"]["run"] for e in ends}.pop()
+                valves[run] = valves.get(run, 0) + 1
+                self.assertEqual({node["sheet"]}, sheets[run], f"{alias} is not on its run's sheet")
+        self.assertEqual((sheets, valves), ({"A": {"S1"}, "B": {"S2"}}, {"A": 2, "B": 1}))
+
+    def test_cross_sheet_pair_joins_two_sheets_and_the_parent_is_equipment(self):
+        n = self.base.nodes
+        (source, target), = [(e.source, e.target) for e in self.base.edges if e.kind == "CROSS_SHEET_REFERENCE"]
+        self.assertEqual(({n[source]["class"], n[target]["class"]}, n[source]["sheet"] != n[target]["sheet"]),
+                         ({"connection_point"}, True))
+        self.assertIn((source, target), self.flows())
+        (child, parent), = [(e.source, e.target) for e in self.base.edges if e.kind == "INSTRUMENT_PARENT"]
+        self.assertEqual((n[child]["class"], n[parent]["class"]), ("instrument", "equipment"))
 
 
 class FidelityFailsOnWrongFacts(unittest.TestCase):
