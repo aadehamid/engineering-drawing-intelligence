@@ -207,6 +207,17 @@ class WspHasWhatSmartPlantStoresDifferently(unittest.TestCase):
             path.append(node)
         self.assertEqual((path[-1], len(path) - 1), ("E2", len(self.flows())))
 
+    def test_tags_and_sheets_are_dec052s(self):
+        # Each named object DEC-052 lists, with its tag and sheet
+        expected = {
+            "E1": ("TK-301", "S1"), "E2": ("TK-302", "S2"), "V1": ("HV-301", "S1"), "V2": ("HV-302", "S1"),
+            "V3": ("HV-303", "S2"), "I1": ("LT-302", "S2"), "X1": ("TO-S2/B", "S1"), "X2": ("FROM-S1/B", "S2"),
+        }
+        found = {a: (self.base.nodes[a].get("tag"), self.base.nodes[a]["sheet"]) for a in expected}
+        self.assertEqual(found, expected)
+        pairs = {(e.kind, e.source, e.target) for e in self.base.edges if e.kind != "FLOW"}
+        self.assertEqual(pairs, {("CROSS_SHEET_REFERENCE", "X1", "X2"), ("INSTRUMENT_PARENT", "I1", "E2")})
+
     def test_facility_and_drawings(self):
         self.assertEqual(self.w["tag_context"], "DEMO-LEKKI/UNIT-B")
         drawings = {a: n["name"] for a, n in self.base.nodes.items() if n["class"] == "drawing"}
