@@ -231,11 +231,14 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.QUOTED, "## Alternatives considered", "``` `\n" + self.INVENTED + "\n## Alternatives considered")
         self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
 
-    def test_quote_after_a_list_item_fence_is_compared(self) -> None:
-        # The fence ends with its list item, so the quote below it is shown
-        self.edit(self.QUOTED, "## Alternatives considered",
-                  "- Example:\n  ```text\n" + self.INVENTED + "\n- Another example:\n  ```\n\n## Alternatives considered")
-        self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+    def test_fence_outside_the_first_column_fails(self) -> None:
+        # An indented or nested fence ends by rules the check does not model
+        for fence in ("- Example:\n  ```text\n", "  ```text\n", "> ```text\n"):
+            with self.subTest(fence=fence):
+                self.setUp()
+                self.edit(self.QUOTED, "## Alternatives considered",
+                          fence + self.INVENTED + "```\n\n## Alternatives considered")
+                self.assertTrue(any("a code fence must start in the first column" in e for e in self.errors()))
 
     def assertInventedQuoteFails(self, source: str) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")

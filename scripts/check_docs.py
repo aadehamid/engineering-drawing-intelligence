@@ -31,13 +31,28 @@ REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|
 FENCE_OPEN = r"^ {0,3}(`{3,}(?=[^`\n]*$)|~{3,})"
 
 
+def as_commonmark(text: str) -> str:
+    """The text CommonMark parses: CRLF and CR end lines, and a NUL becomes U+FFFD."""
+    return text.replace("\r\n", "\n").replace("\r", "\n").replace("\x00", "\ufffd")
+
+
+def nested_fences(text: str) -> list[str]:
+    """Every code fence that does not start in the first column.
+
+    A fence inside a list or quote, or indented, ends by rules this check does not
+    model, so such a fence could hide text or show code as text. Only a fence at the
+    first column is allowed.
+    """
+    return re.findall(r"^[ \t>*+\-\d.)]*[ \t>*+\-.)](?:`{3,}|~{3,}).*", as_commonmark(text), re.MULTILINE)
+
+
 def raw_html(text: str) -> list[str]:
     """Every HTML tag or comment, code spans and fences included. An autolink <https://...> is text.
 
     Code is not exempt: telling CommonMark code from text needs its full escape and
     delimiter rules, and a mistake there would hide a live tag.
     """
-    return re.findall(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?][^>\n]*>?", text)
+    return re.findall(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?][^>\n]*>?", as_commonmark(text))
 
 
 def link_targets(text: str) -> list[str]:
@@ -45,6 +60,7 @@ def link_targets(text: str) -> list[str]:
 
     Raw HTML links are not read; archived Markdown holds no raw HTML (see raw_html).
     """
+    text = as_commonmark(text)
     found = re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
     # Only a destination written as <...> loses its brackets; "a.md>" names a file "a.md>".
     return [target[1:-1] if target.startswith("<") else target for target in found]

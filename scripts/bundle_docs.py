@@ -10,7 +10,7 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, link_targets, raw_html
+from check_docs import BASELINE, link_targets, nested_fences, raw_html
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +53,8 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
             continue
         text = data.decode("utf-8")
         errors += [f"{name}: raw HTML is not allowed, even in code: {tag[:60]}" for tag in raw_html(text)]
+        errors += [f"{name}: a code fence must start in the first column, outside lists and quotes: {line.strip()[:60]}"
+                   for line in nested_fences(text)]
         for target in link_targets(text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc or not parsed.path:

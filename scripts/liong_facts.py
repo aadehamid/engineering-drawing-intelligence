@@ -20,7 +20,7 @@ import sys
 from typing import NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_docs import FENCE_OPEN, raw_html  # noqa: E402
+from check_docs import FENCE_OPEN, nested_fences, raw_html  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
@@ -345,19 +345,14 @@ def rendered(text: str) -> str:
     """
     kept: list[str] = []
     fence = None
-    fence_indent = 0
     hidden_close = None  # the closing marker of the comment or HTML block we are inside
     for line in text.splitlines():
         if fence is not None:
-            # A fence indented under a list item ends with the item, at a line indented less.
-            if line.strip() and len(line) - len(line.lstrip(" ")) < fence_indent:
+            marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
+            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
                 fence = None
-            else:
-                marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line.strip(" ") if fence_indent else line)
-                if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
-                    fence = None
-                kept.append("")
-                continue
+            kept.append("")
+            continue
         visible = ""
         rest = line
         while rest:
@@ -381,7 +376,6 @@ def rendered(text: str) -> str:
         opening = re.match(FENCE_OPEN, visible)
         if opening:
             fence = opening.group(1)
-            fence_indent = len(visible) - len(visible.lstrip(" "))
             kept.append("")
             continue
         kept.append(visible)
@@ -590,6 +584,8 @@ def check_decisions(root: Path) -> list[str]:
         raw = path.read_text(encoding="utf-8")
         if raw_html(raw):
             errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments, even in code")
+        if nested_fences(raw):
+            errors.append(f"{DECISIONS}/{name}: a code fence must start in the first column, outside lists and quotes")
         record = parse_record(raw)
         if not record or not name.startswith(record.record_id + "-"):
             errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")

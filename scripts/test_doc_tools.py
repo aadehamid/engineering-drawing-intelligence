@@ -103,10 +103,17 @@ class DocumentationToolsTests(unittest.TestCase):
     def test_destination_is_read_as_written(self):
         # "README.md>" and "README.md<no-break space>x.md" name files that are not README.md
         path = self.root / "docs/LIONG-REG-001-decisions.md"
-        path.write_text(path.read_text() + "\n[a](../README.md>)\n\n[b](../README.md\u00a0x.md)\n", encoding="utf-8")
+        path.write_bytes(path.read_bytes() + "\n[a](../README.md>)\n\n[b](../README.md\u00a0x.md)\n".encode()
+                         + b"\r\n[c](\r\n../scripts/world.py)\r\n\n[d](../README.md\x00y.md)\n")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for target in ("../README.md>", "../README.md\u00a0x.md"):
+        for target in ("../README.md>", "../README.md\u00a0x.md", "../scripts/world.py", "../README.md\ufffdy.md"):
             self.assertTrue(any(f"{target}, which is not in the archive" in e for e in errors), target)
+
+    def test_fence_outside_the_first_column_is_refused(self):
+        path = self.root / "docs/LIONG-000-index.md"
+        path.write_text(path.read_text() + "\n  ```text\n> code\n  ```\n", encoding="utf-8")
+        self.assertTrue(any("a code fence must start in the first column" in e
+                            for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"

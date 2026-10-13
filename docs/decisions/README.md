@@ -54,6 +54,8 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
   line.
 - **No raw HTML or HTML comments** anywhere, code spans and fences included. The
   review archive holds these records, and its rule is the same.
+- **Code fences start in the first column**, never inside a list or quote and never
+  indented. The review archive has the same rule.
 - **Sections**, in order and none empty: `## Context`, `## Decision`,
   `## Alternatives considered`, `## Owner's words`, `## Evidence`.
 - **Owner's words** in a `Decided` record: a line `The owner answered:` (or
