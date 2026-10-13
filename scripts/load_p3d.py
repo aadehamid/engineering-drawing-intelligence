@@ -25,12 +25,27 @@ import pytds
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = (ROOT / "schemas" / "plant3d-style.sql", ROOT / "schemas" / "outbox.sql")
-# The tables a snapshot fills; the class definitions are part of the schema.
-DATA_TABLES = (
-    "PlantObject", "Equipment", "Valve", "Instrument", "LineSegment", "Junction", "SheetConnector",
-    "SegmentStart", "SegmentEnd", "ConnectorPair", "Ownership", "SheetConnectorLink",
-    "Drawing", "DrawingAppearance", "WorkHistory",
-)
+# The tables a snapshot fills, with their columns as schemas/plant3d-style.sql creates them.
+# A row's keys must be exactly these: column names are never taken from a snapshot file,
+# so a crafted file cannot change the SQL the loader runs.
+COLUMNS = {
+    "PlantObject": ("ObjectId", "ObjectGuid", "ClassName", "Revision", "Status", "RowStamp"),
+    "Equipment": ("ObjectId", "Tag", "TagType", "TagNumber", "Description"),
+    "Valve": ("ObjectId", "Tag", "TagType", "TagNumber", "Description"),
+    "Instrument": ("ObjectId", "Tag", "TagType", "LoopNumber", "Unit", "Description"),
+    "LineSegment": ("ObjectId", "Tag", "LinePrefix", "LineNumber", "SegmentSuffix", "NominalSizeMm"),
+    "Junction": ("ObjectId", "Description"),
+    "SheetConnector": ("ObjectId", "Label", "Direction"),
+    "SegmentStart": ("RowId", "RowGuid", "SegmentId", "ObjectId"),
+    "SegmentEnd": ("RowId", "RowGuid", "SegmentId", "ObjectId"),
+    "ConnectorPair": ("RowId", "RowGuid", "Connector1", "Connector2"),
+    "Ownership": ("RowId", "RowGuid", "OwnerId", "OwnedId"),
+    "SheetConnectorLink": ("RowId", "RowGuid", "OutConnector", "InConnector"),
+    "Drawing": ("DrawingId", "FileName", "Revision", "Status"),
+    "DrawingAppearance": ("RowId", "ObjectId", "DrawingId", "DrawingHandle"),
+    "WorkHistory": ("HistoryId", "ObjectId", "DrawingId", "Revision", "ChangeKind", "Detail", "RecordedAt"),
+}
+DATA_TABLES = tuple(COLUMNS)
 EVENT_NAMESPACE = uuid.UUID("0d6e1b4a-8f2c-4e57-b9a3-61c27f0e5d48")
 
 
@@ -52,7 +67,12 @@ def batches(text: str) -> list[str]:
 
 
 def connect(setting: str | None = None, autocommit: bool = False) -> pytds.Connection:
-    host, port, user, password, database = (setting or os.environ["LIONG_SQLSERVER"]).split(",", 4)
+    """Connect with "host,port,user,password,database", the CI setting plus a database name."""
+    fields = (setting or os.environ.get("LIONG_SQLSERVER", "")).split(",", 4)
+    if len(fields) != 5 or not fields[4]:
+        raise LoadError("LIONG_SQLSERVER must be host,port,user,password,database; "
+                        "add the database to load into after the password")
+    host, port, user, password, database = fields
     return pytds.connect(dsn=host, port=int(port), user=user, password=password,
                          database=database, autocommit=autocommit)
 
@@ -79,6 +99,9 @@ def read_snapshot(folder: Path) -> tuple[dict, str, dict[str, list[dict]]]:
         if manifest["files"].get(name) != digest:
             raise LoadError(f"{name} does not match the manifest; nothing was loaded")
         rows[table] = json.loads(data)
+        for row in rows[table]:
+            if set(row) != set(COLUMNS[table]):
+                raise LoadError(f"{name} has a row whose columns are not p3d.{table}'s; nothing was loaded")
         digests.append(f"{name} {digest}")
     record = manifest["revisions"][revision] | {
         "world": manifest["world"], "backend": manifest["backend"], "revision": revision}
@@ -120,11 +143,10 @@ def load(conn: pytds.Connection, folder: Path, before_commit: Callable[[], None]
         for table in reversed(DATA_TABLES):
             cursor.execute(f"DELETE FROM p3d.{table}")
         for table in DATA_TABLES:
+            columns = COLUMNS[table]
+            insert = f"INSERT INTO p3d.{table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
             for row in rows[table]:
-                columns = list(row)
-                cursor.execute(
-                    f"INSERT INTO p3d.{table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})",
-                    tuple(row[c] for c in columns))
+                cursor.execute(insert, tuple(row[c] for c in columns))
         event = uuid.uuid5(EVENT_NAMESPACE, f"{record['backend']}/{record['world']}/{record['revision']}/{payload}")
         cursor.execute(
             "INSERT INTO outbox.PendingEvent (EventId, Backend, World, Revision, PayloadSha256, RecordedAt) "
@@ -143,7 +165,11 @@ def main(argv: list[str]) -> int:
     if not argv or argv[0] not in ("create", "load") or (argv[0] == "load" and len(argv) != 2):
         print(__doc__, file=sys.stderr)
         return 2
-    conn = connect()
+    try:
+        conn = connect()
+    except LoadError as error:
+        print(f"Cannot load: {error}", file=sys.stderr)
+        return 1
     try:
         if argv[0] == "create":
             create(conn)

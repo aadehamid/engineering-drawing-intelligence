@@ -6,6 +6,8 @@ Each test gets a fresh database, so revisions never leak between scenarios.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -111,6 +113,36 @@ class LoaderTests(unittest.TestCase):
                 loader.load(self.conn, copy / "R0")
         self.assertEqual((self.count("p3d.PlantObject"), self.events()), (0, []))
 
+    def copy_with(self, tmp: str, table: str, edit) -> Path:
+        """A copy of the snapshots whose R0 table is edited and whose manifest is rehashed to match."""
+        copy = Path(tmp) / "p3d-r0"
+        shutil.copytree(SNAPSHOTS, copy)
+        path = copy / "R0" / f"{table}.json"
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        edit(rows)
+        path.write_text(json.dumps(rows), encoding="utf-8")
+        manifest = json.loads((copy / "manifest.json").read_text(encoding="utf-8"))
+        manifest["files"][f"R0/{table}.json"] = hashlib.sha256(path.read_bytes()).hexdigest()
+        (copy / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        return copy
+
+    def test_reloading_a_revision_with_different_files_is_refused(self):
+        loader.load(self.conn, SNAPSHOTS / "R0")
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = self.copy_with(tmp, "Equipment", lambda rows: rows[0].update(Description="changed"))
+            with self.assertRaisesRegex(loader.LoadError, "already loaded with different files"):
+                loader.load(self.conn, copy / "R0")
+        self.assertEqual((self.count("p3d.PlantObject"), self.events()), (15, [("R0", "Pending")]))
+
+    def test_a_column_name_from_a_file_is_never_used(self):
+        # A crafted key would otherwise become part of the INSERT statement
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = self.copy_with(tmp, "Equipment",
+                                  lambda rows: rows[0].update({"Tag) VALUES (1); DROP TABLE p3d.Valve; --": 1}))
+            with self.assertRaisesRegex(loader.LoadError, "whose columns are not p3d.Equipment's"):
+                loader.load(self.conn, copy / "R0")
+        self.assertEqual((self.count("p3d.PlantObject"), self.count("p3d.Valve"), self.events()), (0, 0, []))
+
     def test_rbad_loads_with_its_dangling_rows(self):
         # The database keeps no foreign keys (DEC-043): rejecting Rbad is the pipeline's job
         loader.load(self.conn, SNAPSHOTS / "R0")
@@ -120,6 +152,18 @@ class LoaderTests(unittest.TestCase):
             "WHERE r.Id NOT IN (SELECT ObjectId FROM p3d.PlantObject)")[0]
         self.assertEqual(dangling, 2)
         self.assertEqual([r for r, _ in self.events()], ["R0", "Rbad"])
+
+
+class OfflineTests(unittest.TestCase):
+    def test_columns_match_the_schema_file(self):
+        import test_plant3d_schema as schema
+
+        found = schema.tables(schema.DDL.read_text(encoding="utf-8"))
+        self.assertEqual({t: tuple(found[t]) for t in loader.COLUMNS}, loader.COLUMNS)
+
+    def test_a_setting_without_a_database_is_refused_clearly(self):
+        with self.assertRaisesRegex(loader.LoadError, "host,port,user,password,database"):
+            loader.connect("localhost,1433,sa,secret")
 
 
 if __name__ == "__main__":

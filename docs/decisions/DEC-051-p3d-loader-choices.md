@@ -34,9 +34,11 @@ The choices:
 4. **One event per revision.** A unique key on backend, world and revision stops a
    reload from raising a second event. Reloading the same files changes nothing;
    reloading different files for a loaded revision is refused.
-5. **Checks before any write.** Every file must match the manifest's SHA-256, and a
-   snapshot loads only on top of its base revision, so a backend holds one line of
-   revisions, as a saved project database does.
+5. **Checks before any write.** Every file must match the manifest's SHA-256, and
+   every row's columns must be exactly its table's, as the schema file creates them;
+   the loader never takes a column name from a file. A snapshot loads only on top of
+   its base revision, so a backend holds one line of revisions, as a saved project
+   database does.
 
 ## Alternatives considered
 
