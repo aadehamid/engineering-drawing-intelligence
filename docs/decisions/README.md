@@ -48,7 +48,7 @@ state; a register row links here when its decision has a record.
 | [DEC-051](DEC-051-p3d-loader-choices.md) | The loader replaces the backend's rows with a snapshot and raises one outbox event per revision | Decided | 2026-10-13 |
 | [DEC-052](DEC-052-w-sp-contents.md) | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided | 2026-10-13 |
 | [DEC-053](DEC-053-main-history-stays.md) | Main's history stays as it is, with four commits authored by a test identity | Decided | 2026-10-13 |
-| [DEC-054](DEC-054-delegation-takes-precedence.md) | The owner's delegation takes precedence over an earlier reservation, so W-SP's contents stand | Decided | 2026-10-13 |
+| [DEC-054](DEC-054-delegation-takes-precedence.md) | DEC-048's delegation takes precedence over DEC-036's reservation, so W-SP's contents stand | Decided | 2026-10-13 |
 
 ## Record format
 

@@ -1,4 +1,4 @@
-# DEC-054: The owner's delegation takes precedence over an earlier reservation, so W-SP's contents stand
+# DEC-054: DEC-048's delegation takes precedence over DEC-036's reservation, so W-SP's contents stand
 
 Status: Decided
 Date: 2026-10-13
@@ -13,9 +13,10 @@ to review them, because DEC-036 had reserved them for the owner.
 
 ## Decision
 
-When a delegation and an earlier reservation for the owner cover the same
-choice, the delegation takes precedence. DEC-052 stands as decided, and W-SP's
-contents need no further owner review.
+DEC-048's delegation takes precedence over DEC-036's reservation for W-SP's
+contents. DEC-052 stands as decided, and those contents need no further owner
+review. This record settles that one case. It is not a standing rule for other
+reservations the owner has made.
 
 ## Alternatives considered
 
@@ -25,8 +26,8 @@ contents need no further owner review.
 ## Owner's words
 
 Asked as the second of three questions after the handoff of 2026-10-13: review
-W-SP's contents, which DEC-052 made under delegation while DEC-036 reserved them
-for the owner.
+W-SP's contents, which the agent chose under DEC-048's delegation and recorded as
+DEC-052, while DEC-036 reserved them for the owner.
 
 The owner answered:
 
