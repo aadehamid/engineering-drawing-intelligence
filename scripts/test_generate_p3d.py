@@ -119,6 +119,27 @@ class CommittedFixtureTests(unittest.TestCase):
     CLASS_OF = {"E": "Equipment", "V": "Valve", "I": "Instrument", "J": "Junction", "X": "SheetConnector",
                 "P": "LineSegment"}
 
+    def test_every_class_table_and_drawing_row_of_every_revision(self):
+        # R0's hand-written rows, changed by hand for each revision: R1 and R2 rename E2,
+        # R2 deletes VB and P6, Rbad deletes VB; each drawing carries its snapshot's revision
+        renamed = {"Tag": "TK-202", "TagNumber": "202"}
+        deleted = {"R0": set(), "R1": set(), "R2": {104, 114}, "Rbad": {104}}
+        for revision in ("R0", "R1", "R2", "Rbad"):
+            rows = committed(revision)
+            for table, base in R0_OBJECT_ROWS.items():
+                expected = []
+                for row in base:
+                    if row.get("ObjectId") in deleted[revision]:
+                        continue
+                    row = dict(row)
+                    if row.get("ObjectId") == 102 and revision in ("R1", "R2"):
+                        row.update(renamed)
+                    if table == "Drawing":
+                        row["Revision"] = revision
+                    expected.append(row)
+                with self.subTest(revision=revision, table=table):
+                    self.assertEqual(sorted(rows[table], key=str), sorted(expected, key=str))
+
     def test_every_history_row_of_every_revision(self):
         created = [(None if a[0] == "S" else k, k if a[0] == "S" else None, "R0", "Created", None, "2030-01-01T08:00:00")
                    for a, k in EXPECTED_KEYS.items()]
@@ -158,9 +179,11 @@ class CommittedFixtureTests(unittest.TestCase):
             self.assertEqual({classes[101], classes[103], classes[105], classes[106], classes[108], classes[110]},
                              {"Equipment", "Valve", "Instrument", "Junction", "SheetConnector", "LineSegment"})
 
-    def test_r0_puts_each_connection_in_its_table(self):
-        rows = committed("R0")
-        self.assertEqual({t: pairs(rows, t) for t in R0_ROWS}, R0_ROWS)
+    def test_r0_and_r1_put_each_connection_in_its_table(self):
+        # R1 only renames E2, so its connection rows are R0's
+        for revision in ("R0", "R1"):
+            rows = committed(revision)
+            self.assertEqual({t: pairs(rows, t) for t in R0_ROWS}, R0_ROWS, revision)
 
     def test_r2_drops_only_the_bypass_rows(self):
         rows = committed("R2")

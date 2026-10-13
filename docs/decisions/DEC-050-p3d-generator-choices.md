@@ -75,10 +75,9 @@ The owner said:
 - `scripts/test_generate_p3d.py` projects each snapshot back into the comparison
   view and matches LIONG-006's published counts for R0 and R2; Rbad keeps the two
   flows that name the deleted valve. Against hand-written expectations, it pins
-  every key, every column of R0's class-table and drawing rows, the connection rows
-  of R0, R2 and Rbad, every history row of every revision, and every column of every
-  revision's PlantObject rows except the GUID and row stamp. A generator wrong in
-  any of those fails a test even after regeneration. The rest is checked only for
-  freshness and determinism: generated identifiers (GUIDs, row IDs, drawing handles
-  and row stamps), the class-table and drawing rows of R1, R2 and Rbad apart from
-  E2's renamed tag, and the answer key's per-revision section.
+  every key, every column of every revision's class-table and drawing rows, the
+  connection rows of every revision, every history row of every revision, and every
+  column of every revision's PlantObject rows except the GUID and row stamp. A
+  generator wrong in any of those fails a test even after regeneration. The rest is
+  checked only for freshness and determinism: generated identifiers (GUIDs, row IDs,
+  drawing handles and row stamps) and the answer key's per-revision section.
