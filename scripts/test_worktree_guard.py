@@ -147,7 +147,7 @@ class HookEnvironmentTest(unittest.TestCase):
         clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
         with tempfile.TemporaryDirectory() as decoy:
             subprocess.run(["git", "init", "-q", decoy], env=clean, check=True, capture_output=True)
-            hook = clean | {"GIT_DIR": str(Path(decoy) / ".git"), "GIT_WORK_TREE": decoy}
+            hook = clean | {"GIT_DIR": str(Path(decoy) / ".git")}  # a hook sets GIT_DIR, not GIT_WORK_TREE
             subprocess.run([sys.executable, __file__, "WorktreeGuardTest"], env=hook, capture_output=True)
             log = subprocess.run(["git", "-C", decoy, "rev-list", "--all"], env=clean, capture_output=True, text=True)
             self.assertEqual(log.stdout, "", "a test committed into the repository GIT_DIR named")
