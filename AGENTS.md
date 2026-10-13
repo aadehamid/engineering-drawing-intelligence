@@ -29,12 +29,12 @@ and the pre-push hook runs it before every push. It fails if any check changes a
 tracked file, an untracked file that is not gitignored, the index, or git status.
 
 The review archive in `docs/releases/` contains the root baseline files, every
-`docs/*.md` and `docs/decisions/*.md` file, and the three scripts. A change to any
-of them needs `python3 scripts/bundle_docs.py` to rebuild the archive in the same
-commit. Archived Markdown holds no raw HTML, even in code. Its code fences start in
-the first column, and only LF or CR ends a line. Every relative link in it must point
-to another archived file or to the archive itself. No link target holds whitespace
-or a control character.
+`docs/*.md` and `docs/decisions/*.md` file, the three scripts, `pyproject.toml` and
+`uv.lock`. A change to any
+of them needs `uv run python scripts/bundle_docs.py` to rebuild the archive in the same
+commit. The checks read Markdown with a CommonMark parser. Archived Markdown holds no
+raw HTML outside code. Every relative link in it must point to another archived file
+or to the archive itself, and no link target holds whitespace or a control character.
 
 ## Review
 
@@ -44,7 +44,7 @@ alongside the way-of-working independent review.
 ## Figures and searches
 
 Take every graph or document count a document quotes from
-`python3 scripts/liong_facts.py figures`, never from memory or a one-off script. Use its
+`uv run python scripts/liong_facts.py figures`, never from memory or a one-off script. Use its
 `find` command for repo-wide searches; it matches text split across lines.
 
 When you write a sentence that states a figure, register it in the tool's `CLAIMS` so

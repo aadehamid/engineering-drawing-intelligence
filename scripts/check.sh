@@ -9,11 +9,11 @@ if [ "${1:-}" != "--checks" ]; then
   exec python3 scripts/worktree_guard.py -- scripts/check.sh --checks
 fi
 
-python3 scripts/bundle_docs.py --check
-python3 scripts/check_docs.py
-python3 scripts/test_doc_tools.py
+uv run --locked python scripts/bundle_docs.py --check
+uv run --locked python scripts/check_docs.py
+uv run --locked python scripts/test_doc_tools.py
 python3 scripts/test_worktree_guard.py
-python3 scripts/liong_facts.py check
-python3 scripts/test_liong_facts.py
+uv run --locked python scripts/liong_facts.py check
+uv run --locked python scripts/test_liong_facts.py
 uv run --locked python scripts/world.py check
 uv run --locked python scripts/test_world.py

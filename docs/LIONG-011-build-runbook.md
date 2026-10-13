@@ -116,9 +116,9 @@ This procedure is not executed. [LIONG-007](LIONG-007-stack-and-architecture.md)
 The following utilities concern documents only:
 
 ```sh
-python3 scripts/bundle_docs.py
-python3 scripts/check_docs.py
-python3 scripts/bundle_docs.py --check
+uv run python scripts/bundle_docs.py
+uv run python scripts/check_docs.py
+uv run python scripts/bundle_docs.py --check
 ```
 
 The bundle contains individual Markdown documents, the documentation utilities,
