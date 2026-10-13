@@ -8,6 +8,18 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # SQL Server for the vendor-style backend tests (DEC-027). The password is a
+    # throwaway for this job's container, not a secret.
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: Liong-CI-2026!
+        ports:
+          - 1433:1433
+    env:
+      LIONG_SQLSERVER: localhost,1433,sa,Liong-CI-2026!
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

@@ -43,6 +43,7 @@ state; a register row links here when its decision has a record.
 | [DEC-046](DEC-046-next-pr-order.md) | The next pull requests land in a set order | Decided | 2026-10-12 |
 | [DEC-047](DEC-047-loader-outbox-schema.md) | The outbox lives in a third, non-vendor schema in the same SQL Server database | Decided | 2026-10-12 |
 | [DEC-048](DEC-048-night-delegation.md) | The agent decides open questions for the owner during the night run of 2026-10-13 | Decided | 2026-10-13 |
+| [DEC-049](DEC-049-plant-3d-schema-choices.md) | The Plant 3D-style schema is one T-SQL file, tested on SQL Server in CI, with tags split as the product splits them | Decided | 2026-10-13 |
 
 ## Record format
 
