@@ -1,0 +1,114 @@
+[
+  {
+    "ObjectId": 101,
+    "ObjectGuid": "68BA12B6-2C18-5FEF-B6F2-782E5D44F54F",
+    "ClassName": "Equipment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 101000
+  },
+  {
+    "ObjectId": 102,
+    "ObjectGuid": "2873CDFD-78DD-538C-BE9F-51A4ED02B28D",
+    "ClassName": "Equipment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 102000
+  },
+  {
+    "ObjectId": 103,
+    "ObjectGuid": "81E18D12-9A94-5D2A-ADC1-32A33CCCF8E8",
+    "ClassName": "Valve",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 103000
+  },
+  {
+    "ObjectId": 105,
+    "ObjectGuid": "FF184C56-1A65-551F-8ACA-5623BB1D2E73",
+    "ClassName": "Instrument",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 105000
+  },
+  {
+    "ObjectId": 106,
+    "ObjectGuid": "91F53345-54BC-56BD-86AE-9EBF16B6EA40",
+    "ClassName": "Junction",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 106000
+  },
+  {
+    "ObjectId": 107,
+    "ObjectGuid": "1414CD47-DE2F-5BC1-BBF4-692445165EAD",
+    "ClassName": "Junction",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 107000
+  },
+  {
+    "ObjectId": 108,
+    "ObjectGuid": "3E14EA7D-256B-582C-867C-3890FD24AFA5",
+    "ClassName": "SheetConnector",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 108000
+  },
+  {
+    "ObjectId": 109,
+    "ObjectGuid": "EFC3F8E7-9F47-5100-BED8-D52098AA411A",
+    "ClassName": "SheetConnector",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 109000
+  },
+  {
+    "ObjectId": 110,
+    "ObjectGuid": "F0AD75B6-4653-5F47-B1C1-6F16DD2A760A",
+    "ClassName": "LineSegment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 110000
+  },
+  {
+    "ObjectId": 111,
+    "ObjectGuid": "F7A3C904-F4A0-5CD5-9DBD-F80F037C5E08",
+    "ClassName": "LineSegment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 111000
+  },
+  {
+    "ObjectId": 112,
+    "ObjectGuid": "3EDEAA8B-4003-59F6-9330-F3891898DC65",
+    "ClassName": "LineSegment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 112000
+  },
+  {
+    "ObjectId": 113,
+    "ObjectGuid": "CCE8FAFF-620F-5F40-8E1E-C001F82CD6E3",
+    "ClassName": "LineSegment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 113000
+  },
+  {
+    "ObjectId": 114,
+    "ObjectGuid": "5D30A8EE-CFAE-5FF3-B175-CDB80398A728",
+    "ClassName": "LineSegment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 114000
+  },
+  {
+    "ObjectId": 115,
+    "ObjectGuid": "DF832D58-8361-58D6-9E2E-859C6BEC8C52",
+    "ClassName": "LineSegment",
+    "Revision": "R0",
+    "Status": "Approved",
+    "RowStamp": 115000
+  }
+]

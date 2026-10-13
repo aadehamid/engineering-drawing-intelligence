@@ -1,0 +1,38 @@
+[
+  {
+    "RowId": 1,
+    "RowGuid": "F0EB325D-CD3B-5128-9627-5682F25B4322",
+    "SegmentId": 110,
+    "ObjectId": 106
+  },
+  {
+    "RowId": 2,
+    "RowGuid": "695396AB-8088-5814-BEA9-CA26B667FA87",
+    "SegmentId": 111,
+    "ObjectId": 103
+  },
+  {
+    "RowId": 3,
+    "RowGuid": "6AE3D803-F67F-5086-B1FA-CB894407E43B",
+    "SegmentId": 112,
+    "ObjectId": 107
+  },
+  {
+    "RowId": 4,
+    "RowGuid": "35344FEE-2800-5954-9583-A4D302548FC7",
+    "SegmentId": 113,
+    "ObjectId": 108
+  },
+  {
+    "RowId": 5,
+    "RowGuid": "5DFCDD6C-ECC5-52EA-A930-133D1C3239BB",
+    "SegmentId": 115,
+    "ObjectId": 102
+  },
+  {
+    "RowId": 6,
+    "RowGuid": "2BE956CA-D766-589A-8DAF-006A3AA1F3C3",
+    "SegmentId": 114,
+    "ObjectId": 104
+  }
+]

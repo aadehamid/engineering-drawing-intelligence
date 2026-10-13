@@ -1,0 +1,42 @@
+[
+  {
+    "ObjectId": 110,
+    "Tag": "L-101-1",
+    "LinePrefix": "L",
+    "LineNumber": "101",
+    "SegmentSuffix": "1",
+    "NominalSizeMm": 50
+  },
+  {
+    "ObjectId": 111,
+    "Tag": "L-101-2",
+    "LinePrefix": "L",
+    "LineNumber": "101",
+    "SegmentSuffix": "2",
+    "NominalSizeMm": 50
+  },
+  {
+    "ObjectId": 112,
+    "Tag": "L-101-3",
+    "LinePrefix": "L",
+    "LineNumber": "101",
+    "SegmentSuffix": "3",
+    "NominalSizeMm": 50
+  },
+  {
+    "ObjectId": 113,
+    "Tag": "L-101-4",
+    "LinePrefix": "L",
+    "LineNumber": "101",
+    "SegmentSuffix": "4",
+    "NominalSizeMm": 50
+  },
+  {
+    "ObjectId": 115,
+    "Tag": "L-101-5",
+    "LinePrefix": "L",
+    "LineNumber": "101",
+    "SegmentSuffix": "5",
+    "NominalSizeMm": 50
+  }
+]
