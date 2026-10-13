@@ -42,6 +42,7 @@ state; a register row links here when its decision has a record.
 | [DEC-045](DEC-045-revision-time-sources.md) | Each revision time comes from the system that records it | Decided | 2026-10-12 |
 | [DEC-046](DEC-046-next-pr-order.md) | The next pull requests land in a set order | Decided | 2026-10-12 |
 | [DEC-047](DEC-047-loader-outbox-schema.md) | The outbox lives in a third, non-vendor schema in the same SQL Server database | Decided | 2026-10-12 |
+| [DEC-048](DEC-048-night-delegation.md) | The agent decides open questions for the owner during the night run of 2026-10-13 | Decided | 2026-10-13 |
 
 ## Record format
 
