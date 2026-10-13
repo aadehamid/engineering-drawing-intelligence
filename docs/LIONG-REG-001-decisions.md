@@ -89,7 +89,9 @@ each can be reversed by a later owner decision.
 | DEC-049 | The Plant 3D-style schema is one T-SQL file, tested on SQL Server in CI, with tags split as the product splits them | Decided by the agent under DEC-048 | [record](decisions/DEC-049-plant-3d-schema-choices.md) |
 | DEC-050 | The Plant 3D-style generator writes one JSON file per table per revision, with a separate answer key | Decided by the agent under DEC-048 | [record](decisions/DEC-050-p3d-generator-choices.md) |
 | DEC-051 | The loader replaces the backend's rows with a snapshot and raises one outbox event per revision | Decided by the agent under DEC-048 | [record](decisions/DEC-051-p3d-loader-choices.md) |
-| DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048 | [record](decisions/DEC-052-w-sp-contents.md) |
+| DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048; stands by DEC-054 | [record](decisions/DEC-052-w-sp-contents.md) |
+| DEC-053 | Main's history stays as it is, with four commits authored by a test identity | Owner answered "leave it" | [record](decisions/DEC-053-main-history-stays.md) |
+| DEC-054 | The owner's delegation takes precedence over an earlier reservation, so W-SP's contents stand | Owner answered after the 2026-10-13 handoff | [record](decisions/DEC-054-delegation-takes-precedence.md) |
 
 ## New proposals
 

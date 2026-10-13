@@ -56,3 +56,5 @@ The owner said:
 - `scripts/test_world.py`, class `WspHasWhatSmartPlantStoresDifferently`, checks the
   facility and drawing names, the line number and runs, each run's sheet and valves,
   the cross-sheet pair, the instrument's parent, the size and the single flow path.
+- [DEC-054](DEC-054-delegation-takes-precedence.md): the owner confirmed that the
+  delegation takes precedence over DEC-036's reservation, so these contents stand.
