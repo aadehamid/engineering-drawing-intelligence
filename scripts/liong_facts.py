@@ -17,6 +17,7 @@ import re
 import subprocess
 import sys
 from typing import NamedTuple
+import unicodedata
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_docs import MARKDOWN, raw_html  # noqa: E402
@@ -424,6 +425,10 @@ def owner_quotes_render_plain(section: str) -> bool:
     split by blank lines. The answer phrase is found anywhere in the text a reader sees,
     in any block, so markup or a preceding line cannot hide it. From that block on, no
     code or HTML block passes at any depth. Quotes before it may hold the agent's question.
+
+    The phrase is matched as written in ordinary characters. Invisible format characters
+    fail the section on their own (see check_record); look-alike letters from another
+    script are outside what this check can see.
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
@@ -534,6 +539,8 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
+    if any(unicodedata.category(char) == "Cf" for char in record.raw_owner_words):
+        errors.append(f"{label}: the Owner's words section holds an invisible format character")
     if not owner_quotes_render_plain(record.raw_owner_words):
         errors.append(f"{label}: a quote after the owner's answer line renders markup, not plain paragraphs")
     if status == "Decided" and not owner_answer_is_plain(bodies["## Owner's words"]):
