@@ -104,6 +104,43 @@ class CommittedFixtureTests(unittest.TestCase):
             with self.subTest(table=table):
                 self.assertEqual(sorted(rows[table], key=str), sorted(expected, key=str))
 
+    # Written from R0.yaml's revisions: each revision's changes, with LIONG-006's and DEC-050's times
+    CHANGE_ROWS = {
+        "R0": [],
+        "R1": [(102, None, "R1", "Modified", "Tag TK-102 -> TK-202", "2030-01-02T08:00:00")],
+        "R2": [(102, None, "R1", "Modified", "Tag TK-102 -> TK-202", "2030-01-02T08:00:00"),
+               (None, None, "R2", "Deleted", "FLOW 106 -> 114", "2030-01-03T08:00:00"),
+               (None, None, "R2", "Deleted", "FLOW 114 -> 104", "2030-01-03T08:00:00"),
+               (None, None, "R2", "Deleted", "FLOW 104 -> 107", "2030-01-03T08:00:00"),
+               (104, None, "R2", "Deleted", None, "2030-01-03T08:00:00"),
+               (114, None, "R2", "Deleted", None, "2030-01-03T08:00:00")],
+        "Rbad": [(104, None, "Rbad", "Deleted", None, "2030-01-01T12:00:00")],
+    }
+    CLASS_OF = {"E": "Equipment", "V": "Valve", "I": "Instrument", "J": "Junction", "X": "SheetConnector",
+                "P": "LineSegment"}
+
+    def test_every_history_row_of_every_revision(self):
+        created = [(None if a[0] == "S" else k, k if a[0] == "S" else None, "R0", "Created", None, "2030-01-01T08:00:00")
+                   for a, k in EXPECTED_KEYS.items()]
+        for revision, changes in self.CHANGE_ROWS.items():
+            with self.subTest(revision=revision):
+                rows = committed(revision)["WorkHistory"]
+                found = [(r["ObjectId"], r["DrawingId"], r["Revision"], r["ChangeKind"], r["Detail"], r["RecordedAt"])
+                         for r in rows]
+                self.assertEqual(sorted(found, key=str), sorted(created + changes, key=str))
+                self.assertEqual([r["HistoryId"] for r in rows], list(range(1, len(rows) + 1)))
+
+    def test_every_plant_object_row_of_every_revision(self):
+        # Every column but the GUID and row stamp: key, class, last revision to touch it, status
+        world = load(gen.WORLD)
+        for revision in ("R0", "R1", "R2", "Rbad"):
+            with self.subTest(revision=revision):
+                present = state(world, revision).nodes
+                expected = {(k, self.CLASS_OF[a[0]], "R1" if a == "E2" and revision in ("R1", "R2") else "R0", "Approved")
+                            for a, k in EXPECTED_KEYS.items() if a[0] != "S" and a in present}
+                found = {(r["ObjectId"], r["ClassName"], r["Revision"], r["Status"]) for r in committed(revision)["PlantObject"]}
+                self.assertEqual(found, expected)
+
     def test_r0_history_creates_each_object_and_drawing_once(self):
         rows = committed("R0")["WorkHistory"]
         found = sorted((r["ObjectId"] or r["DrawingId"], r["Revision"], r["ChangeKind"], r["Detail"], r["RecordedAt"])
