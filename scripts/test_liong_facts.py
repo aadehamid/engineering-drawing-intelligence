@@ -239,6 +239,14 @@ class DecisionRecordsTest(CopiedDocsTestCase):
     def test_unquoted_source_text_does_not_count(self) -> None:
         self.assertInventedQuoteFails("Ship nothing and delete the fixture.\n")
 
+    def test_quote_joined_across_a_code_fence_does_not_count(self) -> None:
+        # Two quotes with a fence between them render as separate blocks
+        for fence in ("~~~text", "```"):
+            with self.subTest(fence=fence):
+                self.setUp()
+                self.assertInventedQuoteFails(
+                    f"> Ship nothing and\n{fence}\nThese are separate excerpts.\n{fence[:3]}\n> delete the fixture.\n")
+
     def test_source_quote_with_a_character_that_can_hide_text_does_not_count(self) -> None:
         sentence = "Ship nothing and delete the fixture."
         hidden = (f"[{sentence}]: https://example.com\n",

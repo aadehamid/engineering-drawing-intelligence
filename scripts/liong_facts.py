@@ -334,7 +334,9 @@ HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNO
 
 
 def rendered(text: str) -> str:
-    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences removed.
+    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences blanked.
+
+    Each hidden line becomes a blank line, so text on either side stays in separate blocks.
 
     One pass tracks all three, so a comment marker inside code and a fence inside a
     comment are left alone. Comments and script, style, textarea, and title blocks hide
@@ -349,6 +351,7 @@ def rendered(text: str) -> str:
             marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
             if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
                 fence = None
+            kept.append("")
             continue
         visible = ""
         rest = line
@@ -368,10 +371,12 @@ def rendered(text: str) -> str:
                     hidden_close = rf"</{tag}\s*>" if tag else "-->"
                     visible, rest = visible + rest[:start.start()], rest[start.end():]
         if hidden_close and not visible.strip():
+            kept.append("")
             continue
         opening = re.match(FENCE_OPEN, visible)
         if opening:
             fence = opening.group(1)
+            kept.append("")
             continue
         kept.append(visible)
     return "\n".join(kept) + "\n"

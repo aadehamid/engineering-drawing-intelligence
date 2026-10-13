@@ -15,10 +15,12 @@ BASELINE = (
     "GLOSSARY.md",
 )
 
-INLINE_LINK = r"\]\(\s*(<[^>\n]*>|[^)\s]+)"   # [text](target), even split across lines
+# A destination may sit on the next line, behind that line's quote markers.
+NEXT_LINE = r"[ \t]*(?:\n[ \t>]*)?"
+INLINE_LINK = r"\]\(" + NEXT_LINE + r"(<[^>\n]*>|[^)\s]+)"   # [text](target), even split across lines
 # [label]: target, used by reference links. It may sit inside quotes and lists, and its
 # label may escape a bracket; matching too much only checks one more target.
-REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:\s*(<[^>\n]*>|\S+)"
+REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|\S+)"
 
 
 # A fence opens on three backticks or tildes. A backtick fence's info string holds no
