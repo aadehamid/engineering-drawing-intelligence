@@ -425,12 +425,12 @@ def owner_quotes_render_plain(section: str) -> bool:
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
-        if not started:
-            started = token.type == "inline" and bool(re.match(r"The owner (?:answered|said|wrote):", token.content))
-        elif token.type in ("blockquote_open", "blockquote_close"):
+        if token.type in ("blockquote_open", "blockquote_close"):
             depth += 1 if token.type == "blockquote_open" else -1
-            if depth > 1:
+            if started and depth > 1:
                 return False
+        elif not started:
+            started = token.type == "inline" and bool(re.match(r"The owner (?:answered|said|wrote):", token.content))
         elif depth and token.type not in ("paragraph_open", "paragraph_close"):
             plain = token.type == "inline" and all(
                 child.type in ("text", "softbreak", "hardbreak") for child in token.children or []

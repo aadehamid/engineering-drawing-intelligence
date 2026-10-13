@@ -512,6 +512,11 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                     self.edit(self.RECORD, "Status: Decided", f"Status: {status}")
                     self.assertTrue(any("renders markup" in e for e in self.errors()))
 
+    def test_answer_line_inside_a_quote_still_checks_later_quotes(self) -> None:
+        self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                  "> The owner answered:\n\n> Q12: yes\n\n> agreed, with **emphasis** and [a link](https://example.com/x)\n")
+        self.assertTrue(any("renders markup" in e for e in self.errors()))
+
     def test_plain_owner_answers_pass(self) -> None:
         for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon.",
                        "> yes, add it to #32"):
