@@ -96,7 +96,7 @@ These are proposed runtime controls, not configured safeguards. Assess them unde
 
 The Proposed default is durable local storage for the demonstration record. Temporary process memory or a disposable notebook session is not the sole copy. Storage paths, database choices, encryption, backup destinations, and capacity remain implementation decisions. A local path name does not establish permission or durability.
 
-Remote storage is optional. The exceptions to the open-source condition are listed once, in [REQUIREMENTS.md](../REQUIREMENTS.md#context); none is a mandatory dependency. No service has been provisioned. Verify current terms, free-tier limits, deletion behavior, export capability, credential scopes, and recovery behavior before selecting either.
+Remote storage is optional. The exceptions to the open-source condition are listed once, in [REQUIREMENTS.md](../REQUIREMENTS.md#context); none is a mandatory dependency. No service has been provisioned. Verify current terms, free-tier limits, deletion behavior, export capability, credential scopes, and recovery behavior before selecting a remote storage provider.
 
 In particular, do not assume an R2 bucket or a Databricks Free Edition workspace guarantees retention, backup, version history, or recovery. Provider availability and a free-tier label supply no evidence of those controls. Retain an independently recoverable copy of required records.
 
