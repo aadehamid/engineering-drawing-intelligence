@@ -74,5 +74,7 @@ The owner said:
   and "Reproducibility and separation".
 - `scripts/test_generate_p3d.py` projects each snapshot back into the comparison
   view and matches LIONG-006's published counts for R0 and R2; Rbad keeps the two
-  flows that name the deleted valve. It also pins every key, every R0 row of every
-  table, the relationship rows of R2 and Rbad, R2's history, and R1's revision columns.
+  flows that name the deleted valve. It also pins every key, the values of every R0
+  object and drawing row, the connection rows of R0, R2 and Rbad, the history of R0
+  and R2, and R1's revision columns. Generated identifiers (GUIDs, row IDs, drawing
+  handles and row stamps) are checked only for freshness and determinism.

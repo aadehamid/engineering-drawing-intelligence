@@ -104,6 +104,13 @@ class CommittedFixtureTests(unittest.TestCase):
             with self.subTest(table=table):
                 self.assertEqual(sorted(rows[table], key=str), sorted(expected, key=str))
 
+    def test_r0_history_creates_each_object_and_drawing_once(self):
+        rows = committed("R0")["WorkHistory"]
+        found = sorted((r["ObjectId"] or r["DrawingId"], r["Revision"], r["ChangeKind"], r["Detail"], r["RecordedAt"])
+                       for r in rows)
+        self.assertEqual(found, sorted((key, "R0", "Created", None, "2030-01-01T08:00:00")
+                                       for key in EXPECTED_KEYS.values()))
+
     def test_plant_object_revision_and_status_follow_the_change(self):
         # Only E2 changes in R1, so only its row moves to R1; every row is approved (DEC-039)
         for revision, moved in (("R0", set()), ("R1", {102})):
