@@ -8,11 +8,31 @@ Evidence accessed: 2026-10-05 UTC
 
 Use a local, self-hostable baseline as the proposed default. Run both synthetic vendor-style backends on SQL Server, as two schemas in one Azure SQL Database free-offer database set to pause when it hits a limit so it can never bill, with a local SQL Server container for tests and CI (DEC-027). Evaluate PostgreSQL for control records, Neo4j Community for the shared graph, and a small Python application for conversion, review, publication, and queries. Keep source files and revision artifacts in durable local storage with separate backups. Add remote storage or orchestration only when a demonstrated need justifies it.
 
-Every new technology choice in this document is **Proposed**, including this recommendation, except the SQL Server backends and their Azure host, which DEC-027 decides. The approved [requirements](../REQUIREMENTS.md), [logical architecture](../ARCHITECTURE.md), and [glossary](../GLOSSARY.md) govern behavior. Apache AGE is an existing candidate, not an approved graph choice. Compare it against Neo4j Community after testing the latter against LIONG's publication and traversal requirements.
+Every new technology choice in this document is **Proposed**, including this recommendation, except the SQL Server backends and their Azure host, which DEC-027 decides, and MILESTONE-001's slice choices listed below. The approved [requirements](../REQUIREMENTS.md), [logical architecture](../ARCHITECTURE.md), and [glossary](../GLOSSARY.md) govern behavior. Apache AGE is an existing candidate, not an approved graph choice. Compare it against Neo4j Community after testing the latter against LIONG's publication and traversal requirements.
 
 LIONG is independent of PPC. No PPC service, repository, ontology release, account, or deployment is a runtime prerequisite. The exceptions to the open-source condition are listed once, in [REQUIREMENTS.md](../REQUIREMENTS.md#context). Proprietary document parsing and model APIs may also be assessed. DEC-027 selects SQL Server and its Azure host for the synthetic backends; the other permissions select no provider. No permission here, including DEC-027, approves model-license terms, authorizes uploads, or authorizes provisioning or spending.
 
 This document records inspection and proposed design, not a deployed stack, tested integration, performance result, or dependency lockfile. No PPC code was installed or run.
+
+## MILESTONE-001 slice choices
+
+The owner decided these components for MILESTONE-001's slice only. A decision
+picks the parts; GATE-001 and GATE-003 stay open until a pull request lands their
+closure evidence ([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)).
+The longer-term gates below (GATE-TECH-001, 005 and 008) stay open beyond the slice.
+
+| Slice need | Choice | Record |
+| --- | --- | --- |
+| Graph store | Neo4j Community 2026.09.0 (GPLv3), a pinned image run locally and as a CI service container | [DEC-056](decisions/DEC-056-neo4j-for-the-slice.md) |
+| Query (step 5) | A parameterized Cypher query through the official `neo4j` Python driver, called from a test and a command-line tool; no UI | [DEC-057](decisions/DEC-057-cypher-query-no-ui.md) |
+| Manifests and receipt | JSON files in one run output folder; no PostgreSQL | [DEC-058](decisions/DEC-058-json-run-manifests.md) |
+| Comparison (step 6) | Exact match with the answer key, with JSON and Markdown reports, run in `scripts/check.sh` and CI | [DEC-059](decisions/DEC-059-exact-answer-key-comparison.md) |
+| Orchestration | Plain Python commands chained by one script; Dagster deferred | [DEC-060](decisions/DEC-060-plain-python-orchestration.md) |
+| DEXPI generation and parsing | LIONG's own code on lxml for DEXPI 2.0.1; pyDEXPI excluded | [DEC-061](decisions/DEC-061-dexpi-2-0-1.md), [DEC-063](decisions/DEC-063-own-dexpi-generator-and-parser.md) |
+| Version pins | lxml and `neo4j` pinned exactly in `pyproject.toml` and `uv.lock`, the Neo4j image by digest; each the latest release at least 14 days old when its pull request lands | [DEC-067](decisions/DEC-067-exact-pins.md) |
+
+Exact versions of lxml and the `neo4j` driver, the image digest, and their licenses
+are added to "Version and source evidence" when each component's pull request lands.
 
 ## What the PPC reference establishes
 
@@ -239,4 +259,4 @@ All sources below were accessed on 2026-10-05 UTC. An inspected release is not a
 | REF-TECH-006 | Databricks [Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition) and [limitations](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations) | Rolling service pages, updated 2026-09-11 and 2026-09-29 respectively; no fixed runtime inspected | Actual account entitlement, runtime, numeric compute quota, connector availability, retention period, and network access |
 | REF-TECH-007 | Databricks [data-source and service connections](https://docs.databricks.com/aws/en/connect/) | General AWS platform documentation, updated 2026-09-11; not Free Edition certification | S3/R2 and other connector compatibility in Free Edition remains an implementation gate |
 
-Python, lxml, OpenCV, Tesseract, Dash, FastAPI, Cytoscape.js, and Apache AGE have no exact inspected dependency versions in this document. Their presence in a candidate list is not evidence of selection, license verification, or DEXPI compatibility. Resolve those checks before publishing an executable build plan.
+Python, lxml, OpenCV, Tesseract, Dash, FastAPI, Cytoscape.js, and Apache AGE have no exact inspected dependency versions in this document. Their presence in a candidate list is not evidence of selection, license verification, or DEXPI compatibility. lxml is selected for the slice (DEC-063), but its version and license are recorded only when its pull request lands. Resolve those checks before publishing an executable build plan.

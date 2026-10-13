@@ -66,6 +66,13 @@ with the owner's words quoted, in the format that index defines.
   records that approval is the merge's intent and names its scope. A newer file is
   not more authoritative than an approved one.
 
+## Playbook
+
+A pull request that settles an engineering practice updates
+[the delivery playbook](docs/delivery-playbook.md) in the same pull request
+([DEC-071](docs/decisions/DEC-071-playbook-grows-with-prs.md)), within the limits on
+its content in [DEC-070](docs/decisions/DEC-070-delivery-playbook.md).
+
 ## Terms
 
 [GLOSSARY.md](GLOSSARY.md) owns project vocabulary. Use its terms exactly, and add a

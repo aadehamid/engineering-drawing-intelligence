@@ -39,6 +39,11 @@ this amendment does not approve the other outstanding design proposals.
 | LIONG-REG-001 | [Decision register](LIONG-REG-001-decisions.md) | Approvals, proposals, assumptions, gates | All | No silent promotion of drafts |
 | LIONG-REF-001 | [Reference register](LIONG-REF-001-reference-register.md) | External evidence and permissions | 003, 007 | Pinned claims and unresolved rights |
 
+The [delivery playbook](delivery-playbook.md) is a general guide for teams on
+similar projects, not a LIONG design document. It holds reusable engineering
+practice, and LIONG's own documents stay authoritative for LIONG
+([DEC-070](decisions/DEC-070-delivery-playbook.md)).
+
 ## Authoritative definitions
 
 [GLOSSARY.md](../GLOSSARY.md) owns agreed terminology. The domain document proposes

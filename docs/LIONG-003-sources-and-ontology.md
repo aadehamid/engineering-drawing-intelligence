@@ -51,15 +51,16 @@ The 2.0 XML documentation labels its schema download `DEXPI_XML_Schema_RC_1.xsd`
 
 The legacy C01 reference example in the official GitLab training repository has a `PlantModel` root. Its directory is explicitly `dexpi 1.3`. The repository also contains a `dexpi 1.2` directory. Neither is a native DEXPI 2.0 fixture. See REF-DATA-002.
 
-The current official landing page recommends DEXPI 2.0.1 as a fix release replacing 2.0. This is a new version-selection question, not permission to change LIONG's target. Proposal: review 2.0.0 versus 2.0.1 explicitly before freezing artifacts. No 2.0.1 schema or instance was validated in this inspection.
+The current official landing page recommends DEXPI 2.0.1, released on 2026-09-30, as a fix release replacing 2.0. LIONG's target is now 2.0.1, at the specification repository's V2.0.1 tag ([DEC-061](decisions/DEC-061-dexpi-2-0-1.md)). The 2.0.0 findings above remain as inspected. No 2.0.1 schema or instance has been pinned or validated yet; GATE-001's pull request pins them by SHA-256.
 
 ### 3.2 Compatibility assessment
 
 | Candidate | Inspected evidence | Proposed use and remaining gate |
 | --- | --- | --- |
-| DEXPI 2.0 official XML and schema | Native `Model`-root reference instance and XSD were fetched and parsed as XML. Model import URLs failed TLS hostname verification. | First candidate for native format tests. Obtain trusted, version-matched Core, Plant, Builtin, and any other required dependencies before semantic validation. |
+| DEXPI 2.0 official XML and schema | Native `Model`-root reference instance and XSD were fetched and parsed as XML. Model import URLs failed TLS hostname verification. | Selected at 2.0.1 for the slice (DEC-061). The GATE-001 pull request is to add pinned copies of the model files, and validation will never fetch them ([DEC-062](decisions/DEC-062-vendored-model-files.md)). LIONG will write its own generator and parser on lxml ([DEC-063](decisions/DEC-063-own-dexpi-generator-and-parser.md)). |
 | DEXPI TrainingTestCases | Licensed legacy examples, including C01 XML/SVG and nozzle, off-page connector, and intersection cases | Use for legacy parsing and drawing assessment. Conversion requires an explicit mapping and loss report. Do not rename the format to 2.0. |
-| pyDEXPI | Inspected README states DEXPI 1.3 support and a Proteus XML loader. Code license is AGPL-3.0-or-later. | Candidate legacy adapter or research reference only. No evidence of native 2.0 read/write compatibility was established. |
+| pyDEXPI | Inspected README states DEXPI 1.3 support and a Proteus XML loader. Code license is AGPL-3.0-or-later. | Excluded for DEXPI 2.0 (DEC-063). At most a legacy research reference. |
+| bpmn2dexpi | MIT-licensed TypeScript tool whose `--validate` option checks DEXPI 2.0 Process and Plant files against the XSD and the information models. Targets 2.0, not 2.0.1. See REF-STD-010. | Recorded, kept out of the slice, and looked at again when it supports 2.0.1 ([DEC-069](decisions/DEC-069-bpmn2dexpi-recorded-not-used.md)). |
 | DEXPI GraphicBuilder | GitHub README declares migration to GitLab. Current GitLab implementation was not inspected. | Unverified renderer candidate. Confirm encoding, exact version, license, and output fidelity before selection. |
 | Generic XML tooling | No LIONG DEXPI implementation exists in this assessment | XML parsing or XSD validation alone cannot validate engineering classes, imported models, connectivity, or the supported subset. |
 
@@ -74,6 +75,8 @@ The current official landing page recommends DEXPI 2.0.1 as a fix release replac
 7. For any legacy conversion or outward export, report unsupported information and test semantic round trips. Successful import is not proof of export completeness.
 
 These are proposed test details for existing requirements. They do not assert full DEXPI compliance or replace human review.
+
+For the slice, [DEC-064](decisions/DEC-064-four-stage-dexpi-validation.md) decides gate 3's validation as four named stages (schema, references, model, LIONG rules) plus an exact round trip, and [DEC-065](decisions/DEC-065-claim-names-stages-that-ran.md) limits each claim to the stages that ran. None of this is built yet. The parser will also read DEXPI's 2.0.1 reference P&ID ([DEC-066](decisions/DEC-066-reference-pid-parser-test.md)).
 
 ## 4. Dataset assessment
 
@@ -93,7 +96,7 @@ Use bounded references and explicit mappings before considering imports. Externa
 
 | Reference and official URL | Role and bounded proposal | Mismatches and limits | Inspected version and license evidence; open gate |
 | --- | --- | --- | --- |
-| REF-STD-001: [DEXPI](https://dexpi.org/specification/2.0/html/) | Engineering exchange model for the mandatory backend path; explicit subset mappings to the shared engineering model | Serialization is not a provenance, approval, or stable-identity policy. Plant, process, and drawing representation must remain distinct. | 2.0.0 HTML and native XML/XSD inspected; specification CC BY 4.0. Artifact dependency resolution and 2.0.1 choice remain open. |
+| REF-STD-001: [DEXPI](https://dexpi.org/specification/2.0/html/) | Engineering exchange model for the mandatory backend path; explicit subset mappings to the shared engineering model | Serialization is not a provenance, approval, or stable-identity policy. Plant, process, and drawing representation must remain distinct. | 2.0.0 HTML and native XML/XSD inspected; specification CC BY 4.0. Target is 2.0.1 (DEC-061); artifact pins and dependency resolution remain open under GATE-001. |
 | REF-STD-002: [QUDT](https://qudt.org/schema/qudt/) | Reference selected unit and quantity definitions for engineering attributes and measurement values | Matching dimensions alone does not establish the same physical meaning. Gauge/absolute pressure, temperature offsets, and measurement basis need explicit source context. | Live schema labels itself 3.5.2; CC BY 4.0 metadata and a UCUM rights notice inspected. Pin immutable unit vocabularies and assess embedded rights before reuse. |
 | REF-STD-003: [PROV-O](https://www.w3.org/TR/2013/REC-prov-o-20130430/) | Candidate mapping for source artifacts, transformation activities, responsible agents, and derivation | Provenance does not prove correctness, engineering approval, or publication. It does not choose historical storage. | W3C Recommendation 2013-04-30. Document-use notice inspected; exact distributable ontology artifact and its license remain to be pinned. |
 | REF-STD-004: [SOSA/SSN](https://www.w3.org/TR/2017/REC-vocab-ssn-20171019/) | Small observation subset connected through the equipment bridge | A reading, an observation activity, a sensor, and a feature of interest are different objects. A P&ID instrument tag alone does not establish all of them. | W3C/OGC Recommendation 2017-10-19. Live SOSA RDF declares W3C 2015 software/document and OGC software license links. Freeze matching RDF artifacts and dependency scope. |

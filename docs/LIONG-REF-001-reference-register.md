@@ -37,6 +37,7 @@ The package index resolves related documents. Their inclusion does not approve t
 - Artifact inspected: [`_static/DEXPI_XML_Schema.xsd`](https://dexpi.org/specification/2.0/html/_static/DEXPI_XML_Schema.xsd). SHA-256 `0bd6568b7c52fd59ac4ef6d8547ab2b2aa890c009a3a1bfbc5d7cc18c53b36e6`. Its schema `version` is `1.0.0`; the linking page calls the download `DEXPI_XML_Schema_RC_1.xsd`.
 - Supported claims: 2.0 uses DEXPI XML for models and instances, without requiring Proteus XML schema. The root is `Model`. File-local IDs and imported name references have distinct syntax. Model classes and properties require more than generic XML parsing.
 - Additional observation: the landing page recommends 2.0.1 as a fix release replacing 2.0 and links [2.0.1 HTML](https://dexpi.org/specification/2.0.1/html/). The linked 2.0.1 artifacts were not inspected.
+- 2.0.1 observations, accessed 2026-10-13: the [release announcement](https://dexpi.org/dexpi-2-0-1-specification-published-the-update-replacing-dexpi-2-0/) dates 2.0.1 to 2026-09-30 and calls it the update replacing 2.0. It says 2.0.1 fixes a small number of issues in the Plant model and improves the Process model. The [specification repository](https://gitlab.com/dexpi/Specification) has a V2.0.1 tag holding the XSD and a 2.0.1 reference P&ID. The specification defines DEXPI XML as its exchange encoding; no other encoding was found. No official 2.0 validator was found. LIONG targets 2.0.1 ([DEC-061](decisions/DEC-061-dexpi-2-0-1.md)); its artifacts are not yet hashed here.
 - Reuse/license status: 2.0 specification explicitly states [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Confirm scope for separately packaged downloads and preserve attribution and modification notices.
 - Unresolved gates: review exact 2.0-family release; pin all imported models and their hashes; reconcile schema label versus artifact name; test syntax, schema, semantic rules, and engineering fidelity separately. No conformance test was run.
 
@@ -94,6 +95,7 @@ The package index resolves related documents. Their inclusion does not approve t
 - Reuse/license status: AGPL version 3 or later, as stated in the license's program notice. No software copied or executed.
 - Unresolved gates: assess copyleft obligations for intended use and any bundled data separately; verify exact input/output formats and fidelity. No native 2.0 reader/writer claim is supported.
 - Access note: an initial `main` URL returned 404; repository metadata identified `master`.
+- 2.0 support, accessed 2026-10-13: the latest release, v1.2.0 (2026-04-14), still supports DEXPI 1.3. In [issue 6](https://github.com/process-intelligence-research/pyDEXPI/issues/6), on 2.0 support, the maintainer wrote on 2026-07-28 that it would come in the upcoming months, with no date.
 
 ### REF-STD-009: DEXPI GraphicBuilder
 
@@ -101,6 +103,13 @@ The package index resolves related documents. Their inclusion does not approve t
 - Supported claims: deprecated GitHub repository points to [GitLab GraphicBuilder](https://gitlab.com/dexpi/GraphicBuilder).
 - Reuse/license status: current GitLab code and license unverified.
 - Unresolved gates: inspect current release, accepted encoding, renderer fidelity, and license before use. No native DEXPI 2.0 compatibility claim is made.
+
+### REF-STD-010: bpmn2dexpi
+
+- Source/version: [GitHub repository](https://github.com/skhella/bpmn2dexpi), README on `main` at `f198a5b0b5ee90a829895b728beebd8c05903c03`, inspected 2026-10-13.
+- Supported claims: README states that `--validate` checks existing DEXPI 2.0 Process and Plant files against the XSD and five information-model checks: property names and kinds, data types, reference targets, cardinality, and class existence. It ships DEXPI 2.0 copies of `Core.xml`, `Plant.xml` and `Process.xml`. It targets 2.0, not 2.0.1. It runs on Node.js.
+- Reuse/license status: README states MIT. No software copied or executed.
+- Unresolved gates: 2.0.1 support. Kept out of the slice ([DEC-069](decisions/DEC-069-bpmn2dexpi-recorded-not-used.md)).
 
 ## Data references
 
@@ -110,7 +119,7 @@ The package index resolves related documents. Their inclusion does not approve t
 - Artifact inspected: XML SHA-256 `f068ad94a18dd089afa3fc224d92056b08ee0059bd06686c68190c0b789ae2b1`. Its root is `Model`, with name `example` and URI `http://www.example.org`.
 - Supported claims: XML uses Core and Plant imports under `/models/2.0.0/` and contains a `Core/EngineeringModel`. The appendix presents it as an illustration of the Plant model. The SVG link was inspected, not its visual content.
 - Reuse/license status: governing specification page states CC BY 4.0. No independent per-download license notice was established for XML/SVG. Confirm coverage and attribution before redistribution.
-- Access failure: `https://data.dexpi.org/models/2.0.0/Core.xml` and `https://data.dexpi.org/models/2.0.0/Plant.xml` failed TLS certificate hostname verification. Verification was not disabled.
+- Access failure: `https://data.dexpi.org/models/2.0.0/Core.xml` and `https://data.dexpi.org/models/2.0.0/Plant.xml` failed TLS certificate hostname verification. Verification was not disabled. On 2026-10-13 `data.dexpi.org` did not respond. [DEC-062](decisions/DEC-062-vendored-model-files.md) has LIONG keep pinned copies of the model files instead; none are pinned yet.
 - Unresolved gates: acquire authentic imported artifacts through a trusted source; check complete dependency closure, SVG content, notices, and engineering completeness. XML well-formedness was checked, not XSD or semantic conformance.
 
 ### REF-DATA-002: DEXPI TrainingTestCases

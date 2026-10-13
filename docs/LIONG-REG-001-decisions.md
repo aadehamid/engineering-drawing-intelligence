@@ -79,6 +79,23 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-048 | The agent decides open questions for the owner during the night run of 2026-10-13 | Owner said: "you shpuld decide for me unless it is aboslutely not clear what decisions to make" | [record](decisions/DEC-048-night-delegation.md) |
 | DEC-053 | Main's history stays as it is, with four commits authored by a test identity | Owner answered "leave it" | [record](decisions/DEC-053-main-history-stays.md) |
 | DEC-054 | DEC-048's delegation takes precedence over DEC-036's reservation, so W-SP's contents stand | Owner answered: "My delegation takes precedence. You can settel it" | [record](decisions/DEC-054-delegation-takes-precedence.md) |
+| DEC-055 | This round chooses components for MILESTONE-001's slice only, and a gate closes when a PR lands its closure evidence | Owner answered Q1 with "yes to all" | [record](decisions/DEC-055-slice-choices-close-gates-on-evidence.md) |
+| DEC-056 | The slice's graph store is Neo4j Community 2026.09.0, run from a pinned image locally and in CI | Owner answered Q2 with "yes to all" | [record](decisions/DEC-056-neo4j-for-the-slice.md) |
+| DEC-057 | Step 5 is a parameterized Cypher query run through the official neo4j Python driver, with no UI in the slice | Owner answered Q3 with "yes to all" | [record](decisions/DEC-057-cypher-query-no-ui.md) |
+| DEC-058 | The slice's manifests and publication receipt are JSON files in a run output folder, with no PostgreSQL | Owner answered Q4 with "yes to all" | [record](decisions/DEC-058-json-run-manifests.md) |
+| DEC-059 | Step 6 compares the published graph with the answer key and requires an exact match | Owner answered Q5 with "yes to all" | [record](decisions/DEC-059-exact-answer-key-comparison.md) |
+| DEC-060 | Each slice step is a plain Python command, chained by one script, with no orchestrator | Owner answered Q6 with "yes to all" | [record](decisions/DEC-060-plain-python-orchestration.md) |
+| DEC-061 | The slice targets DEXPI 2.0.1, pinned at the specification's V2.0.1 tag | Owner answered Q7 with "yes to all" | [record](decisions/DEC-061-dexpi-2-0-1.md) |
+| DEC-062 | Pinned copies of the DEXPI model files live in the repository, and validation never fetches over the network | Owner answered Q8 with "yes to all" | [record](decisions/DEC-062-vendored-model-files.md) |
+| DEC-063 | LIONG writes its own DEXPI 2.0.1 generator and parser for the supported subset, on lxml | Owner answered Q9 with "yes to all" | [record](decisions/DEC-063-own-dexpi-generator-and-parser.md) |
+| DEC-064 | A DEXPI file is valid only when it passes four named validation stages and an exact round trip | Owner accepted Q10 and Q14 ("I am good") | [record](decisions/DEC-064-four-stage-dexpi-validation.md) |
+| DEC-065 | A DEXPI validity claim names only the stages that ran, never conformance or certification | Owner accepted Q10 and Q15 ("I am good") | [record](decisions/DEC-065-claim-names-stages-that-ran.md) |
+| DEC-066 | The parser also reads DEXPI's own 2.0.1 reference P&ID and reports what it does not support | Owner answered Q11 with "yes to all" | [record](decisions/DEC-066-reference-pid-parser-test.md) |
+| DEC-067 | Every new slice component is pinned exactly, at the latest release at least 14 days old | Owner answered Q12 with "yes to all" | [record](decisions/DEC-067-exact-pins.md) |
+| DEC-068 | The glossary defines supported subset | Owner answered Q13 with "yes to all" | [record](decisions/DEC-068-supported-subset-term.md) |
+| DEC-069 | bpmn2dexpi is recorded as a candidate validator and kept out of the slice | Owner accepted Q16 ("I am good") | [record](decisions/DEC-069-bpmn2dexpi-recorded-not-used.md) |
+| DEC-070 | A general delivery playbook for engineering-data-to-graph projects lives in this repository | Owner accepted Q17 to Q23, with comments that the playbook holds no project-specific items and no pull request references | [record](decisions/DEC-070-delivery-playbook.md) |
+| DEC-071 | A pull request that settles an engineering practice updates the playbook in the same pull request | Owner accepted Q19 and Q22, with the comments recorded in the record | [record](decisions/DEC-071-playbook-grows-with-prs.md) |
 
 ## Decisions made under delegation
 
@@ -134,6 +151,10 @@ requirements. Approval must identify which groups or sections it covers.
 | GATE-006 | Named downstream analysis and its required inputs | Claiming analysis-ready export for a particular calculation | Versioned analysis profile, required quantities/units, completeness fixtures |
 | GATE-007 | Public evaluation thresholds and workload budgets | Declaring public accuracy or performance acceptance | Frozen datasets, baseline measures, hardware/workload definition, owner-approved targets |
 | GATE-008 | Review of all new design proposals and document versions | Treating the package as an approved implementation specification | Document/section approvals with version and unresolved exceptions |
+
+DEC-055 to DEC-069 choose the components for MILESTONE-001's slice under GATE-001
+and GATE-003. Both gates stay open until a pull request lands their closure
+evidence ([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)).
 
 Source-specific gates in LIONG-003, technology gates in LIONG-007, and operational
 gates in LIONG-009 refine this list. Closing one gate does not close the others.
