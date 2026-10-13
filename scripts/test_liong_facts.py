@@ -501,6 +501,14 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                 self.edit(self.RECORD, "> Q12: yes", answer)
                 self.assertTrue(any("plain-text" in e for e in self.errors()))
 
+    def test_indented_markup_in_owner_answer_fails(self) -> None:
+        for answer in (">  # Q12: yes", ">   ## Q12: yes", ">  - Q12: yes", ">    - Q12: yes", ">  1. Q12: yes",
+                       "> Q12: yes\n>\n>     words in a code block", ">\t- Q12: yes"):
+            with self.subTest(answer=answer):
+                self.setUp()
+                self.edit(self.RECORD, "> Q12: yes", answer)
+                self.assertTrue(any("indented quote lines" in e for e in self.errors()))
+
     def test_plain_owner_answers_pass(self) -> None:
         for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon.",
                        "> yes, add it to #32"):
