@@ -257,6 +257,19 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
         self.assertTrue(any("Evidence: end each quote with a blank line before" in e for e in self.errors()))
 
+    def test_line_of_only_a_no_break_space_continues_the_quote(self) -> None:
+        # A line holding only U+00A0 is not blank, so the next line runs on in the quote
+        self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n",
+                  self.DECISION_QUOTE + "> the milestones that use them.\n\u00a0\nand delete all later milestones.\n")
+        self.assertTrue(any("end each quote with a blank line before" in e for e in self.errors()))
+
+    def test_number_in_a_quote_must_match(self) -> None:
+        # "3. It" after a quote line is text, not a list marker, so the number counts
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n> Choose option\n> 2. It is approved.\n\n")
+        self.edit(self.QUOTED, "## Alternatives considered",
+                  "> Choose option\n> 3. It is approved.\n\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Choose option 3. It is approved.\"" in e for e in self.errors()))
+
     def assertInventedQuoteFails(self, source: str) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
         self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")

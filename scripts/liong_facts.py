@@ -455,7 +455,7 @@ def quote_blocks(body: str) -> tuple[list[str], list[str]]:
         if re.match(r"\s*(?:(?:[-*+]|\d+[.)])\s+)*>", line):
             errors.append(f"a quote must start the line, not sit inside a list: {line.strip()[:60]}")
         if current:
-            if line.strip():
+            if line.strip(" \t"):  # a line of only U+00A0 is not blank; it continues the quote
                 errors.append(f"end each quote with a blank line before: {line.strip()[:60]}")
             blocks.append("\n".join(current))
             current = []
@@ -477,12 +477,11 @@ def plain_block(block: str) -> bool:
 
 
 def flat_quote(text: str) -> str:
-    """The quoted words: quote and list markers and line breaks removed, every other character kept."""
-    lines = []
-    for line in text.splitlines():
-        while re.match(CONTAINER_MARKER, line):
-            line = re.sub(CONTAINER_MARKER, "", line, count=1)
-        lines.append(line)
+    """The quoted words: each line's quote marker and the line breaks removed, every other character kept.
+
+    A number or dash after the marker stays, because a reader may see it as text.
+    """
+    lines = [re.sub(r"^ {0,3}>", "", line) for line in text.splitlines()]
     return " ".join(" ".join(lines).split())
 
 
