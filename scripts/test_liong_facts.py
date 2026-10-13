@@ -516,7 +516,10 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         for section in ("> > The owner answered: yes\n",
                         "> The owner **answered**: yes\n\n> agreed, with **emphasis**\n",
                         "> [The owner answered:](https://example.com/x)\n\n> # later heading\n",
-                        ">     The owner answered: yes\n\n> # later heading\n"):
+                        ">     The owner answered: yes\n\n> # later heading\n",
+                        "Thanks!\nThe owner answered:\n\n> Q12: yes\n\n> # decoy heading\n",
+                        "\u200bThe owner answered:\n\n> Q12: yes\n\n> # decoy heading\n",
+                        "The owner answered:\n\n> Q12: yes\n\n    words in a code block\n"):
             with self.subTest(section=section):
                 self.setUp()
                 self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
