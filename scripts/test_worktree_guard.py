@@ -16,6 +16,13 @@ import worktree_guard as guard
 
 class WorktreeGuardTest(unittest.TestCase):
     def setUp(self) -> None:
+        # A pre-push hook runs these tests with GIT_DIR and its siblings set. Inherited,
+        # they point every git call, here and in the guard, at the real repository
+        # instead of the temporary one, so they are cleared for each test.
+        saved = {name: value for name, value in os.environ.items() if name.startswith("GIT_")}
+        for name in saved:
+            del os.environ[name]
+        self.addCleanup(os.environ.update, saved)
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.git("init", "-q")
@@ -132,6 +139,18 @@ class WorktreeGuardTest(unittest.TestCase):
             self.assertIn("changed entry: made.txt", report.getvalue())
         finally:
             os.chdir(cwd)
+
+
+class HookEnvironmentTest(unittest.TestCase):
+    def test_tests_leave_the_repository_named_by_git_dir_alone(self) -> None:
+        # The way a pre-push hook in a worktree runs this file: GIT_DIR names a real repository
+        clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        with tempfile.TemporaryDirectory() as decoy:
+            subprocess.run(["git", "init", "-q", decoy], env=clean, check=True, capture_output=True)
+            hook = clean | {"GIT_DIR": str(Path(decoy) / ".git"), "GIT_WORK_TREE": decoy}
+            subprocess.run([sys.executable, __file__, "WorktreeGuardTest"], env=hook, capture_output=True)
+            log = subprocess.run(["git", "-C", decoy, "rev-list", "--all"], env=clean, capture_output=True, text=True)
+            self.assertEqual(log.stdout, "", "a test committed into the repository GIT_DIR named")
 
 
 if __name__ == "__main__":
