@@ -15,7 +15,9 @@ the two-world idea and did not name the worlds, so this record stayed Proposed i
 
 R0 is the Autodesk world, and its backend uses the Plant 3D-style schema. W-SP is
 the SmartPlant world, and its backend uses the SmartPlant-style schema. What W-SP
-contains is decided in [DEC-036](DEC-036-w-sp-new-plant.md).
+contains is decided in [DEC-036](DEC-036-w-sp-new-plant.md), and its exact contents
+in [DEC-052](DEC-052-w-sp-contents.md), which stands by
+[DEC-054](DEC-054-delegation-takes-precedence.md).
 
 ## Alternatives considered
 

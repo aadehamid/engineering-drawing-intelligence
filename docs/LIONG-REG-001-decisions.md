@@ -64,7 +64,7 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-033 | ARCHITECTURE.md describes two synthetic backends that follow vendor storage patterns | Owner accepted the Q20 recommendation | ARCHITECTURE.md, LIONG-003, LIONG-006; [record](decisions/DEC-033-architecture-wording.md) |
 | DEC-034 | R0 is also generated in SmartPlant form, as a test fixture for the two mappings | Owner's answer to Q23: keep the cross check | LIONG-006; [record](decisions/DEC-034-r0-smartplant-cross-check.md) |
 | DEC-035 | R0 is the Autodesk world, and a new world W-SP is the SmartPlant world | Owner's answer on 2026-10-12: "yes, R0 is Autodesk and W-SP is SmartPlant" | LIONG-006; [record](decisions/DEC-035-r0-is-the-autodesk-world.md) |
-| DEC-036 | W-SP is a new hand-authored plant about R0's size, built around what SmartPlant stores differently | Owner accepted the Q24 recommendation | [record](decisions/DEC-036-w-sp-new-plant.md) |
+| DEC-036 | W-SP is a new hand-authored plant about R0's size, built around what SmartPlant stores differently | Owner accepted the Q24 recommendation; exact contents in DEC-052, which stands by DEC-054 | [record](decisions/DEC-036-w-sp-new-plant.md) |
 | DEC-037 | Each source revision is one complete backend snapshot that fills in the vendor's own revision fields | Owner accepted the Q25 recommendation | [record](decisions/DEC-037-revision-snapshots.md) |
 | DEC-038 | MOC records stay a separate source representation, outside both vendor schemas | Owner accepted the Q26 recommendation | [record](decisions/DEC-038-moc-outside-vendor-schemas.md) |
 | DEC-039 | Each backend stores the source approval in its vendor's own fields | Owner accepted the Q27 recommendation | [record](decisions/DEC-039-approval-in-vendor-fields.md) |
@@ -77,6 +77,8 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-046 | The next pull requests land in a set order | Owner accepted the Q34 recommendation | [record](decisions/DEC-046-next-pr-order.md) |
 | DEC-047 | The outbox lives in a third, non-vendor schema in the same SQL Server database | Owner chose option (b) of Q35: "go with b" | [record](decisions/DEC-047-loader-outbox-schema.md) |
 | DEC-048 | The agent decides open questions for the owner during the night run of 2026-10-13 | Owner said: "you shpuld decide for me unless it is aboslutely not clear what decisions to make" | [record](decisions/DEC-048-night-delegation.md) |
+| DEC-053 | Main's history stays as it is, with four commits authored by a test identity | Owner answered "leave it" | [record](decisions/DEC-053-main-history-stays.md) |
+| DEC-054 | DEC-048's delegation takes precedence over DEC-036's reservation, so W-SP's contents stand | Owner answered: "My delegation takes precedence. You can settel it" | [record](decisions/DEC-054-delegation-takes-precedence.md) |
 
 ## Decisions made under delegation
 
@@ -89,7 +91,7 @@ each can be reversed by a later owner decision.
 | DEC-049 | The Plant 3D-style schema is one T-SQL file, tested on SQL Server in CI, with tags split as the product splits them | Decided by the agent under DEC-048 | [record](decisions/DEC-049-plant-3d-schema-choices.md) |
 | DEC-050 | The Plant 3D-style generator writes one JSON file per table per revision, with a separate answer key | Decided by the agent under DEC-048 | [record](decisions/DEC-050-p3d-generator-choices.md) |
 | DEC-051 | The loader replaces the backend's rows with a snapshot and raises one outbox event per revision | Decided by the agent under DEC-048 | [record](decisions/DEC-051-p3d-loader-choices.md) |
-| DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048 | [record](decisions/DEC-052-w-sp-contents.md) |
+| DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048; stands by DEC-054 | [record](decisions/DEC-052-w-sp-contents.md) |
 
 ## New proposals
 
