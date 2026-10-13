@@ -146,13 +146,18 @@ class DocumentationToolsTests(unittest.TestCase):
                             for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
     def test_link_target_with_a_space_or_control_character_is_refused(self):
-        # Parsers disagree on a space inside <...>, so any whitespace there is refused
+        # Parsers disagree on whitespace in a destination, even wrapped onto the next line, so it is refused
         path = self.root / "README.md"
         path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n\n[c]: <./READ ME.md>\n\nSee [c].\n"
-                        "\n[d](\u2003README.md)\n\n[e]: \u00a0README.md\n\nSee [e].\n", encoding="utf-8")
+                        "\n[d](\u2003README.md)\n\n[e]: \u00a0README.md\n\nSee [e].\n"
+                        "\n[f](\n\u2003README.md\n)\n\n[g]:\n\u2003README.md\n\nSee [g].\n"
+                        "\n![h](\u2003README.md)\n\n[i](a(\u2003)b.md)\n", encoding="utf-8")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for target in ("< ./README.md>", "<./READ\tME.md>", "<./READ ME.md>", "\u2003README.md", "\u00a0README.md"):
+        for target in ("< ./README.md>", "<./READ\tME.md>", "<./READ ME.md>", "\u2003README.md", "\u00a0README.md",
+                       "a(\u2003)b.md"):
             self.assertTrue(any(f"link target holds whitespace: {target}" in e for e in errors), target)
+        # The wrapped inline link, the next-line reference and the image each add one more
+        self.assertEqual(sum("link target holds whitespace: " in e for e in errors), 9)
 
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"

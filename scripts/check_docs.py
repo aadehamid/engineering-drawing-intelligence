@@ -52,9 +52,19 @@ def spaced_targets(text: str) -> list[str]:
     """
     found = re.findall(r"\]\(\s*(<[^<>\n]*\s[^<>\n]*>)", text)
     found += re.findall(r"\]:\s*(<[^<>\n]*\s[^<>\n]*>)", text)
-    found += [m for m in re.findall(r"\]\(([^()\n]*)\)", text) if re.search(UNICODE_SPACE, m)]
-    found += [m for m in re.findall(r"^[ \t>*+\-\d.)]*\[[^\]\n]+\]:[ \t]*([^\n]*)$", text, re.MULTILINE)
-              if re.search(UNICODE_SPACE, m)]
+    # Everything a destination could span, read from the source: after "](", up to the
+    # matching ")" across lines and one level of parentheses; after "]:", the rest of
+    # that line and the next. Any Unicode space there refuses the link.
+    for start in (m.end() for m in re.finditer(r"\]\(", text)):
+        depth, end = 0, start
+        while end < len(text) and not (text[end] == ")" and depth == 0):
+            depth += {"(": 1, ")": -1}.get(text[end], 0)
+            end += 1
+        if re.search(UNICODE_SPACE, text[start:end]):
+            found.append(text[start:end].strip(" \t\n"))
+    for m in re.finditer(r"\]:[^\n]*(?:\n[^\n]*)?", text):
+        if re.search(UNICODE_SPACE, m.group(0)):
+            found.append(m.group(0)[2:].strip(" \t\n"))
     return found
 
 
