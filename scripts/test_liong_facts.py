@@ -501,13 +501,16 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                 self.edit(self.RECORD, "> Q12: yes", answer)
                 self.assertTrue(any("plain-text" in e for e in self.errors()))
 
-    def test_indented_markup_in_owner_answer_fails(self) -> None:
+    def test_markup_rendered_in_owner_quote_fails_however_spelled(self) -> None:
         for answer in (">  # Q12: yes", ">   ## Q12: yes", ">  - Q12: yes", ">    - Q12: yes", ">  1. Q12: yes",
-                       "> Q12: yes\n>\n>     words in a code block", ">\t- Q12: yes"):
-            with self.subTest(answer=answer):
-                self.setUp()
-                self.edit(self.RECORD, "> Q12: yes", answer)
-                self.assertTrue(any("indented quote lines" in e for e in self.errors()))
+                       "> Q12: yes\n>\n>     words in a code block", ">\t- Q12: yes", "> \t- Q12: yes",
+                       "> Q12: yes\n   >  # inner heading", "> Q12: yes\n\n>  # decoy heading"):
+            for status in ("Decided", "Proposed"):
+                with self.subTest(answer=answer, status=status):
+                    self.setUp()
+                    self.edit(self.RECORD, "> Q12: yes", answer)
+                    self.edit(self.RECORD, "Status: Decided", f"Status: {status}")
+                    self.assertTrue(any("renders markup" in e for e in self.errors()))
 
     def test_plain_owner_answers_pass(self) -> None:
         for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon.",

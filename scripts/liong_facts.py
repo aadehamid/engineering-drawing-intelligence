@@ -416,7 +416,28 @@ def has_content(body: str) -> bool:
 PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*"
 
 
-OWNER_ANSWER = r"^The owner (?:answered|said|wrote):\n+((?:>.*\n?)+)"
+def owner_quotes_render_plain(section: str) -> bool:
+    """Every quote after 'The owner answered:' (or said/wrote) renders as plain paragraphs.
+
+    The CommonMark parser decides, so no spelling of a heading, list, code block, nested
+    quote, link or emphasis inside the owner's words passes, however it is indented or
+    split by blank lines. Quotes before the answer line may hold the agent's question.
+    """
+    started, depth = False, 0
+    for token in MARKDOWN.parse(section):
+        if not started:
+            started = token.type == "inline" and bool(re.match(r"The owner (?:answered|said|wrote):", token.content))
+        elif token.type in ("blockquote_open", "blockquote_close"):
+            depth += 1 if token.type == "blockquote_open" else -1
+            if depth > 1:
+                return False
+        elif depth and token.type not in ("paragraph_open", "paragraph_close"):
+            plain = token.type == "inline" and all(
+                child.type in ("text", "softbreak", "hardbreak") for child in token.children or []
+            )
+            if not plain:
+                return False
+    return True
 
 
 def owner_answer_is_plain(body: str) -> bool:
@@ -425,7 +446,7 @@ def owner_answer_is_plain(body: str) -> bool:
     An allow-list, not a Markdown parser: no link, tag, entity, code, or nested container
     can stand in for the owner's words, because none of their characters are allowed.
     """
-    answer = re.search(OWNER_ANSWER, body, re.MULTILINE)
+    answer = re.search(r"^The owner (?:answered|said|wrote):\n+((?:>.*\n?)+)", body, re.MULTILINE)
     if not answer:
         return False
     lines = [line for line in answer.group(1).splitlines() if line.strip() != ">"]
@@ -503,10 +524,8 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
-    # An indented line in the owner's answer can open a heading, a list or a code block.
-    answer = re.search(OWNER_ANSWER, record.raw_owner_words, re.MULTILINE)
-    if answer and re.search(r"^>(?: {2,}|\t)", answer.group(1), re.MULTILINE):
-        errors.append(f"{label}: the owner's answer has indented quote lines, which can hide markup")
+    if not owner_quotes_render_plain(record.raw_owner_words):
+        errors.append(f"{label}: a quote after the owner's answer line renders markup, not plain paragraphs")
     if status == "Decided" and not owner_answer_is_plain(bodies["## Owner's words"]):
         errors.append(
             f"{label}: a Decided record quotes the owner after 'The owner answered:' in a plain-text '>' block"
