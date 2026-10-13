@@ -240,6 +240,16 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                           fence + self.INVENTED + "```\n\n## Alternatives considered")
                 self.assertTrue(any("a code fence must start in the first column" in e for e in self.errors()))
 
+    def test_line_break_other_than_lf_or_cr_fails(self) -> None:
+        # Python splits lines at U+2028; CommonMark does not
+        self.edit(self.QUOTED, "## Alternatives considered",
+                  "text\u2028```\n" + self.INVENTED + "\ntext\u2028```\n\n## Alternatives considered")
+        self.assertTrue(any("only LF and CR may end a line" in e for e in self.errors()))
+
+    def test_closing_fence_followed_by_a_no_break_space_stays_open(self) -> None:
+        # CommonMark allows only spaces or tabs after a closing fence, so the quote is code
+        self.assertInventedQuoteFails("```text\nexample\n```\u00a0\n" + self.INVENTED + "```\n")
+
     def assertInventedQuoteFails(self, source: str) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
         self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")

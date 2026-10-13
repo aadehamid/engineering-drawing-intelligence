@@ -10,7 +10,7 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, link_targets, nested_fences, raw_html
+from check_docs import BASELINE, link_targets, names_a_directory, nested_fences, odd_line_breaks, raw_html
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +53,8 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
             continue
         text = data.decode("utf-8")
         errors += [f"{name}: raw HTML is not allowed, even in code: {tag[:60]}" for tag in raw_html(text)]
+        if odd_line_breaks(text):
+            errors.append(f"{name}: only LF and CR may end a line; found {odd_line_breaks(text)[0]!r}")
         errors += [f"{name}: a code fence must start in the first column, outside lists and quotes: {line.strip()[:60]}"
                    for line in nested_fences(text)]
         for target in link_targets(text):
@@ -60,7 +62,7 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
             if parsed.scheme or parsed.netloc or not parsed.path:
                 continue
             dest = posixpath.normpath(posixpath.join(posixpath.dirname(name), unquote(parsed.path)))
-            if dest not in contents and dest != OUTPUT.as_posix():
+            if names_a_directory(unquote(parsed.path)) or (dest not in contents and dest != OUTPUT.as_posix()):
                 errors.append(f"{name}: links to {target}, which is not in the archive")
     return errors
 

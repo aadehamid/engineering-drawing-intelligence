@@ -32,8 +32,8 @@ The review archive in `docs/releases/` contains the root baseline files, every
 `docs/*.md` and `docs/decisions/*.md` file, and the three scripts. A change to any
 of them needs `python3 scripts/bundle_docs.py` to rebuild the archive in the same
 commit. Archived Markdown holds no raw HTML, even in code. Its code fences start in
-the first column. Every relative link in it must point to another archived file,
-except a link to the archive itself.
+the first column, and only LF or CR ends a line. Every relative link in it must point
+to another archived file, except a link to the archive itself.
 
 ## Review
 

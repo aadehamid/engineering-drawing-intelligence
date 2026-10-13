@@ -115,6 +115,19 @@ class DocumentationToolsTests(unittest.TestCase):
         self.assertTrue(any("a code fence must start in the first column" in e
                             for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
+    def test_link_naming_a_directory_is_refused(self):
+        path = self.root / "docs/LIONG-REG-001-decisions.md"
+        path.write_text(path.read_text() + "\n[a](../README.md/)\n\n[b](../README.md/.)\n", encoding="utf-8")
+        errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
+        for target in ("../README.md/", "../README.md/."):
+            self.assertTrue(any(f"links to {target}, which" in e for e in errors), target)
+
+    def test_line_break_other_than_lf_or_cr_is_refused(self):
+        path = self.root / "docs/LIONG-000-index.md"
+        path.write_text(path.read_text() + "\ntext\u2028more\n", encoding="utf-8")
+        self.assertTrue(any("only LF and CR may end a line" in e
+                            for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
+
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"
         html = ('<a href="\n../scripts/world.py">world</a>', '<img srcset="../scripts/world.py 1x">',

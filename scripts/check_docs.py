@@ -36,6 +36,21 @@ def as_commonmark(text: str) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n").replace("\x00", "\ufffd")
 
 
+# Python ends a line at these characters and CommonMark does not, so a check that splits
+# lines with Python would see a different document. Archived Markdown holds none of them.
+ODD_LINE_BREAK = "[\v\f\x1c\x1d\x1e\x85\u2028\u2029]"
+
+
+def odd_line_breaks(text: str) -> list[str]:
+    """Every character other than LF or CR that Python treats as a line break."""
+    return re.findall(ODD_LINE_BREAK, text)
+
+
+def names_a_directory(path: str) -> bool:
+    """True when a link path ends in '/', '.' or '..', so it cannot name a file."""
+    return path.rsplit("/", 1)[-1] in ("", ".", "..")
+
+
 def nested_fences(text: str) -> list[str]:
     """Every code fence that does not start in the first column.
 
@@ -116,7 +131,9 @@ def check(root: Path) -> list[str]:
             if parsed.scheme or parsed.netloc:
                 continue  # External source availability is a separate research check.
             dest = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
-            if not dest.is_relative_to(root.resolve()):
+            if parsed.path and names_a_directory(unquote(parsed.path)):
+                errors.append(f"{path.name}: link names a directory, not a file: {target}")
+            elif not dest.is_relative_to(root.resolve()):
                 errors.append(f"{path.name}: local link escapes repository: {target}")
             elif not dest.is_file():
                 errors.append(f"{path.name}: missing link target: {target}")

@@ -20,7 +20,7 @@ import sys
 from typing import NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_docs import FENCE_OPEN, nested_fences, raw_html  # noqa: E402
+from check_docs import FENCE_OPEN, nested_fences, odd_line_breaks, raw_html  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
@@ -348,7 +348,7 @@ def rendered(text: str) -> str:
     hidden_close = None  # the closing marker of the comment or HTML block we are inside
     for line in text.splitlines():
         if fence is not None:
-            marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
+            marker = re.match(r" {0,3}(`{3,}|~{3,})[ \t]*$", line)  # only spaces or tabs may follow
             if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
                 fence = None
             kept.append("")
@@ -584,6 +584,8 @@ def check_decisions(root: Path) -> list[str]:
         raw = path.read_text(encoding="utf-8")
         if raw_html(raw):
             errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments, even in code")
+        if odd_line_breaks(raw):
+            errors.append(f"{DECISIONS}/{name}: only LF and CR may end a line; found {odd_line_breaks(raw)[0]!r}")
         if nested_fences(raw):
             errors.append(f"{DECISIONS}/{name}: a code fence must start in the first column, outside lists and quotes")
         record = parse_record(raw)
