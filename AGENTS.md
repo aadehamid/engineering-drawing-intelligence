@@ -70,9 +70,8 @@ with the owner's words quoted, in the format that index defines.
 
 A pull request that settles an engineering practice updates
 [the delivery playbook](docs/delivery-playbook.md) in the same pull request
-([DEC-071](docs/decisions/DEC-071-playbook-grows-with-prs.md)). The playbook holds
-no project-specific items: no pull request numbers, decision IDs or file paths
-([DEC-070](docs/decisions/DEC-070-delivery-playbook.md)).
+([DEC-071](docs/decisions/DEC-071-playbook-grows-with-prs.md)), within the limits on
+its content in [DEC-070](docs/decisions/DEC-070-delivery-playbook.md).
 
 ## Terms
 

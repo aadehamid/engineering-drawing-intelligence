@@ -144,10 +144,10 @@ These are facts about the standard as checked on 2026-10-13. Check them again
 before you rely on them.
 
 - **Releases.** DEXPI 2.0.0 was released on 2025-10-10. DEXPI 2.0.1 was released
-  on 2026-09-30 as the update replacing 2.0. 2.0.1 corrects the Plant model and
-  changes parts of the Process model.
+  on 2026-09-30 as the update replacing 2.0. Its announcement says it fixes a small
+  number of issues in the Plant model and improves the Process model.
 - **Format.** DEXPI 2.0 uses DEXPI XML, with a `Model` root, in place of the older
-  Proteus XML. There is no JSON form.
+  Proteus XML. No other encoding was found.
 - **Source of truth.** The specification repository is
   [gitlab.com/dexpi/Specification](https://gitlab.com/dexpi/Specification). The
   V2.0.1 tag holds the XSD and a 2.0.1 reference P&ID. The HTML specification is
@@ -160,4 +160,4 @@ before you rely on them.
   2.0 files against the XSD and the information models, but it targets 2.0, not
   2.0.1.
 - **Python libraries.** None reads or writes 2.0. pyDEXPI supports DEXPI 1.3, under
-  AGPL-3.0. Its maintainer gives no date for 2.0 support.
+  AGPL-3.0-or-later. Its maintainer has said 2.0 support will come, without a date.

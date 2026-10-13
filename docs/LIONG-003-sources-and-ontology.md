@@ -57,7 +57,7 @@ The current official landing page recommends DEXPI 2.0.1, released on 2026-09-30
 
 | Candidate | Inspected evidence | Proposed use and remaining gate |
 | --- | --- | --- |
-| DEXPI 2.0 official XML and schema | Native `Model`-root reference instance and XSD were fetched and parsed as XML. Model import URLs failed TLS hostname verification. | Selected at 2.0.1 for the slice (DEC-061). The model files are pinned copies in the repository, and validation never fetches them ([DEC-062](decisions/DEC-062-vendored-model-files.md)). LIONG writes its own generator and parser on lxml ([DEC-063](decisions/DEC-063-own-dexpi-generator-and-parser.md)). |
+| DEXPI 2.0 official XML and schema | Native `Model`-root reference instance and XSD were fetched and parsed as XML. Model import URLs failed TLS hostname verification. | Selected at 2.0.1 for the slice (DEC-061). The GATE-001 pull request is to add pinned copies of the model files, and validation will never fetch them ([DEC-062](decisions/DEC-062-vendored-model-files.md)). LIONG will write its own generator and parser on lxml ([DEC-063](decisions/DEC-063-own-dexpi-generator-and-parser.md)). |
 | DEXPI TrainingTestCases | Licensed legacy examples, including C01 XML/SVG and nozzle, off-page connector, and intersection cases | Use for legacy parsing and drawing assessment. Conversion requires an explicit mapping and loss report. Do not rename the format to 2.0. |
 | pyDEXPI | Inspected README states DEXPI 1.3 support and a Proteus XML loader. Code license is AGPL-3.0-or-later. | Excluded for DEXPI 2.0 (DEC-063). At most a legacy research reference. |
 | bpmn2dexpi | MIT-licensed TypeScript tool whose `--validate` option checks DEXPI 2.0 Process and Plant files against the XSD and the information models. Targets 2.0, not 2.0.1. See REF-STD-010. | Recorded, kept out of the slice, and looked at again when it supports 2.0.1 ([DEC-069](decisions/DEC-069-bpmn2dexpi-recorded-not-used.md)). |
@@ -76,7 +76,7 @@ The current official landing page recommends DEXPI 2.0.1, released on 2026-09-30
 
 These are proposed test details for existing requirements. They do not assert full DEXPI compliance or replace human review.
 
-For the slice, [DEC-064](decisions/DEC-064-four-stage-dexpi-validation.md) decides gate 3's validation as four named stages (schema, references, model, LIONG rules) plus an exact round trip, and [DEC-065](decisions/DEC-065-claim-names-stages-that-ran.md) limits each claim to the stages that ran. The parser also reads DEXPI's 2.0.1 reference P&ID ([DEC-066](decisions/DEC-066-reference-pid-parser-test.md)).
+For the slice, [DEC-064](decisions/DEC-064-four-stage-dexpi-validation.md) decides gate 3's validation as four named stages (schema, references, model, LIONG rules) plus an exact round trip, and [DEC-065](decisions/DEC-065-claim-names-stages-that-ran.md) limits each claim to the stages that ran. None of this is built yet. The parser will also read DEXPI's 2.0.1 reference P&ID ([DEC-066](decisions/DEC-066-reference-pid-parser-test.md)).
 
 ## 4. Dataset assessment
 

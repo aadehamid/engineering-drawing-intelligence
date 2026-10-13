@@ -56,6 +56,6 @@ The owner answered:
 
 ## Evidence
 
-- Questions Q17, Q18, Q20, Q21, Q22 and Q23 of the round.
+- Questions Q17, Q18, Q20, Q21, Q22 and Q23 of the round, and the owner's comment on Q19, which set the rule that the playbook holds no project-specific items.
 - The owner's request is quoted in [DEC-064](DEC-064-four-stage-dexpi-validation.md).
 - The agent then summarized Q1 to Q23 as one shared understanding, and the owner answered "works for me".

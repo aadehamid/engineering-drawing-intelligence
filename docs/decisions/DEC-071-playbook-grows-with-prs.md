@@ -51,5 +51,6 @@ The owner answered:
 
 ## Evidence
 
-- Questions Q19 and Q22 of the round.
+- Question Q19 of the round, which proposed the same-pull-request update and the three statuses; the owner's comment on Q19 is recorded in DEC-070.
+- Question Q22, which ruled out pull request references in the playbook.
 - The agent then summarized Q1 to Q23 as one shared understanding, and the owner answered "works for me".
