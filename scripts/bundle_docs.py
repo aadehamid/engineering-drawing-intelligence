@@ -10,7 +10,7 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, link_targets, names_a_directory, odd_target, nested_fences, odd_line_breaks, raw_html
+from check_docs import BASELINE, link_targets, names_a_directory, odd_target, raw_html, spaced_angle_targets
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,7 +44,8 @@ def payload(root: Path) -> dict[str, bytes]:
 def broken_links(contents: dict[str, bytes]) -> list[str]:
     """Raw HTML in archived Markdown, and relative links that point at a file the archive lacks.
 
-    Raw HTML is refused outright, so every link is a Markdown link this check reads.
+    Both come from the CommonMark parser, so they are what a reader's renderer shows.
+    Raw HTML is refused, so every link is a Markdown link the parser reports.
     A link to the archive itself is allowed: it cannot be inside itself.
     """
     errors = []
@@ -52,21 +53,19 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
         if not name.endswith(".md"):
             continue
         text = data.decode("utf-8")
-        errors += [f"{name}: raw HTML is not allowed, even in code: {tag[:60]}" for tag in raw_html(text)]
-        if odd_line_breaks(text):
-            errors.append(f"{name}: only LF and CR may end a line; found {odd_line_breaks(text)[0]!r}")
-        errors += [f"{name}: a code fence must start in the first column, outside lists and quotes: {line.strip()[:60]}"
-                   for line in nested_fences(text)]
+        errors += [f"{name}: raw HTML is not allowed outside code: {tag[:60]}" for tag in raw_html(text)]
+        errors += [f"{name}: link target holds whitespace: {target}" for target in spaced_angle_targets(text)]
         for target in link_targets(text):
-            if odd_target(target):
-                errors.append(f"{name}: link target holds whitespace or a control character: {target!r}")
-                continue
             parsed = urlsplit(target)
+            path = unquote(parsed.path)
             if parsed.scheme or parsed.netloc or not parsed.path:
                 continue
-            dest = posixpath.normpath(posixpath.join(posixpath.dirname(name), unquote(parsed.path)))
-            if names_a_directory(unquote(parsed.path)) or (dest not in contents and dest != OUTPUT.as_posix()):
-                errors.append(f"{name}: links to {target}, which is not in the archive")
+            if odd_target(path):
+                errors.append(f"{name}: link target holds whitespace or a control character: {unquote(target)!r}")
+                continue
+            dest = posixpath.normpath(posixpath.join(posixpath.dirname(name), path))
+            if names_a_directory(path) or (dest not in contents and dest != OUTPUT.as_posix()):
+                errors.append(f"{name}: links to {unquote(target)}, which is not in the archive")
     return errors
 
 
@@ -106,7 +105,7 @@ def main() -> int:
         return 1
     if args.check:
         if not matches(output, contents):
-            print("Archive missing or stale. Run python3 scripts/bundle_docs.py")
+            print("Archive missing or stale. Run uv run python scripts/bundle_docs.py")
             return 1
         print(f"Archive matches all {len(contents) - 1} source files and its manifest.")
         return 0

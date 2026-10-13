@@ -5,6 +5,9 @@ import re
 import sys
 from urllib.parse import unquote, urlsplit
 
+from markdown_it import MarkdownIt
+from markdown_it.token import Token
+
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = (
@@ -15,44 +18,34 @@ BASELINE = (
     "GLOSSARY.md",
 )
 
-# A destination may sit on the next line, behind that line's quote markers.
-NEXT_LINE = r"[ \t]*(?:\n[ \t>]*)?"
-# A bare destination ends at ASCII whitespace or a control character only, so a Unicode
-# space stays in the match; odd_target then refuses it.
-BARE = r"[^\x00-\x20)]+"
-INLINE_LINK = r"\]\(" + NEXT_LINE + r"(<[^>\n]*>|" + BARE + ")"   # [text](target), even split across lines
-# [label]: target, used by reference links. It may sit inside quotes and lists, and its
-# label may escape a bracket or end a line with a backslash; matching too much only
-# checks one more target.
-REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\[\s\S]|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|[^\x00-\x20]+)"
+# GitHub renders this repository's Markdown as CommonMark plus tables and strikethrough.
+MARKDOWN = MarkdownIt("commonmark").enable(["table", "strikethrough"])
 
 
-# A fence opens on three backticks or tildes. A backtick fence's info string holds no
-# backtick; a line like "``` `" is ordinary text in CommonMark.
-FENCE_OPEN = r"^ {0,3}(`{3,}(?=[^`\n]*$)|~{3,})"
-
-
-def as_commonmark(text: str) -> str:
-    """The text CommonMark parses: CRLF and CR end lines, and a NUL becomes U+FFFD."""
-    return text.replace("\r\n", "\n").replace("\r", "\n").replace("\x00", "\ufffd")
-
-
-# Python ends a line at these characters and CommonMark does not, so a check that splits
-# lines with Python would see a different document. Archived Markdown holds none of them.
-ODD_LINE_BREAK = "[\v\f\x1c\x1d\x1e\x85\u2028\u2029]"
-
-
-def odd_line_breaks(text: str) -> list[str]:
-    """Every character other than LF or CR that Python treats as a line break."""
-    return re.findall(ODD_LINE_BREAK, text)
+def tokens(text: str) -> list[Token]:
+    """Every token of the parsed document, the inline children of each block included."""
+    found = []
+    for token in MARKDOWN.parse(text):
+        found.append(token)
+        found += token.children or []
+    return found
 
 
 def odd_target(target: str) -> bool:
     """True when a link target holds whitespace of any kind or a control character.
 
-    URL parsing drops or changes these, and CommonMark trims Unicode spaces at the ends.
+    URL parsing drops or changes these, so a file named with one is never what a link means.
     """
     return any(ch.isspace() or ch < " " or ch == "\x7f" for ch in target)
+
+
+def spaced_angle_targets(text: str) -> list[str]:
+    """Every '<...>' link target that holds whitespace.
+
+    Parsers disagree on these: markdown-it trims a leading space that GitHub keeps.
+    Refusing them keeps the link check from depending on which parser is right.
+    """
+    return re.findall(r"\]\(\s*(<[^<>\n]*\s[^<>\n]*>)", text) + re.findall(r"\]:\s*(<[^<>\n]*\s[^<>\n]*>)", text)
 
 
 def names_a_directory(path: str) -> bool:
@@ -60,35 +53,19 @@ def names_a_directory(path: str) -> bool:
     return path.rsplit("/", 1)[-1] in ("", ".", "..")
 
 
-def nested_fences(text: str) -> list[str]:
-    """Every code fence that does not start in the first column.
-
-    A fence inside a list or quote, or indented, ends by rules this check does not
-    model, so such a fence could hide text or show code as text. Only a fence at the
-    first column is allowed.
-    """
-    return re.findall(r"^[ \t>*+\-\d.)]*[ \t>*+\-.)](?:`{3,}|~{3,}).*", as_commonmark(text), re.MULTILINE)
-
-
 def raw_html(text: str) -> list[str]:
-    """Every HTML tag or comment, code spans and fences included. An autolink <https://...> is text.
-
-    Code is not exempt: telling CommonMark code from text needs its full escape and
-    delimiter rules, and a mistake there would hide a live tag.
-    """
-    return re.findall(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?][^>\n]*>?", as_commonmark(text))
+    """Every HTML block or inline tag a reader's renderer would act on. HTML inside code is text."""
+    return [t.content.strip() for t in tokens(text) if t.type in ("html_block", "html_inline")]
 
 
 def link_targets(text: str) -> list[str]:
-    """Every Markdown link and image target: inline ones and reference definitions.
+    """Every link and image target a reader sees, URL-encoded as the renderer writes it.
 
-    Raw HTML links are not read; archived Markdown holds no raw HTML (see raw_html).
+    Reference links arrive resolved; a definition nothing uses renders nothing and is skipped.
     """
-    text = as_commonmark(text)
-    # Overlapping matches: in "[a](x/[b](y.md)" Markdown links "b" to y.md, inside a's target
-    found = re.findall(f"(?={INLINE_LINK})", text) + re.findall(REFERENCE, text, re.MULTILINE)
-    # Only a destination written as <...> loses its brackets; "a.md>" names a file "a.md>".
-    return [target[1:-1] if target.startswith("<") else target for target in found]
+    found = [t.attrGet("href") if t.type == "link_open" else t.attrGet("src")
+             for t in tokens(text) if t.type in ("link_open", "image")]
+    return [str(target) for target in found if target is not None]
 
 
 def heading_ids(text: str) -> set[str]:
@@ -136,23 +113,24 @@ def check(root: Path) -> list[str]:
             errors.append(f"{label}: missing explicit draft status")
 
     for path, text in texts.items():
+        errors += [f"{path.name}: link target holds whitespace: {target}" for target in spaced_angle_targets(text)]
         for target in link_targets(text):
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc:
                 continue  # External source availability is a separate research check.
             dest = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
-            if odd_target(target):
-                errors.append(f"{path.name}: link target holds whitespace or a control character: {target!r}")
+            if odd_target(unquote(parsed.path)):
+                errors.append(f"{path.name}: link target holds whitespace or a control character: {unquote(target)!r}")
             elif parsed.path and names_a_directory(unquote(parsed.path)):
-                errors.append(f"{path.name}: link names a directory, not a file: {target}")
+                errors.append(f"{path.name}: link names a directory, not a file: {unquote(target)}")
             elif not dest.is_relative_to(root.resolve()):
-                errors.append(f"{path.name}: local link escapes repository: {target}")
+                errors.append(f"{path.name}: local link escapes repository: {unquote(target)}")
             elif not dest.is_file():
-                errors.append(f"{path.name}: missing link target: {target}")
+                errors.append(f"{path.name}: missing link target: {unquote(target)}")
             elif parsed.fragment and dest.suffix == ".md":
                 fragment = unquote(parsed.fragment)
                 if fragment not in heading_ids(dest.read_text(encoding="utf-8")):
-                    errors.append(f"{path.name}: missing heading: {target}")
+                    errors.append(f"{path.name}: missing heading: {unquote(target)}")
 
     requirements = root / "docs/LIONG-002-users-and-requirements.md"
     evaluation = root / "docs/LIONG-010-evaluation.md"

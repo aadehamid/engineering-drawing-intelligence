@@ -1,17 +1,16 @@
 """The one source for figures the documents quote.
 
 Usage:
-  python3 scripts/liong_facts.py figures [--json]   every figure, the files read, and the commit
-  python3 scripts/liong_facts.py check              fail if a registered claim or swept count disagrees,
-                                                    or a decision record disagrees with its index
-  python3 scripts/liong_facts.py find PATTERN       search the documents, matching across line breaks
+  uv run python scripts/liong_facts.py figures [--json]  every figure, the files read, and the commit
+  uv run python scripts/liong_facts.py check             fail if a registered claim or swept count disagrees,
+                                                         or a decision record disagrees with its index
+  uv run python scripts/liong_facts.py find PATTERN      search the documents, matching across line breaks
 
 Figures are computed from the R0 fixture tables and edge lists in LIONG-006 and the
 workload table in LIONG-010. The tool reads files only; it never writes to the repository.
 """
 
 import argparse
-import html
 import json
 from pathlib import Path
 import re
@@ -20,7 +19,8 @@ import sys
 from typing import NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_docs import FENCE_OPEN, nested_fences, odd_line_breaks, raw_html  # noqa: E402
+from check_docs import MARKDOWN, raw_html  # noqa: E402
+from markdown_it.token import Token  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
@@ -328,97 +328,89 @@ class Record(NamedTuple):
     amends: list[str]
     superseded_by: list[str]
     raw_owner_words: str
+    quotes: dict[str, list[str]]
 
 
-HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNORECASE)
+def lines_of(text: str) -> list[str]:
+    """The lines the parser numbers: CRLF and CR end a line, and nothing else does."""
+    return text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
 
 
 def rendered(text: str) -> str:
-    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences blanked.
+    """The source lines a reader sees as prose, with every other line blank.
 
-    Each hidden line becomes a blank line, so text on either side stays in separate blocks.
-
-    One pass tracks all three, so a comment marker inside code and a fence inside a
-    comment are left alone. Comments and script, style, textarea, and title blocks hide
-    their contents and run to the end of the document if unclosed. A fence closes only
-    on the same character repeated at least as many times.
+    The CommonMark parser decides: lines of headings, paragraphs, tables and rules are
+    kept as written, container markers included; lines of code, HTML and reference
+    definitions become blank, so a pattern that reads the result never sees them.
     """
-    kept: list[str] = []
-    fence = None
-    hidden_close = None  # the closing marker of the comment or HTML block we are inside
-    for line in text.splitlines():
-        if fence is not None:
-            marker = re.match(r" {0,3}(`{3,}|~{3,})[ \t]*$", line)  # only spaces or tabs may follow
-            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
-                fence = None
-            kept.append("")
-            continue
-        visible = ""
-        rest = line
-        while rest:
-            if hidden_close:
-                end = re.search(hidden_close, rest, re.IGNORECASE)
-                if not end:
-                    rest = ""
-                else:
-                    hidden_close, rest = None, rest[end.end():]
-            else:
-                start = HIDDEN_OPEN.search(rest)
-                if not start:
-                    visible, rest = visible + rest, ""
-                else:
-                    tag = start.group(1)
-                    hidden_close = rf"</{tag}\s*>" if tag else "-->"
-                    visible, rest = visible + rest[:start.start()], rest[start.end():]
-        if hidden_close and not visible.strip():
-            kept.append("")
-            continue
-        opening = re.match(FENCE_OPEN, visible)
-        if opening:
-            fence = opening.group(1)
-            kept.append("")
-            continue
-        kept.append(visible)
-    return "\n".join(kept) + "\n"
+    lines = lines_of(text)
+    keep = [False] * len(lines)
+    for token in MARKDOWN.parse(text):
+        if token.type in ("heading_open", "paragraph_open", "table_open", "hr") and token.map:
+            for number in range(*token.map):
+                keep[number] = True
+    return "\n".join(line if kept else "" for line, kept in zip(lines, keep)) + "\n"
 
 
-CONTAINER_MARKER = r"^\s*(?:>|[-*+]|\d+[.)])(?:\s+|$)"
-INVISIBLE_LINE = (
-    r" {0,3}#{1,6}(\s.*)?"                 # a heading
-    r"| {0,3}\[[^\]]+\]:\s*\S.*"            # a link reference definition, which renders nothing
-)
-HTML_TAG = r"</?[A-Za-z][\w-]*(\s[^>]*)?/?>"  # an autolink such as <https://...> is text, not a tag
+def shown(children: list[Token] | None, images: bool) -> str:
+    """The text an inline run displays: emphasis and link markers gone, entities decoded.
 
-
-def visible_lines(body: str) -> list[str]:
-    """Lines as a reader sees them: quote and list markers removed, then code, comments, and tags.
-
-    Containers are unwrapped before fences and comments are removed, so a fence or comment
-    inside a quote or list item is hidden the same way as one at the top level.
+    With `images`, an image becomes U+FFFC: a loaded image shows no alt text, so its
+    alt words never count as quoted words.
     """
-    unwrapped = []
-    for line in body.splitlines():
-        while re.match(CONTAINER_MARKER, line):
-            line = re.sub(CONTAINER_MARKER, "", line, count=1)
-        unwrapped.append(line)
-    return [
-        visible_inline(line)
-        for line in rendered("\n".join(unwrapped)).splitlines()
-        if not re.fullmatch(INVISIBLE_LINE, line)
-    ]
+    parts = []
+    for child in children or []:
+        if child.type in ("text", "code_inline"):
+            parts.append(child.content)
+        elif child.type in ("softbreak", "hardbreak"):
+            parts.append(" ")
+        elif child.type == "image" and images:
+            parts.append(" \ufffc ")
+    return "".join(parts)
 
 
-def visible_inline(line: str) -> str:
-    """One line's displayed text: images dropped, links reduced to labels, tags removed, entities decoded."""
-    line = re.sub(r"!\[[^\]]*\](\([^)]*\)|\[[^\]]*\])", "", line)
-    line = re.sub(r"\[([^\]]*)\](\([^)]*\)|\[[^\]]*\])", r"\1", line)
-    line = re.sub(HTML_TAG, "", line)
-    return html.unescape(line).replace("\xa0", " ")
+def displayed_quotes(text: str) -> dict[str, list[str]]:
+    """The words a reader sees in each outermost block quote, keyed by its '## ' section.
+
+    Lazy continuation lines, nested lists and code inside a quote are part of it, as
+    CommonMark renders them; list numbers and bullets stay, because a reader sees them.
+    """
+    found: dict[str, list[str]] = {}
+    stream = MARKDOWN.parse(text)
+    heading = ""
+    depth = 0
+    parts: list[str] = []
+    for index, token in enumerate(stream):
+        if token.type == "heading_open" and token.tag == "h2" and token.level == 0:
+            heading = "## " + stream[index + 1].content.strip()
+        elif token.type == "blockquote_open":
+            depth += 1
+            if depth == 1:
+                parts = []
+        elif token.type == "blockquote_close":
+            depth -= 1
+            if depth == 0:
+                found.setdefault(heading, []).append(" ".join(" ".join(parts).split()))
+        elif depth:
+            if token.type == "inline":
+                parts.append(shown(token.children, True))
+            elif token.type == "list_item_open":
+                parts.append(f"{token.info}{token.markup}" if token.info else "•")
+            elif token.type in ("fence", "code_block"):
+                parts.append(token.content)
+            elif token.type in ("paragraph_close", "heading_close", "td_close", "th_close"):
+                parts.append(" ")
+    return found
 
 
 def has_content(body: str) -> bool:
-    """True when a reader sees at least one letter or digit outside headings and markup."""
-    return any(re.search(r"[^\W_]", line) for line in visible_lines(body))
+    """True when a reader sees at least one letter or digit outside headings, code and markup."""
+    stream = MARKDOWN.parse(body)
+    return any(
+        token.type == "inline" and stream[index - 1].type != "heading_open"
+        and re.search(r"[^\W_]", shown(token.children, False))
+        for index, token in enumerate(stream)
+    )
 
 
 PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*"
@@ -440,54 +432,10 @@ def owner_answer_is_plain(body: str) -> bool:
     )
 
 
-def quote_blocks(body: str) -> tuple[list[str], list[str]]:
-    """Each '>' block in a section, and the layout errors that would hide a quote.
-
-    Only a top-level '>' block that ends at a blank line is compared. A quote nested in a
-    list, or a line that runs on from a quote without its own '>', would show text the
-    comparison never sees, so both are errors.
-    """
-    blocks, errors, current = [], [], []
-    for line in body.splitlines() + [""]:
-        if re.match(r" {0,3}>", line):
-            current.append(line)
-            continue
-        if re.match(r"\s*(?:(?:[-*+]|\d+[.)])\s+)*>", line):
-            errors.append(f"a quote must start the line, not sit inside a list: {line.strip()[:60]}")
-        if current:
-            if line.strip(" \t"):  # a line of only U+00A0 is not blank; it continues the quote
-                errors.append(f"end each quote with a blank line before: {line.strip()[:60]}")
-            blocks.append("\n".join(current))
-            current = []
-    return blocks, errors
-
-
-# Letters, digits, spaces and punctuation that CommonMark shows as written. No backtick,
-# tilde, bracket, angle bracket, backslash or pipe: code, fences, links, images,
-# reference definitions, HTML, escapes and tables need one of them to hide or change text.
-PLAIN_TEXT = r"(?:[^\W_]|[ .,:;?!'\"’‘“”/%+=@()*_&–—-])*"
-
-
-def plain_block(block: str) -> bool:
-    """True when every line of a '>' block is plain text a reader sees exactly as written."""
-    return all(
-        re.fullmatch(PLAIN_TEXT, re.sub(r"^ {0,3}>", "", line)) and not re.search(r"&#?\w+;", line)
-        for line in block.splitlines()
-    )
-
-
-def flat_quote(text: str) -> str:
-    """The quoted words: each line's quote marker and the line breaks removed, every other character kept.
-
-    A number or dash after the marker stays, because a reader may see it as text.
-    """
-    lines = [re.sub(r"^ {0,3}>", "", line) for line in text.splitlines()]
-    return " ".join(" ".join(lines).split())
-
-
 def parse_record(text: str) -> Record | None:
     raw = re.search(r"^## Owner's words\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
     raw_owner_words = raw.group(1) if raw else ""
+    quotes = displayed_quotes(text)
     text = rendered(text)
     heading = re.match(r"\s*# (DEC-\d{3}): (.+)\n", text)
     if not heading:
@@ -508,6 +456,7 @@ def parse_record(text: str) -> Record | None:
         re.findall(r"^Amends (DEC-\d{3})\b", text, re.MULTILINE),
         re.findall(r"^Superseded by (DEC-\d{3}) on \d{4}-\d{2}-\d{2}\.?$", text, re.MULTILINE),
         raw_owner_words,
+        quotes,
     )
 
 
@@ -541,18 +490,12 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
-    sources = []
-    for heading in ("## Owner's words", "## Evidence"):
-        blocks, layout = quote_blocks(bodies[heading])
-        errors += [f"{label}: {heading[3:]}: {error}" for error in layout]
-        sources += [flat_quote(block) for block in blocks if plain_block(block)]
-    blocks, layout = quote_blocks(bodies["## Decision"])
-    errors += [f"{label}: Decision: {error}" for error in layout]
-    for quote in map(flat_quote, blocks):
+    sources = record.quotes.get("## Owner's words", []) + record.quotes.get("## Evidence", [])
+    for quote in record.quotes.get("## Decision", []):
         if not quote:
             errors.append(f"{label}: a Decision quote is empty")
         elif not any(re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", source) for source in sources):
-            errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word in a plain quote under Owner's words or Evidence")
+            errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word in a quote under Owner's words or Evidence")
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
@@ -587,11 +530,7 @@ def check_decisions(root: Path) -> list[str]:
     for name, path in sorted(files.items()):
         raw = path.read_text(encoding="utf-8")
         if raw_html(raw):
-            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments, even in code")
-        if odd_line_breaks(raw):
-            errors.append(f"{DECISIONS}/{name}: only LF and CR may end a line; found {odd_line_breaks(raw)[0]!r}")
-        if nested_fences(raw):
-            errors.append(f"{DECISIONS}/{name}: a code fence must start in the first column, outside lists and quotes")
+            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
         record = parse_record(raw)
         if not record or not name.startswith(record.record_id + "-"):
             errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")

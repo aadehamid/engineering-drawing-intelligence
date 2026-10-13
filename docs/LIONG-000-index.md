@@ -76,9 +76,9 @@ Each linked document is a standalone Markdown file. The
 [complete review archive](releases/LIONG-review-package-v0.1.zip) contains those
 files with the root baseline and a manifest of file hashes.
 
-Run `python3 scripts/check_docs.py` from the repository root to check local links,
+Run `uv run python scripts/check_docs.py` from the repository root to check local links,
 document presence, cross-referenced requirement/scenario IDs, and basic formatting.
-Run `python3 scripts/bundle_docs.py --check` to check archive freshness.
+Run `uv run python scripts/bundle_docs.py --check` to check archive freshness.
 These are documentation checks, not engineering acceptance tests.
 
 ## PPC reuse summary

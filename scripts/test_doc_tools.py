@@ -112,10 +112,11 @@ class DocumentationToolsTests(unittest.TestCase):
             self.assertTrue(any(f"{target}, which is not in the archive" in e for e in errors), target)
         self.assertTrue(any("whitespace or a control character: '../README.md\\xa0x.md'" in e for e in errors))
 
-    def test_fence_outside_the_first_column_is_refused(self):
+    def test_link_after_a_list_item_fence_is_checked(self):
+        # The fence ends with its list item, so the link below it is live
         path = self.root / "docs/LIONG-000-index.md"
-        path.write_text(path.read_text() + "\n  ```text\n> code\n  ```\n", encoding="utf-8")
-        self.assertTrue(any("a code fence must start in the first column" in e
+        path.write_text(path.read_text() + "\n- Example:\n  ```text\n[x](../absent-11.md)\n", encoding="utf-8")
+        self.assertTrue(any("../absent-11.md, which is not in the archive" in e
                             for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
     def test_link_naming_a_directory_is_refused(self):
@@ -125,19 +126,20 @@ class DocumentationToolsTests(unittest.TestCase):
         for target in ("../README.md/", "../README.md/."):
             self.assertTrue(any(f"links to {target}, which" in e for e in errors), target)
 
-    def test_line_break_other_than_lf_or_cr_is_refused(self):
+    def test_link_after_a_line_separator_is_checked(self):
+        # U+2028 is an ordinary character to CommonMark, so it opens no fence
         path = self.root / "docs/LIONG-000-index.md"
-        path.write_text(path.read_text() + "\ntext\u2028more\n", encoding="utf-8")
-        self.assertTrue(any("only LF and CR may end a line" in e
+        path.write_text(path.read_text() + "\ntext\u2028```\n[x](../absent-12.md)\n", encoding="utf-8")
+        self.assertTrue(any("../absent-12.md, which is not in the archive" in e
                             for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
     def test_link_target_with_a_space_or_control_character_is_refused(self):
-        # URL parsing drops the leading space and the tab, so "./README.md" would pass
+        # Parsers disagree on a space inside <...>, so any whitespace there is refused
         path = self.root / "README.md"
-        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n\n[c](\u2003README.md)\n", encoding="utf-8")
+        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n\n[c]: <./READ ME.md>\n\nSee [c].\n", encoding="utf-8")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for target in (" ./README.md", "./READ\tME.md", "\u2003README.md"):
-            self.assertTrue(any(f"whitespace or a control character: {target!r}" in e for e in errors), target)
+        for target in ("< ./README.md>", "<./READ\tME.md>", "<./READ ME.md>"):
+            self.assertTrue(any(f"link target holds whitespace: {target}" in e for e in errors), target)
 
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"
@@ -151,15 +153,23 @@ class DocumentationToolsTests(unittest.TestCase):
             self.assertTrue(any(e.startswith("docs/LIONG-000-index.md: raw HTML") and first_line[:20] in e
                                 for e in errors), tag)
 
-    def test_html_in_code_and_around_false_code_is_refused(self):
-        for html in ('Use `<a href="x">` here.', '```\n<img src="y">\n```', '\\`<a href="../scripts/world.py">W</a>\\`',
-                     '```<a href="../scripts/world.py">W</a>``'):
+    def test_html_around_false_code_is_refused(self):
+        # Escaped or unequal backticks leave the tag live
+        for html in ('\\`<a href="../scripts/world.py">W</a>\\`', '```<a href="../scripts/world.py">W</a>``'):
             with self.subTest(html=html):
                 self.setUp()
                 path = self.root / "docs/LIONG-000-index.md"
                 path.write_text(path.read_text() + "\n" + html + "\n", encoding="utf-8")
-                self.assertTrue(any("raw HTML is not allowed, even in code" in e
+                self.assertTrue(any("raw HTML is not allowed outside code" in e
                                     for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
+
+    def test_html_inside_code_is_text(self):
+        for html in ('Use `<a href="x">` here.', '```\n<img src="y">\n```'):
+            with self.subTest(html=html):
+                self.setUp()
+                path = self.root / "docs/LIONG-000-index.md"
+                path.write_text(path.read_text() + "\n" + html + "\n", encoding="utf-8")
+                self.assertEqual(bundle_docs.broken_links(bundle_docs.payload(self.root)), [])
 
     def test_bundler_refuses_a_broken_link_and_writes_nothing(self):
         archive = self.root / bundle_docs.OUTPUT
