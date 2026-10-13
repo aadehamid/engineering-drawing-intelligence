@@ -8,10 +8,14 @@ Dependencies: LIONG-001 through LIONG-010 and
 
 ## Current state
 
-The repository contains documentation and documentation-checking utilities.
-It does not contain an engineering pipeline, deployed graph, generated engineering
-dataset, approved dependency lock, or executed engineering acceptance tests.
-The steps below are future implementation work, not commands already executed.
+The repository contains documentation, documentation-checking utilities, and the
+first synthetic backend: R0's canonical world file, the Plant 3D-style schema, a
+generator that writes R0's backend snapshots and answer key, and a loader that applies
+a snapshot and its outbox event to SQL Server. CI applies the schema and loads the
+snapshots on a SQL Server container. The repository does not contain an engineering
+pipeline, deployed graph, or executed engineering acceptance tests, and no hosted
+database has been provisioned. The steps below are future implementation work, not
+commands already executed.
 
 Document approval and gate closure precede dependent build work. No step here
 authorizes cloud provisioning, charges, sensitive data, or publishing datasets.
