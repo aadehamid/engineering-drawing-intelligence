@@ -49,6 +49,23 @@ state; a register row links here when its decision has a record.
 | [DEC-052](DEC-052-w-sp-contents.md) | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided | 2026-10-13 |
 | [DEC-053](DEC-053-main-history-stays.md) | Main's history stays as it is, with four commits authored by a test identity | Decided | 2026-10-13 |
 | [DEC-054](DEC-054-delegation-takes-precedence.md) | DEC-048's delegation takes precedence over DEC-036's reservation, so W-SP's contents stand | Decided | 2026-10-13 |
+| [DEC-055](DEC-055-slice-choices-close-gates-on-evidence.md) | This round chooses components for MILESTONE-001's slice only, and a gate closes when a PR lands its closure evidence | Decided | 2026-10-13 |
+| [DEC-056](DEC-056-neo4j-for-the-slice.md) | The slice's graph store is Neo4j Community 2026.09.0, run from a pinned image locally and in CI | Decided | 2026-10-13 |
+| [DEC-057](DEC-057-cypher-query-no-ui.md) | Step 5 is a parameterized Cypher query run through the official neo4j Python driver, with no UI in the slice | Decided | 2026-10-13 |
+| [DEC-058](DEC-058-json-run-manifests.md) | The slice's manifests and publication receipt are JSON files in a run output folder, with no PostgreSQL | Decided | 2026-10-13 |
+| [DEC-059](DEC-059-exact-answer-key-comparison.md) | Step 6 compares the published graph with the answer key and requires an exact match | Decided | 2026-10-13 |
+| [DEC-060](DEC-060-plain-python-orchestration.md) | Each slice step is a plain Python command, chained by one script, with no orchestrator | Decided | 2026-10-13 |
+| [DEC-061](DEC-061-dexpi-2-0-1.md) | The slice targets DEXPI 2.0.1, pinned at the specification's V2.0.1 tag | Decided | 2026-10-13 |
+| [DEC-062](DEC-062-vendored-model-files.md) | Pinned copies of the DEXPI model files live in the repository, and validation never fetches over the network | Decided | 2026-10-13 |
+| [DEC-063](DEC-063-own-dexpi-generator-and-parser.md) | LIONG writes its own DEXPI 2.0.1 generator and parser for the supported subset, on lxml | Decided | 2026-10-13 |
+| [DEC-064](DEC-064-four-stage-dexpi-validation.md) | A DEXPI file is valid only when it passes four named validation stages and an exact round trip | Decided | 2026-10-13 |
+| [DEC-065](DEC-065-claim-names-stages-that-ran.md) | A DEXPI validity claim names only the stages that ran, never conformance or certification | Decided | 2026-10-13 |
+| [DEC-066](DEC-066-reference-pid-parser-test.md) | The parser also reads DEXPI's own 2.0.1 reference P&ID and reports what it does not support | Decided | 2026-10-13 |
+| [DEC-067](DEC-067-exact-pins.md) | Every new slice component is pinned exactly, at the latest release at least 14 days old | Decided | 2026-10-13 |
+| [DEC-068](DEC-068-supported-subset-term.md) | The glossary defines supported subset | Decided | 2026-10-13 |
+| [DEC-069](DEC-069-bpmn2dexpi-recorded-not-used.md) | bpmn2dexpi is recorded as a candidate validator and kept out of the slice | Decided | 2026-10-13 |
+| [DEC-070](DEC-070-delivery-playbook.md) | A general delivery playbook for engineering-data-to-graph projects lives in this repository | Decided | 2026-10-13 |
+| [DEC-071](DEC-071-playbook-grows-with-prs.md) | A pull request that settles an engineering practice updates the playbook in the same pull request | Decided | 2026-10-13 |
 
 ## Record format
 

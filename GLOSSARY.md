@@ -93,3 +93,7 @@ file names, revisions, or raster variants does not make data independent.
 A source representation whose schema follows one authoring product's storage
 patterns, using original names. The SmartPlant-style and Plant 3D-style backends
 are the two in this project.
+
+**Supported subset**:
+The DEXPI classes and properties this project generates and reads. Anything
+outside it is reported as unsupported, never dropped silently.
