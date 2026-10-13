@@ -88,6 +88,7 @@ each can be reversed by a later owner decision.
 | --- | --- | --- | --- |
 | DEC-049 | The Plant 3D-style schema is one T-SQL file, tested on SQL Server in CI, with tags split as the product splits them | Decided by the agent under DEC-048 | [record](decisions/DEC-049-plant-3d-schema-choices.md) |
 | DEC-050 | The Plant 3D-style generator writes one JSON file per table per revision, with a separate answer key | Decided by the agent under DEC-048 | [record](decisions/DEC-050-p3d-generator-choices.md) |
+| DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048 | [record](decisions/DEC-052-w-sp-contents.md) |
 
 ## New proposals
 

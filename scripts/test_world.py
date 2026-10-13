@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for scripts/world.py and worlds/R0.yaml.
+"""Tests for scripts/world.py, worlds/R0.yaml and worlds/W-SP.yaml.
 
 `fidelity_errors` compares R0.yaml with the facts its parsers read from LIONG-006:
 every node's class, role, tag or drawing name, sheet, diameter and unit (and nothing
@@ -158,6 +158,93 @@ class R0MatchesLiong006(unittest.TestCase):
             s = world.state(self.data, revision)
             self.assertEqual(len(s.nodes), figures[f"{prefix}.nodes"], revision)
             self.assertEqual(len(s.all_edges()), figures[f"{prefix}.edges"], revision)
+
+
+class WspHasWhatSmartPlantStoresDifferently(unittest.TestCase):
+    """W-SP holds DEC-036's four features, at about R0's size, with only its baseline (DEC-042)."""
+
+    w = world.load(world.ROOT / "worlds" / "W-SP.yaml")
+    base = world.state(w, "W0")
+
+    def flows(self) -> set[tuple[str, str]]:
+        return {(e.source, e.target) for e in self.base.edges if e.kind == "FLOW"}
+
+    def test_only_the_baseline(self):
+        self.assertEqual(list(self.w["revisions"]), ["W0"])
+        self.assertEqual(world.problems(self.base), [])
+
+    def test_one_pipeline_of_several_runs_sharing_a_line_number(self):
+        runs = {}
+        for alias, node in self.base.nodes.items():
+            if node["class"] == "pipe_segment":
+                runs.setdefault(node["attributes"]["line_number"], set()).add(node["attributes"]["run"])
+        self.assertEqual(runs, {"301": {"A", "B"}})
+
+    def test_one_run_carries_several_inline_components(self):
+        on_run = {}
+        for alias, node in self.base.nodes.items():
+            if node["class"] == "valve":
+                ends = {s for s, t in self.flows() if t == alias} | {t for s, t in self.flows() if s == alias}
+                runs = {self.base.nodes[e]["attributes"]["run"] for e in ends}
+                self.assertEqual(len(runs), 1, f"{alias} sits between two runs")
+                on_run.setdefault(runs.pop(), []).append(alias)
+        self.assertGreaterEqual(max(len(v) for v in on_run.values()), 2)
+
+    def test_one_cross_sheet_pair_and_one_instrument_with_a_parent(self):
+        kinds = [e.kind for e in self.base.edges]
+        self.assertEqual((kinds.count("CROSS_SHEET_REFERENCE"), kinds.count("INSTRUMENT_PARENT")), (1, 1))
+
+    def test_about_r0_size(self):
+        self.assertEqual((len(self.base.nodes), len(self.base.all_edges())), (15, 26))
+
+    def test_flow_is_one_path_from_supply_to_receiving_vessel(self):
+        nexts = dict(self.flows())
+        self.assertEqual(len(nexts), len(self.flows()), "a node has two outgoing flows")
+        path, node = ["E1"], "E1"
+        while node in nexts:
+            node = nexts[node]
+            self.assertNotIn(node, path, f"flow returns to {node}")  # a cycle fails instead of hanging
+            path.append(node)
+        self.assertEqual((path[-1], len(path) - 1), ("E2", len(self.flows())))
+
+    def test_tags_and_sheets_are_dec052s(self):
+        # Each named object DEC-052 lists, with its tag and sheet
+        expected = {
+            "E1": ("TK-301", "S1"), "E2": ("TK-302", "S2"), "V1": ("HV-301", "S1"), "V2": ("HV-302", "S1"),
+            "V3": ("HV-303", "S2"), "I1": ("LT-302", "S2"), "X1": ("TO-S2/B", "S1"), "X2": ("FROM-S1/B", "S2"),
+        }
+        found = {a: (self.base.nodes[a].get("tag"), self.base.nodes[a]["sheet"]) for a in expected}
+        self.assertEqual(found, expected)
+        pairs = {(e.kind, e.source, e.target) for e in self.base.edges if e.kind != "FLOW"}
+        self.assertEqual(pairs, {("CROSS_SHEET_REFERENCE", "X1", "X2"), ("INSTRUMENT_PARENT", "I1", "E2")})
+
+    def test_facility_and_drawings(self):
+        self.assertEqual(self.w["tag_context"], "DEMO-LEKKI/UNIT-B")
+        drawings = {a: n["name"] for a, n in self.base.nodes.items() if n["class"] == "drawing"}
+        self.assertEqual(drawings, {"S1": "DEMO-PID-101", "S2": "DEMO-PID-102"})
+
+    def test_each_run_sits_on_one_sheet_with_its_valves(self):
+        # Run A on the first sheet with two valves, run B on the second with one (DEC-052)
+        sheets, valves = {}, {}
+        for alias, node in self.base.nodes.items():
+            if node["class"] == "pipe_segment":
+                sheets.setdefault(node["attributes"]["run"], set()).add(node["sheet"])
+        for alias, node in self.base.nodes.items():
+            if node["class"] == "valve":
+                ends = {s for s, t in self.flows() if t == alias} | {t for s, t in self.flows() if s == alias}
+                run = {self.base.nodes[e]["attributes"]["run"] for e in ends}.pop()
+                valves[run] = valves.get(run, 0) + 1
+                self.assertEqual({node["sheet"]}, sheets[run], f"{alias} is not on its run's sheet")
+        self.assertEqual((sheets, valves), ({"A": {"S1"}, "B": {"S2"}}, {"A": 2, "B": 1}))
+
+    def test_cross_sheet_pair_joins_two_sheets_and_the_parent_is_equipment(self):
+        n = self.base.nodes
+        (source, target), = [(e.source, e.target) for e in self.base.edges if e.kind == "CROSS_SHEET_REFERENCE"]
+        self.assertEqual(({n[source]["class"], n[target]["class"]}, n[source]["sheet"] != n[target]["sheet"]),
+                         ({"connection_point"}, True))
+        self.assertIn((source, target), self.flows())
+        (child, parent), = [(e.source, e.target) for e in self.base.edges if e.kind == "INSTRUMENT_PARENT"]
+        self.assertEqual((n[child]["class"], n[parent]["class"]), ("instrument", "equipment"))
 
 
 class FidelityFailsOnWrongFacts(unittest.TestCase):
