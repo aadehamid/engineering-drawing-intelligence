@@ -537,6 +537,16 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                               spot.format(c=char) + "\n\n> # later heading\n")
                     self.assertTrue(any("invisible format character" in e for e in self.errors()))
 
+    def test_inserted_blank_character_cannot_hide_the_answer_phrase(self) -> None:
+        for char in ("\ufe0e", "\u034f", "\u3164", "\u2800"):
+            for spot in ("The{c} owner answered:", "The owner {c}answered:", "The owner answered{c}:"):
+                with self.subTest(char=hex(ord(char)), spot=spot):
+                    self.setUp()
+                    self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+                    self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                              spot.format(c=char) + "\n\n> # later heading\n")
+                    self.assertTrue(any("renders markup" in e for e in self.errors()))
+
     def test_markup_on_a_quoted_answer_line_fails(self) -> None:
         self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
         self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",

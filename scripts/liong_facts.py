@@ -426,10 +426,9 @@ def owner_quotes_render_plain(section: str) -> bool:
     in any block, so markup or a preceding line cannot hide it. From that block on, no
     code or HTML block passes at any depth. Quotes before it may hold the agent's question.
 
-    The phrase is matched as written in ordinary characters. Invisible format characters
-    fail the section on their own (see check_record). Look-alike letters from another
-    script, and blank characters outside that category (variation selectors, fillers
-    such as U+3164, the Braille blank), are outside what this check can see.
+    Every character other than an ASCII letter, a space or a colon is deleted before the
+    search, so no character inserted into the phrase can hide it. A letter replaced by a
+    look-alike from another script is outside what this check can see.
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
@@ -440,7 +439,8 @@ def owner_quotes_render_plain(section: str) -> bool:
             continue
         if not started:
             seen = shown(token.children, False) if token.type == "inline" else token.content
-            started = bool(re.search(r"The\s+owner\s+(?:answered|said|wrote)\s*:", seen))
+            letters = re.sub(r"[^A-Za-z:\s]", "", seen)
+            started = bool(re.search(r"The\s+owner\s+(?:answered|said|wrote)\s*:", letters))
             if not started:
                 continue
             if depth > 1:
