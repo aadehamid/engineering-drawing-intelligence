@@ -136,6 +136,16 @@ def history(world: dict, chain: list[str], key: dict[str, int]) -> list[dict]:
                 add(name, alias, "Modified", f"Tag {world['nodes'][alias].get('tag')} -> {change['set_tag']['tag']}")
             elif "delete_node" in change:
                 add(name, change["delete_node"], "Deleted", None)
+            elif "delete_edge" in change:
+                # A removed connection names no object as deleted; its detail uses keys, not aliases
+                kind, source, target = change["delete_edge"]
+                rows.append({
+                    "HistoryId": len(rows) + 1, "ObjectId": None, "DrawingId": None, "Revision": name,
+                    "ChangeKind": "Deleted", "Detail": f"{kind} {key[source]} -> {key[target]}",
+                    "RecordedAt": RECORDED_AT[name],
+                })
+            else:
+                raise GenerationError(f"revision {name} has a change this backend cannot record: {change}")
     return rows
 
 
@@ -270,7 +280,7 @@ def main(argv: list[str]) -> int:
         return 1
     if args.check:
         stale = [p for p, b in files.items() if not p.is_file() or p.read_bytes() != b]
-        extra = [p for p in OUT.rglob("*.json") if p not in files]
+        extra = [p for folder in (OUT, ANSWER_KEY.parent) for p in folder.rglob("*") if p.is_file() and p not in files]
         for p in stale + extra:
             print(f"stale or extra: {p.relative_to(ROOT)}", file=sys.stderr)
         if stale or extra:

@@ -163,6 +163,33 @@
   },
   {
     "HistoryId": 19,
+    "ObjectId": null,
+    "DrawingId": null,
+    "Revision": "R2",
+    "ChangeKind": "Deleted",
+    "Detail": "FLOW 106 -> 114",
+    "RecordedAt": "2030-01-03T08:00:00"
+  },
+  {
+    "HistoryId": 20,
+    "ObjectId": null,
+    "DrawingId": null,
+    "Revision": "R2",
+    "ChangeKind": "Deleted",
+    "Detail": "FLOW 114 -> 104",
+    "RecordedAt": "2030-01-03T08:00:00"
+  },
+  {
+    "HistoryId": 21,
+    "ObjectId": null,
+    "DrawingId": null,
+    "Revision": "R2",
+    "ChangeKind": "Deleted",
+    "Detail": "FLOW 104 -> 107",
+    "RecordedAt": "2030-01-03T08:00:00"
+  },
+  {
+    "HistoryId": 22,
     "ObjectId": 104,
     "DrawingId": null,
     "Revision": "R2",
@@ -171,7 +198,7 @@
     "RecordedAt": "2030-01-03T08:00:00"
   },
   {
-    "HistoryId": 20,
+    "HistoryId": 23,
     "ObjectId": 114,
     "DrawingId": null,
     "Revision": "R2",

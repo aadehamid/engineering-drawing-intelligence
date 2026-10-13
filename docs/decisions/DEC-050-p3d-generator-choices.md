@@ -22,7 +22,8 @@ The agent decided under the owner's delegation:
 The choices:
 
 1. **Format.** Each revision of a world is one folder holding one JSON file per
-   `p3d` table, each a list of rows. JSON keeps column names and nulls, and a loader
+   `p3d` data table, each a list of rows. The class definitions are part of the
+   schema file, not of a snapshot. JSON keeps column names and nulls, and a loader
    inserts it without parsing rules of its own.
 2. **Location.** R0's snapshots go in `fixtures/p3d-r0/`, with a `manifest.json`.
    The answer key goes in `fixtures/answer-keys/p3d-r0.json`, outside the snapshot
@@ -41,9 +42,12 @@ The choices:
    refuses a world where those two differ. Any other direct flow, R0's VB to J2, is
    a `ConnectorPair` row. An instrument's parent is an `Ownership` row, and each
    ON_SHEET edge is a `DrawingAppearance` row.
-6. **Rbad's time.** LIONG-006 gives Rbad no time. It is recorded at 12:00 on R0's
+6. **History.** Each change along a revision's ancestry is one work-history row: a
+   created object, a tag change, a deleted object, or a removed connection, whose
+   detail names the two keys. A change the backend cannot record stops generation.
+7. **Rbad's time.** LIONG-006 gives Rbad no time. It is recorded at 12:00 on R0's
    day, 2030-01-01, after R0 and before R1.
-7. **Manifest.** In place of the generator commit, which a committed file cannot
+8. **Manifest.** In place of the generator commit, which a committed file cannot
    contain, the manifest records the SHA-256 of the world file, the schema, the
    generator and `uv.lock`, then the SHA-256 of every snapshot file.
 
@@ -69,5 +73,5 @@ The owner said:
 - `docs/LIONG-006-synthetic-data.md`, "Exact baseline R0", "Revision and time rules"
   and "Reproducibility and separation".
 - `scripts/test_generate_p3d.py` projects each snapshot back into the comparison
-  view: R0 gives 17 nodes and 31 edges, R2 gives 15 and 26, and Rbad keeps the two
-  flows that name the deleted valve.
+  view and matches LIONG-006's published counts for R0 and R2; Rbad keeps the two
+  flows that name the deleted valve. It also pins each table's rows and every key.

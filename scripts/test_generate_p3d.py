@@ -2,6 +2,7 @@
 """Tests for the Plant 3D-style generator: fresh files, a faithful round trip, and no leaked truth."""
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -20,6 +21,34 @@ def read(revision: str) -> dict[str, list[dict]]:
     return {table: json.loads(FRESH[gen.OUT / revision / f"{table}.json"]) for table in gen.TABLES}
 
 
+# Written out by hand from DEC-050, so these checks do not trust the generator under test.
+EXPECTED_KEYS = {
+    "E1": 101, "E2": 102, "V1": 103, "VB": 104, "I1": 105, "J1": 106, "J2": 107, "X1": 108, "X2": 109,
+    "P1": 110, "P2": 111, "P3": 112, "P4": 113, "P6": 114, "P5": 115, "S1": 901, "S2": 902,
+}
+R0_ROWS = {  # each relationship table's rows in R0, as (first column, second column) aliases
+    "SegmentStart": {("P1", "E1"), ("P2", "J1"), ("P3", "V1"), ("P4", "J2"), ("P5", "X2"), ("P6", "J1")},
+    "SegmentEnd": {("P1", "J1"), ("P2", "V1"), ("P3", "J2"), ("P4", "X1"), ("P5", "E2"), ("P6", "VB")},
+    "ConnectorPair": {("VB", "J2")},
+    "SheetConnectorLink": {("X1", "X2")},
+    "Ownership": {("E2", "I1")},
+}
+PAIR_COLUMNS = {"SegmentStart": ("SegmentId", "ObjectId"), "SegmentEnd": ("SegmentId", "ObjectId"),
+                "ConnectorPair": ("Connector1", "Connector2"), "SheetConnectorLink": ("OutConnector", "InConnector"),
+                "Ownership": ("OwnerId", "OwnedId")}
+
+
+def committed(revision: str) -> dict[str, list[dict]]:
+    """A revision's rows as the repository holds them, not as the generator would write them."""
+    return {table: json.loads((gen.OUT / revision / f"{table}.json").read_text(encoding="utf-8")) for table in gen.TABLES}
+
+
+def pairs(rows: dict[str, list[dict]], table: str) -> set[tuple[str, str]]:
+    alias = {key: name for name, key in EXPECTED_KEYS.items()}
+    first, second = PAIR_COLUMNS[table]
+    return {(alias[r[first]], alias[r[second]]) for r in rows[table]}
+
+
 def project(rows: dict[str, list[dict]]) -> tuple[set[int], set[tuple[str, int, int]]]:
     """A snapshot read back as keys and (kind, source key, target key) edges, the way a mapping would.
 
@@ -36,6 +65,89 @@ def project(rows: dict[str, list[dict]]) -> tuple[set[int], set[tuple[str, int, 
     edges |= {("INSTRUMENT_PARENT", r["OwnedId"], r["OwnerId"]) for r in rows["Ownership"]}
     edges |= {("ON_SHEET", r["ObjectId"], r["DrawingId"]) for r in rows["DrawingAppearance"]}
     return nodes, edges
+
+
+class CommittedFixtureTests(unittest.TestCase):
+    """The committed files against hand-written expectations."""
+
+    def test_answer_key_pins_every_key(self):
+        self.assertEqual(json.loads(gen.ANSWER_KEY.read_text(encoding="utf-8"))["keys"], EXPECTED_KEYS)
+
+    def test_r0_puts_each_connection_in_its_table(self):
+        rows = committed("R0")
+        self.assertEqual({t: pairs(rows, t) for t in R0_ROWS}, R0_ROWS)
+
+    def test_r2_drops_only_the_bypass_rows(self):
+        rows = committed("R2")
+        bypass = {"P6", "VB"}
+        expected = {t: {p for p in v if not set(p) & bypass} for t, v in R0_ROWS.items()}
+        self.assertEqual({t: pairs(rows, t) for t in R0_ROWS}, expected)
+
+    def test_every_object_keeps_its_key_and_class_in_every_snapshot(self):
+        tables = {"E": "Equipment", "V": "Valve", "I": "Instrument", "J": "Junction", "X": "SheetConnector",
+                  "P": "LineSegment"}
+        for revision in ("R0", "R1", "R2", "Rbad"):
+            rows = committed(revision)
+            for alias, key in EXPECTED_KEYS.items():
+                if alias[0] == "S":
+                    continue
+                with self.subTest(revision=revision, alias=alias):
+                    present = state(load(gen.WORLD), revision).nodes.get(alias) is not None
+                    found = [r for r in rows[tables[alias[0]]] if r["ObjectId"] == key]
+                    self.assertEqual(len(found), 1 if present else 0)
+
+    def test_r2_history_records_every_change(self):
+        rows = [(r["Revision"], r["ChangeKind"], r["ObjectId"], r["Detail"])
+                for r in committed("R2")["WorkHistory"] if r["ChangeKind"] != "Created"]
+        self.assertEqual(rows, [
+            ("R1", "Modified", 102, "Tag TK-102 -> TK-202"),
+            ("R2", "Deleted", None, "FLOW 106 -> 114"),
+            ("R2", "Deleted", None, "FLOW 114 -> 104"),
+            ("R2", "Deleted", None, "FLOW 104 -> 107"),
+            ("R2", "Deleted", 104, None),
+            ("R2", "Deleted", 114, None),
+        ])
+
+
+class GenerationErrorTests(unittest.TestCase):
+    def world(self) -> dict:
+        return copy.deepcopy(load(gen.WORLD))
+
+    def test_tag_that_does_not_fit_its_format_stops_generation(self):
+        w = self.world()
+        w["nodes"]["I1"]["tag"] = "PI-10-2"
+        with self.assertRaisesRegex(gen.GenerationError, "does not fit the Instrument tag format"):
+            gen.snapshot(w, "R0")
+
+    def test_sheet_connector_flow_without_its_reference_stops_generation(self):
+        w = self.world()
+        w["edges"]["CROSS_SHEET_REFERENCE"] = []
+        with self.assertRaisesRegex(gen.GenerationError, "without a cross-sheet reference"):
+            gen.snapshot(w, "R0")
+
+    def test_reference_without_a_flow_stops_generation(self):
+        w = self.world()
+        w["edges"]["CROSS_SHEET_REFERENCE"].append(["X2", "X1"])
+        with self.assertRaisesRegex(gen.GenerationError, "has no flow"):
+            gen.snapshot(w, "R0")
+
+    def test_change_the_backend_cannot_record_stops_generation(self):
+        w = self.world()
+        w["revisions"]["R1"]["changes"].append({"move_node": "E2"})
+        with self.assertRaisesRegex(gen.GenerationError, "cannot record"):
+            gen.history(w, ["R0", "R1"], EXPECTED_KEYS)
+
+    def test_main_reports_a_generation_error(self):
+        original = gen.outputs
+
+        def broken():
+            raise gen.GenerationError("broken world")
+
+        gen.outputs = broken
+        try:
+            self.assertEqual(gen.main([]), 1)
+        finally:
+            gen.outputs = original
 
 
 class GeneratorTests(unittest.TestCase):
@@ -103,6 +215,7 @@ class GeneratorTests(unittest.TestCase):
 
             def walk(value):
                 if isinstance(value, dict):
+                    values.update(value)  # keys too: an alias must not appear as a key either
                     for v in value.values():
                         walk(v)
                 elif isinstance(value, list):

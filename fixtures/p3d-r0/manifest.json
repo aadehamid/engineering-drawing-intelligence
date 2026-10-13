@@ -6,7 +6,7 @@
   "inputs": {
     "worlds/R0.yaml": "a0f8e6d293d7fcad251b5bd69d7bc7ff37533b8272d40430bdf0486e9e863eee",
     "schemas/plant3d-style.sql": "3ac975d38af828f2ebacb082e9e04a55fa959cfa3d140beea7be91ce05ff071b",
-    "scripts/generate_p3d.py": "3fd3a5c815799e8575b7072a61620c3e513a17c5e2452f98e5d68e06053273fc",
+    "scripts/generate_p3d.py": "2ece4de6a15aee416765d6b7ffb106edd19c2f5d4efc98236f4e8102703ae80d",
     "uv.lock": "006f48d26723e26806726d9ce698270a35690d26c18da2df1759ac230e638500"
   },
   "revisions": {
@@ -76,7 +76,7 @@
     "R2/SheetConnector.json": "97a3298e50bc6b1bed8a1591e09c30b480f261375a792da0227c475cd1ea2d88",
     "R2/SheetConnectorLink.json": "2b7bf9e2254c7c1c996fec240bef57fe0b709c7611164e1c396e4e6cb460f5ba",
     "R2/Valve.json": "f6538b59a377c07131b0fdcf5f38fd948b130151f4fedc79ca9c26bbf842c08d",
-    "R2/WorkHistory.json": "9ba4af31e017e72b7f4df9425bbbea59f3785841dce06dce82d22d1394310922",
+    "R2/WorkHistory.json": "cc55f43a42e205ac3b4145c3795c66ce9cbeb2446ca50fe8e1461c22737c5f6e",
     "Rbad/ConnectorPair.json": "e313e356124804daf31285dac459555600707ce869bae2c3c8efed83fd56fcdd",
     "Rbad/Drawing.json": "ba752cd9e92d3935df5e802eac0539cabdb7567da4ab297d1d8fa07cc6e3fc97",
     "Rbad/DrawingAppearance.json": "f792d067cd60a8fa77ee8c248b46cd7ef6728cb61b68c50e500407fb8106ca14",
