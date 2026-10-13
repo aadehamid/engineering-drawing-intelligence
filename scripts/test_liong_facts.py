@@ -512,6 +512,17 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                     self.edit(self.RECORD, "Status: Decided", f"Status: {status}")
                     self.assertTrue(any("renders markup" in e for e in self.errors()))
 
+    def test_answer_line_hidden_by_markup_is_still_found(self) -> None:
+        for section in ("> > The owner answered: yes\n",
+                        "> The owner **answered**: yes\n\n> agreed, with **emphasis**\n",
+                        "> [The owner answered:](https://example.com/x)\n\n> # later heading\n",
+                        ">     The owner answered: yes\n\n> # later heading\n"):
+            with self.subTest(section=section):
+                self.setUp()
+                self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+                self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n", section)
+                self.assertTrue(any("renders markup" in e for e in self.errors()))
+
     def test_markup_on_a_quoted_answer_line_fails(self) -> None:
         self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
         self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",

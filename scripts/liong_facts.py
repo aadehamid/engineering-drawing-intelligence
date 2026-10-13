@@ -421,8 +421,9 @@ def owner_quotes_render_plain(section: str) -> bool:
 
     The CommonMark parser decides, so no spelling of a heading, list, code block, nested
     quote, link or emphasis inside the owner's words passes, however it is indented or
-    split by blank lines. The answer line counts only where it starts a paragraph; a
-    quoted answer line is checked too. Quotes before it may hold the agent's question.
+    split by blank lines. The answer line is found by the text a reader sees, in any
+    block, so markup cannot hide it, and the line itself is checked like the quotes after
+    it. Quotes before it may hold the agent's question.
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
@@ -432,9 +433,12 @@ def owner_quotes_render_plain(section: str) -> bool:
                 return False
             continue
         if not started:
-            started = token.type == "inline" and bool(re.match(r"The owner (?:answered|said|wrote):", token.content))
+            seen = shown(token.children, False) if token.type == "inline" else token.content
+            started = bool(re.match(r"\s*The\s+owner\s+(?:answered|said|wrote)\s*:", seen))
             if not started:
                 continue
+            if depth > 1:
+                return False
         if depth and token.type not in ("paragraph_open", "paragraph_close"):
             plain = token.type == "inline" and all(
                 child.type in ("text", "softbreak", "hardbreak") for child in token.children or []
