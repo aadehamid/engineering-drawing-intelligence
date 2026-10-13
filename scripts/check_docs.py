@@ -46,6 +46,11 @@ def odd_line_breaks(text: str) -> list[str]:
     return re.findall(ODD_LINE_BREAK, text)
 
 
+def odd_target(target: str) -> bool:
+    """True when a link target holds a space or control character, which URL parsing drops or changes."""
+    return bool(re.search(r"[\x00-\x20\x7f]", target))
+
+
 def names_a_directory(path: str) -> bool:
     """True when a link path ends in '/', '.' or '..', so it cannot name a file."""
     return path.rsplit("/", 1)[-1] in ("", ".", "..")
@@ -131,7 +136,9 @@ def check(root: Path) -> list[str]:
             if parsed.scheme or parsed.netloc:
                 continue  # External source availability is a separate research check.
             dest = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
-            if parsed.path and names_a_directory(unquote(parsed.path)):
+            if odd_target(target):
+                errors.append(f"{path.name}: link target holds a space or control character: {target!r}")
+            elif parsed.path and names_a_directory(unquote(parsed.path)):
                 errors.append(f"{path.name}: link names a directory, not a file: {target}")
             elif not dest.is_relative_to(root.resolve()):
                 errors.append(f"{path.name}: local link escapes repository: {target}")

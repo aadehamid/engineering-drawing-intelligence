@@ -542,8 +542,11 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
-    sources = [flat_quote(block) for heading in ("## Owner's words", "## Evidence")
-               for block in quote_blocks(bodies[heading])[0] if plain_block(block)]
+    sources = []
+    for heading in ("## Owner's words", "## Evidence"):
+        blocks, layout = quote_blocks(bodies[heading])
+        errors += [f"{label}: {heading[3:]}: {error}" for error in layout]
+        sources += [flat_quote(block) for block in blocks if plain_block(block)]
     blocks, layout = quote_blocks(bodies["## Decision"])
     errors += [f"{label}: Decision: {error}" for error in layout]
     for quote in map(flat_quote, blocks):

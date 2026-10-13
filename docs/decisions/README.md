@@ -64,9 +64,9 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
   `said:` or `wrote:`) followed by the quote in a `>` block of plain text: letters,
   digits, spaces and ordinary punctuation. The whole section holds no HTML,
   entities, or code.
-- **Decision quotes**: each `>` block under Decision starts its line, ends at a
-  blank line, and appears word for word inside one `>` block under Owner's words or
-  Evidence. Every line of that source block is plain text: letters, digits, spaces
+- **Decision quotes**: each `>` block under Decision, Owner's words or Evidence
+  starts its line and ends at a blank line. Each Decision block appears word for
+  word inside one `>` block under Owner's words or Evidence. Every line of that source block is plain text: letters, digits, spaces
   and ordinary punctuation, with no backtick, tilde, bracket, angle bracket,
   backslash, pipe or character entity. Only line breaks and list markers may differ.
 - **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,

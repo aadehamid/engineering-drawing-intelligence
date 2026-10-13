@@ -128,6 +128,14 @@ class DocumentationToolsTests(unittest.TestCase):
         self.assertTrue(any("only LF and CR may end a line" in e
                             for e in bundle_docs.broken_links(bundle_docs.payload(self.root))))
 
+    def test_link_target_with_a_space_or_control_character_is_refused(self):
+        # URL parsing drops the leading space and the tab, so "./README.md" would pass
+        path = self.root / "README.md"
+        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n", encoding="utf-8")
+        errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
+        for target in (" ./README.md", "./READ\tME.md"):
+            self.assertTrue(any(f"space or control character: {target!r}" in e for e in errors), target)
+
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"
         html = ('<a href="\n../scripts/world.py">world</a>', '<img srcset="../scripts/world.py 1x">',

@@ -250,6 +250,13 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         # CommonMark allows only spaces or tabs after a closing fence, so the quote is code
         self.assertInventedQuoteFails("```text\nexample\n```\u00a0\n" + self.INVENTED + "```\n")
 
+    def test_source_quote_inside_a_link_title_fails(self) -> None:
+        # The '>' line sits inside a link title that runs across unquoted lines
+        self.edit(self.QUOTED, "## Evidence\n",
+                  "## Evidence\n\n> [reference](\nhttps://example.com \"\n" + self.INVENTED + "\")\n\n")
+        self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
+        self.assertTrue(any("Evidence: end each quote with a blank line before" in e for e in self.errors()))
+
     def assertInventedQuoteFails(self, source: str) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
         self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")

@@ -10,7 +10,7 @@ import re
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE, link_targets, names_a_directory, nested_fences, odd_line_breaks, raw_html
+from check_docs import BASELINE, link_targets, names_a_directory, odd_target, nested_fences, odd_line_breaks, raw_html
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,6 +58,9 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
         errors += [f"{name}: a code fence must start in the first column, outside lists and quotes: {line.strip()[:60]}"
                    for line in nested_fences(text)]
         for target in link_targets(text):
+            if odd_target(target):
+                errors.append(f"{name}: link target holds a space or control character: {target!r}")
+                continue
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc or not parsed.path:
                 continue
