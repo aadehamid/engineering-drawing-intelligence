@@ -417,11 +417,12 @@ PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*[A-Za-z0-9][A-Za
 
 
 def owner_quotes_render_plain(section: str) -> bool:
-    """Every quote after 'The owner answered:' (or said/wrote) renders as plain paragraphs.
+    """Every quote from 'The owner answered:' (or said/wrote) on renders as plain paragraphs.
 
     The CommonMark parser decides, so no spelling of a heading, list, code block, nested
     quote, link or emphasis inside the owner's words passes, however it is indented or
-    split by blank lines. Quotes before the answer line may hold the agent's question.
+    split by blank lines. The answer line counts only where it starts a paragraph; a
+    quoted answer line is checked too. Quotes before it may hold the agent's question.
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
@@ -429,9 +430,12 @@ def owner_quotes_render_plain(section: str) -> bool:
             depth += 1 if token.type == "blockquote_open" else -1
             if started and depth > 1:
                 return False
-        elif not started:
+            continue
+        if not started:
             started = token.type == "inline" and bool(re.match(r"The owner (?:answered|said|wrote):", token.content))
-        elif depth and token.type not in ("paragraph_open", "paragraph_close"):
+            if not started:
+                continue
+        if depth and token.type not in ("paragraph_open", "paragraph_close"):
             plain = token.type == "inline" and all(
                 child.type in ("text", "softbreak", "hardbreak") for child in token.children or []
             )
