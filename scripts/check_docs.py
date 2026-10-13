@@ -22,8 +22,9 @@ NEXT_LINE = r"[ \t]*(?:\n[ \t>]*)?"
 BARE = r"[^\x00-\x20)]+"
 INLINE_LINK = r"\]\(" + NEXT_LINE + r"(<[^>\n]*>|" + BARE + ")"   # [text](target), even split across lines
 # [label]: target, used by reference links. It may sit inside quotes and lists, and its
-# label may escape a bracket; matching too much only checks one more target.
-REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|[^\x00-\x20]+)"
+# label may escape a bracket or end a line with a backslash; matching too much only
+# checks one more target.
+REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\[\s\S]|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|[^\x00-\x20]+)"
 
 
 # A fence opens on three backticks or tildes. A backtick fence's info string holds no
