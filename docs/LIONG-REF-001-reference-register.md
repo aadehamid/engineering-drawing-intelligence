@@ -151,6 +151,20 @@ Referenced software/service names do not waive licensing or provider terms.
 No third-party packages, specifications, or example datasets are redistributed
 in this documentation archive. New LIONG code/data licensing remains an owner decision.
 
+## Vendor storage references
+
+These entries support the Plant 3D-style backend in `schemas/plant3d-style.sql`
+([DEC-040](decisions/DEC-040-plant-3d-patterns.md),
+[DEC-049](decisions/DEC-049-plant-3d-schema-choices.md)). Access date: 2026-10-13 UTC.
+They describe how the products store saved data; the backend copies the patterns
+under its own names and copies no vendor schema.
+
+| ID | Primary source and inspected state | Supported claim and remaining gate |
+| --- | --- | --- |
+| REF-TECH-015 | Autodesk support article [Understanding PnPDatabase structure using DCF files in AutoCAD Plant 3D](https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/Understanding-PnPDatabase-structure-using-DCF-files-in-AutoCAD-Plant-3D.html), rolling page | The Plant 3D and P&ID project database stores project data, object properties and relationships. Table-level detail comes from REF-TECH-016. |
+| REF-TECH-016 | Carsten Beinecke, [AutoCAD P&ID and AutoCAD Plant 3D: Hidden Treasures in Your Databases](https://static.au-uw2-prd.autodesk.com/handout_5740_PD5740.pdf), Autodesk University handout PD5740, version 1.0; SHA-256 `7900432bb4cdbf196178dad0e91341e22aa19fb4590f20cb796a20874c117701` | A project database can be SQLite or SQL Server. Each class has its own table; system tables start with PnP, including PnPBase (PnPID, PnPClassName, PnPStatus, PnPGuid, PnPTimestamp), PnPDataLinks and PnPColumnAttributes. Relationship tables include LineStartAsset and LineEndAsset (Line, Asset), ConnectorsRelationship (Connector1, Connector2), LineOffPageConnector and AssetOwnership. Equipment rows carry Tag, Type and Number. The column lists come from the handout's screenshots; the product's current release was not inspected. |
+| REF-TECH-017 | Autodesk Plant 3D Help, [To set up a tag format](https://help.autodesk.com/view/PLNT3D/2017/ENU/?caas=caas/CloudHelp/cloudhelp/2017/ENU/Plant3D-UserGuide/files/project-create-tags-wrkflw-htm.html), 2017 user guide | A class's tag format is built from subparts, for example "Equipment Tag [Type-Number]". Later releases were not compared. |
+
 ## Drawing extraction references
 
 Accessed 2026-10-05 UTC. These are documentation and model-card inspections, not

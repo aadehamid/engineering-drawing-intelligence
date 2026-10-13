@@ -77,6 +77,7 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-046 | The next pull requests land in a set order | Owner accepted the Q34 recommendation | [record](decisions/DEC-046-next-pr-order.md) |
 | DEC-047 | The outbox lives in a third, non-vendor schema in the same SQL Server database | Owner chose option (b) of Q35: "go with b" | [record](decisions/DEC-047-loader-outbox-schema.md) |
 | DEC-048 | The agent decides open questions for the owner during the night run of 2026-10-13 | Owner said: "you shpuld decide for me unless it is aboslutely not clear what decisions to make" | [record](decisions/DEC-048-night-delegation.md) |
+| DEC-049 | The Plant 3D-style schema is one T-SQL file, tested on SQL Server in CI, with tags split as the product splits them | Agent decided under DEC-048 | [record](decisions/DEC-049-plant-3d-schema-choices.md) |
 
 ## New proposals
 
