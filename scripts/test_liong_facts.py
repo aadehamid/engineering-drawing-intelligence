@@ -270,6 +270,10 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                   "> Choose option\n> 3. It is approved.\n\n## Alternatives considered")
         self.assertTrue(any("the Decision quote \"Choose option 3. It is approved.\"" in e for e in self.errors()))
 
+    def test_empty_decision_quote_fails(self) -> None:
+        self.edit(self.QUOTED, "## Alternatives considered", ">\n\n## Alternatives considered")
+        self.assertTrue(any("a Decision quote is empty" in e for e in self.errors()))
+
     def assertInventedQuoteFails(self, source: str) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
         self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")

@@ -17,8 +17,8 @@ BASELINE = (
 
 # A destination may sit on the next line, behind that line's quote markers.
 NEXT_LINE = r"[ \t]*(?:\n[ \t>]*)?"
-# A bare destination ends at ASCII whitespace or a control character only; CommonMark
-# keeps a no-break space or other Unicode space inside the destination.
+# A bare destination ends at ASCII whitespace or a control character only, so a Unicode
+# space stays in the match; odd_target then refuses it.
 BARE = r"[^\x00-\x20)]+"
 INLINE_LINK = r"\]\(" + NEXT_LINE + r"(<[^>\n]*>|" + BARE + ")"   # [text](target), even split across lines
 # [label]: target, used by reference links. It may sit inside quotes and lists, and its
@@ -47,8 +47,11 @@ def odd_line_breaks(text: str) -> list[str]:
 
 
 def odd_target(target: str) -> bool:
-    """True when a link target holds a space or control character, which URL parsing drops or changes."""
-    return bool(re.search(r"[\x00-\x20\x7f]", target))
+    """True when a link target holds whitespace of any kind or a control character.
+
+    URL parsing drops or changes these, and CommonMark trims Unicode spaces at the ends.
+    """
+    return any(ch.isspace() or ch < " " or ch == "\x7f" for ch in target)
 
 
 def names_a_directory(path: str) -> bool:
@@ -138,7 +141,7 @@ def check(root: Path) -> list[str]:
                 continue  # External source availability is a separate research check.
             dest = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
             if odd_target(target):
-                errors.append(f"{path.name}: link target holds a space or control character: {target!r}")
+                errors.append(f"{path.name}: link target holds whitespace or a control character: {target!r}")
             elif parsed.path and names_a_directory(unquote(parsed.path)):
                 errors.append(f"{path.name}: link names a directory, not a file: {target}")
             elif not dest.is_relative_to(root.resolve()):

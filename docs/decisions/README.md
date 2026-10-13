@@ -68,7 +68,7 @@ section fixes only the shape that `python3 scripts/liong_facts.py check` verifie
   starts its line and ends at a blank line. Each Decision block appears word for
   word inside one `>` block under Owner's words or Evidence. Every line of that source block is plain text: letters, digits, spaces
   and ordinary punctuation, with no backtick, tilde, bracket, angle bracket,
-  backslash, pipe or character entity. Only line breaks may differ.
+  backslash, pipe or character entity. Only line breaks and spacing may differ.
 - **Supersession**: the earlier record has `Superseded by DEC-NNN on YYYY-MM-DD`,
   and the later record has a line `Amends DEC-NNN`.
 - **Index**: one row per record, with the link, decision, status and date matching

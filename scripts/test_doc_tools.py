@@ -107,8 +107,9 @@ class DocumentationToolsTests(unittest.TestCase):
         path.write_bytes(path.read_bytes() + "\n[a](../README.md>)\n\n[b](../README.md\u00a0x.md)\n".encode()
                          + b"\r\n[c](\r\n../scripts/world.py)\r\n\n[d](../README.md\x00y.md)\n")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for target in ("../README.md>", "../README.md\u00a0x.md", "../scripts/world.py", "../README.md\ufffdy.md"):
+        for target in ("../README.md>", "../scripts/world.py", "../README.md\ufffdy.md"):
             self.assertTrue(any(f"{target}, which is not in the archive" in e for e in errors), target)
+        self.assertTrue(any("whitespace or a control character: '../README.md\\xa0x.md'" in e for e in errors))
 
     def test_fence_outside_the_first_column_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"
@@ -132,10 +133,10 @@ class DocumentationToolsTests(unittest.TestCase):
     def test_link_target_with_a_space_or_control_character_is_refused(self):
         # URL parsing drops the leading space and the tab, so "./README.md" would pass
         path = self.root / "README.md"
-        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n", encoding="utf-8")
+        path.write_text(path.read_text() + "\n[a](< ./README.md>)\n\n[b](<./READ\tME.md>)\n\n[c](\u2003README.md)\n", encoding="utf-8")
         errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
-        for target in (" ./README.md", "./READ\tME.md"):
-            self.assertTrue(any(f"space or control character: {target!r}" in e for e in errors), target)
+        for target in (" ./README.md", "./READ\tME.md", "\u2003README.md"):
+            self.assertTrue(any(f"whitespace or a control character: {target!r}" in e for e in errors), target)
 
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"

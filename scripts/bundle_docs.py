@@ -59,7 +59,7 @@ def broken_links(contents: dict[str, bytes]) -> list[str]:
                    for line in nested_fences(text)]
         for target in link_targets(text):
             if odd_target(target):
-                errors.append(f"{name}: link target holds a space or control character: {target!r}")
+                errors.append(f"{name}: link target holds whitespace or a control character: {target!r}")
                 continue
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc or not parsed.path:

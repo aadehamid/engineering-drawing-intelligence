@@ -33,8 +33,8 @@ The review archive in `docs/releases/` contains the root baseline files, every
 of them needs `python3 scripts/bundle_docs.py` to rebuild the archive in the same
 commit. Archived Markdown holds no raw HTML, even in code. Its code fences start in
 the first column, and only LF or CR ends a line. Every relative link in it must point
-to another archived file or to the archive itself. No link target holds a space or
-control character.
+to another archived file or to the archive itself. No link target holds whitespace
+or a control character.
 
 ## Review
 
