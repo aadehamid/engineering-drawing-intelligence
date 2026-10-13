@@ -19,6 +19,9 @@ import subprocess
 import sys
 from typing import NamedTuple
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_docs import FENCE_OPEN, nested_fences, odd_line_breaks, raw_html  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path("docs/LIONG-006-synthetic-data.md")
 EVALUATION = Path("docs/LIONG-010-evaluation.md")
@@ -331,7 +334,9 @@ HIDDEN_OPEN = re.compile(r"<!--|<(script|style|textarea|title)\b[^>]*>", re.IGNO
 
 
 def rendered(text: str) -> str:
-    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences removed.
+    """The text a reader sees outside code: comments, hidden HTML blocks, and code fences blanked.
+
+    Each hidden line becomes a blank line, so text on either side stays in separate blocks.
 
     One pass tracks all three, so a comment marker inside code and a fence inside a
     comment are left alone. Comments and script, style, textarea, and title blocks hide
@@ -343,9 +348,10 @@ def rendered(text: str) -> str:
     hidden_close = None  # the closing marker of the comment or HTML block we are inside
     for line in text.splitlines():
         if fence is not None:
-            marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
+            marker = re.match(r" {0,3}(`{3,}|~{3,})[ \t]*$", line)  # only spaces or tabs may follow
             if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
                 fence = None
+            kept.append("")
             continue
         visible = ""
         rest = line
@@ -365,10 +371,12 @@ def rendered(text: str) -> str:
                     hidden_close = rf"</{tag}\s*>" if tag else "-->"
                     visible, rest = visible + rest[:start.start()], rest[start.end():]
         if hidden_close and not visible.strip():
+            kept.append("")
             continue
-        opening = re.match(r" {0,3}(`{3,}|~{3,})", visible)
+        opening = re.match(FENCE_OPEN, visible)
         if opening:
             fence = opening.group(1)
+            kept.append("")
             continue
         kept.append(visible)
     return "\n".join(kept) + "\n"
@@ -432,6 +440,51 @@ def owner_answer_is_plain(body: str) -> bool:
     )
 
 
+def quote_blocks(body: str) -> tuple[list[str], list[str]]:
+    """Each '>' block in a section, and the layout errors that would hide a quote.
+
+    Only a top-level '>' block that ends at a blank line is compared. A quote nested in a
+    list, or a line that runs on from a quote without its own '>', would show text the
+    comparison never sees, so both are errors.
+    """
+    blocks, errors, current = [], [], []
+    for line in body.splitlines() + [""]:
+        if re.match(r" {0,3}>", line):
+            current.append(line)
+            continue
+        if re.match(r"\s*(?:(?:[-*+]|\d+[.)])\s+)*>", line):
+            errors.append(f"a quote must start the line, not sit inside a list: {line.strip()[:60]}")
+        if current:
+            if line.strip(" \t"):  # a line of only U+00A0 is not blank; it continues the quote
+                errors.append(f"end each quote with a blank line before: {line.strip()[:60]}")
+            blocks.append("\n".join(current))
+            current = []
+    return blocks, errors
+
+
+# Letters, digits, spaces and punctuation that CommonMark shows as written. No backtick,
+# tilde, bracket, angle bracket, backslash or pipe: code, fences, links, images,
+# reference definitions, HTML, escapes and tables need one of them to hide or change text.
+PLAIN_TEXT = r"(?:[^\W_]|[ .,:;?!'\"’‘“”/%+=@()*_&–—-])*"
+
+
+def plain_block(block: str) -> bool:
+    """True when every line of a '>' block is plain text a reader sees exactly as written."""
+    return all(
+        re.fullmatch(PLAIN_TEXT, re.sub(r"^ {0,3}>", "", line)) and not re.search(r"&#?\w+;", line)
+        for line in block.splitlines()
+    )
+
+
+def flat_quote(text: str) -> str:
+    """The quoted words: each line's quote marker and the line breaks removed, every other character kept.
+
+    A number or dash after the marker stays, because a reader may see it as text.
+    """
+    lines = [re.sub(r"^ {0,3}>", "", line) for line in text.splitlines()]
+    return " ".join(" ".join(lines).split())
+
+
 def parse_record(text: str) -> Record | None:
     raw = re.search(r"^## Owner's words\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
     raw_owner_words = raw.group(1) if raw else ""
@@ -488,6 +541,18 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     for heading in RECORD_SECTIONS:
         if not has_content(bodies[heading]):
             errors.append(f"{label}: section {heading} is empty")
+    sources = []
+    for heading in ("## Owner's words", "## Evidence"):
+        blocks, layout = quote_blocks(bodies[heading])
+        errors += [f"{label}: {heading[3:]}: {error}" for error in layout]
+        sources += [flat_quote(block) for block in blocks if plain_block(block)]
+    blocks, layout = quote_blocks(bodies["## Decision"])
+    errors += [f"{label}: Decision: {error}" for error in layout]
+    for quote in map(flat_quote, blocks):
+        if not quote:
+            errors.append(f"{label}: a Decision quote is empty")
+        elif not any(re.search(rf"(?<!\w){re.escape(quote)}(?!\w)", source) for source in sources):
+            errors.append(f"{label}: the Decision quote \"{quote[:60]}\" is not word for word in a plain quote under Owner's words or Evidence")
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
@@ -521,10 +586,12 @@ def check_decisions(root: Path) -> list[str]:
     names: dict[str, str] = {}
     for name, path in sorted(files.items()):
         raw = path.read_text(encoding="utf-8")
-        outside_code = re.sub(r"`[^`\n]*`", "", re.sub(r"^ {0,3}(`{3,}|~{3,}).*?(^ {0,3}\1|\Z)", "", raw,
-                                                         flags=re.DOTALL | re.MULTILINE))
-        if re.search(r"<(?![A-Za-z][\w+.-]*:)[A-Za-z!/?]", outside_code):  # an autolink <https://...> is text
-            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments outside code")
+        if raw_html(raw):
+            errors.append(f"{DECISIONS}/{name}: decision records hold no raw HTML or comments, even in code")
+        if odd_line_breaks(raw):
+            errors.append(f"{DECISIONS}/{name}: only LF and CR may end a line; found {odd_line_breaks(raw)[0]!r}")
+        if nested_fences(raw):
+            errors.append(f"{DECISIONS}/{name}: a code fence must start in the first column, outside lists and quotes")
         record = parse_record(raw)
         if not record or not name.startswith(record.record_id + "-"):
             errors.append(f"{DECISIONS}/{name}: first line must be '# DEC-NNN: <decision>' matching the file name")
@@ -567,7 +634,7 @@ def find(root: Path, pattern: str) -> list[str]:
     """Search documents; spaces in the pattern also match line breaks."""
     regex = re.compile(r"\s+".join(map(re.escape, pattern.split())), re.IGNORECASE)
     results = []
-    for path in sorted([*root.glob("*.md"), *(root / "docs").glob("*.md")]):
+    for path in sorted([*root.glob("*.md"), *(root / "docs").glob("*.md"), *(root / DECISIONS).glob("*.md")]):
         text = path.read_text(encoding="utf-8")
         for match in regex.finditer(text):
             line = text.count("\n", 0, match.start()) + 1

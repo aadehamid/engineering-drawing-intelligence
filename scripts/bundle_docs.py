@@ -4,10 +4,13 @@ import argparse
 import hashlib
 import io
 import json
+import posixpath
 from pathlib import Path
+import re
 import zipfile
+from urllib.parse import unquote, urlsplit
 
-from check_docs import BASELINE
+from check_docs import BASELINE, link_targets, names_a_directory, odd_target, nested_fences, odd_line_breaks, raw_html
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +21,7 @@ UTILITIES = ("check_docs.py", "bundle_docs.py", "test_doc_tools.py")
 def payload(root: Path) -> dict[str, bytes]:
     files = [root / name for name in BASELINE]
     files += sorted((root / "docs").glob("*.md"))
+    files += sorted((root / "docs" / "decisions").glob("*.md"))
     files += [root / "scripts" / name for name in UTILITIES]
     contents = {
         path.relative_to(root).as_posix(): path.read_bytes()
@@ -35,6 +39,35 @@ def payload(root: Path) -> dict[str, bytes]:
         json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     ).encode("utf-8")
     return contents
+
+
+def broken_links(contents: dict[str, bytes]) -> list[str]:
+    """Raw HTML in archived Markdown, and relative links that point at a file the archive lacks.
+
+    Raw HTML is refused outright, so every link is a Markdown link this check reads.
+    A link to the archive itself is allowed: it cannot be inside itself.
+    """
+    errors = []
+    for name, data in sorted(contents.items()):
+        if not name.endswith(".md"):
+            continue
+        text = data.decode("utf-8")
+        errors += [f"{name}: raw HTML is not allowed, even in code: {tag[:60]}" for tag in raw_html(text)]
+        if odd_line_breaks(text):
+            errors.append(f"{name}: only LF and CR may end a line; found {odd_line_breaks(text)[0]!r}")
+        errors += [f"{name}: a code fence must start in the first column, outside lists and quotes: {line.strip()[:60]}"
+                   for line in nested_fences(text)]
+        for target in link_targets(text):
+            if odd_target(target):
+                errors.append(f"{name}: link target holds whitespace or a control character: {target!r}")
+                continue
+            parsed = urlsplit(target)
+            if parsed.scheme or parsed.netloc or not parsed.path:
+                continue
+            dest = posixpath.normpath(posixpath.join(posixpath.dirname(name), unquote(parsed.path)))
+            if names_a_directory(unquote(parsed.path)) or (dest not in contents and dest != OUTPUT.as_posix()):
+                errors.append(f"{name}: links to {target}, which is not in the archive")
+    return errors
 
 
 def archive_bytes(contents: dict[str, bytes]) -> bytes:
@@ -67,6 +100,10 @@ def main() -> int:
     args = parser.parse_args()
     contents = payload(ROOT)
     output = ROOT / OUTPUT
+    errors = broken_links(contents)
+    if errors:
+        print("\n".join(errors))
+        return 1
     if args.check:
         if not matches(output, contents):
             print("Archive missing or stale. Run python3 scripts/bundle_docs.py")

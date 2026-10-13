@@ -147,6 +147,9 @@ class FiguresTest(CopiedDocsTestCase):
         self.edit(facts.FIXTURES, "baseline therefore contains 31 edges", "baseline therefore\ncontains 31 edges")
         self.assertTrue(any(r.endswith(": therefore contains 31") for r in facts.find(self.root, "therefore contains 31")))
 
+    def test_find_searches_decision_records(self) -> None:
+        self.assertTrue(any(r.startswith("docs/decisions/DEC-014-") for r in facts.find(self.root, "Q12: yes")))
+
     def test_tool_never_writes_to_the_repository(self) -> None:
         before = guard.snapshot(facts.ROOT)
         script = str(facts.ROOT / "scripts" / "liong_facts.py")
@@ -196,6 +199,127 @@ class DecisionRecordsTest(CopiedDocsTestCase):
     def test_decided_needs_owner_quote(self) -> None:
         self.edit(self.RECORD, "> Q12: yes", "Q12: yes")
         self.assertTrue(any("quotes the owner" in e for e in self.errors()))
+
+    QUOTED = Path("docs/decisions/DEC-015-first-generation-slice.md")
+    DECISION_QUOTE = "> Yes. Build only what MILESTONE-001 needs, and add the other representations at\n"
+
+    def test_reworded_decision_quote_fails(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE, self.DECISION_QUOTE.replace("only", "first"))
+        self.assertTrue(any(e.startswith(f"{self.QUOTED}: the Decision quote \"Yes. Build first") for e in self.errors()))
+
+    def test_decision_quote_must_match_whole_words(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n",
+                  "> Yes. Build only what MILESTONE-001 need\n")
+        self.assertTrue(any("the Decision quote \"Yes. Build only what MILESTONE-001 need\"" in e for e in self.errors()))
+
+    def test_literal_underscore_in_a_decision_quote_fails(self) -> None:
+        self.edit(self.QUOTED, self.DECISION_QUOTE, self.DECISION_QUOTE.replace("MILESTONE", "MILE_STONE"))
+        self.assertTrue(any("the Decision quote \"Yes. Build only what MILE_STONE" in e for e in self.errors()))
+
+    def test_decision_quote_spanning_owner_words_and_evidence_fails(self) -> None:
+        record = facts.parse_record((self.root / self.QUOTED).read_text(encoding="utf-8"))
+        bodies = dict(record.sections)
+        last = facts.flat_quote(bodies["## Owner's words"]).split(". ")[-1]
+        first = facts.flat_quote(bodies["## Evidence"]).split(". ")[0]
+        self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n", f"> {last} {first}\n")
+        self.assertTrue(any("is not word for word" in e for e in self.errors()))
+
+    INVENTED = "> Ship nothing and delete the fixture.\n"
+
+    def test_quote_after_a_false_fence_is_compared(self) -> None:
+        # "``` `" is text, not a fence: its info string holds a backtick
+        self.edit(self.QUOTED, "## Alternatives considered", "``` `\n" + self.INVENTED + "\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+
+    def test_fence_outside_the_first_column_fails(self) -> None:
+        # An indented or nested fence ends by rules the check does not model
+        for fence in ("- Example:\n  ```text\n", "  ```text\n", "> ```text\n"):
+            with self.subTest(fence=fence):
+                self.setUp()
+                self.edit(self.QUOTED, "## Alternatives considered",
+                          fence + self.INVENTED + "```\n\n## Alternatives considered")
+                self.assertTrue(any("a code fence must start in the first column" in e for e in self.errors()))
+
+    def test_line_break_other_than_lf_or_cr_fails(self) -> None:
+        # Python splits lines at U+2028; CommonMark does not
+        self.edit(self.QUOTED, "## Alternatives considered",
+                  "text\u2028```\n" + self.INVENTED + "\ntext\u2028```\n\n## Alternatives considered")
+        self.assertTrue(any("only LF and CR may end a line" in e for e in self.errors()))
+
+    def test_closing_fence_followed_by_a_no_break_space_stays_open(self) -> None:
+        # CommonMark allows only spaces or tabs after a closing fence, so the quote is code
+        self.assertInventedQuoteFails("```text\nexample\n```\u00a0\n" + self.INVENTED + "```\n")
+
+    def test_source_quote_inside_a_link_title_fails(self) -> None:
+        # The '>' line sits inside a link title that runs across unquoted lines
+        self.edit(self.QUOTED, "## Evidence\n",
+                  "## Evidence\n\n> [reference](\nhttps://example.com \"\n" + self.INVENTED + "\")\n\n")
+        self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
+        self.assertTrue(any("Evidence: end each quote with a blank line before" in e for e in self.errors()))
+
+    def test_line_of_only_a_no_break_space_continues_the_quote(self) -> None:
+        # A line holding only U+00A0 is not blank, so the next line runs on in the quote
+        self.edit(self.QUOTED, self.DECISION_QUOTE + "> the milestones that use them.\n",
+                  self.DECISION_QUOTE + "> the milestones that use them.\n\u00a0\nand delete all later milestones.\n")
+        self.assertTrue(any("end each quote with a blank line before" in e for e in self.errors()))
+
+    def test_number_in_a_quote_must_match(self) -> None:
+        # "3. It" after a quote line is text, not a list marker, so the number counts
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n> Choose option\n> 2. It is approved.\n\n")
+        self.edit(self.QUOTED, "## Alternatives considered",
+                  "> Choose option\n> 3. It is approved.\n\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Choose option 3. It is approved.\"" in e for e in self.errors()))
+
+    def test_empty_decision_quote_fails(self) -> None:
+        self.edit(self.QUOTED, "## Alternatives considered", ">\n\n## Alternatives considered")
+        self.assertTrue(any("a Decision quote is empty" in e for e in self.errors()))
+
+    def assertInventedQuoteFails(self, source: str) -> None:
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
+        self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+
+    def test_unquoted_source_text_does_not_count(self) -> None:
+        self.assertInventedQuoteFails("Ship nothing and delete the fixture.\n")
+
+    def test_quote_joined_across_a_code_fence_does_not_count(self) -> None:
+        # Two quotes with a fence between them render as separate blocks
+        for fence in ("~~~text", "```"):
+            with self.subTest(fence=fence):
+                self.setUp()
+                self.assertInventedQuoteFails(
+                    f"> Ship nothing and\n{fence}\nThese are separate excerpts.\n{fence[:3]}\n> delete the fixture.\n")
+
+    def test_source_quote_with_a_character_that_can_hide_text_does_not_count(self) -> None:
+        sentence = "Ship nothing and delete the fixture."
+        hidden = (f"[{sentence}]: https://example.com\n",
+                  f"[see]: https://example.com\n\"{sentence}\"\n",
+                  f"[{sentence}\\]]: https://example.com\n",
+                  f"[see this](https://example.com \"{sentence}\")\n",
+                  f"[see this](<https://example.com> \") {sentence}\")\n",
+                  f"![{sentence}](https://example.com/logo.png)\n",
+                  f"<!-- {sentence} -->\n",
+                  f"\\{sentence}\n")
+        for source in hidden:
+            with self.subTest(source=source):
+                self.setUp()
+                self.assertInventedQuoteFails("".join("> " + line + "\n" for line in source.splitlines()))
+
+    def test_quote_inside_a_list_fails(self) -> None:
+        for nested in ("- Approval:\n    > Invented approval.\n", "- > Invented approval.\n"):
+            with self.subTest(nested=nested):
+                self.setUp()
+                self.edit(self.QUOTED, "## Alternatives considered", nested + "\n## Alternatives considered")
+                self.assertTrue(any("a quote must start the line, not sit inside a list" in e for e in self.errors()))
+
+    def test_line_running_on_from_a_quote_fails(self) -> None:
+        self.edit(self.QUOTED, "> the milestones that use them.\n", "> the milestones that use them.\nand delete all later milestones.\n")
+        self.assertTrue(any("end each quote with a blank line before: and delete" in e for e in self.errors()))
+
+    def test_decision_quote_may_come_from_evidence(self) -> None:
+        self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n> Build only what MILESTONE-001 needs.\n\n")
+        self.edit(self.QUOTED, "## Alternatives considered", "> Build only what MILESTONE-001 needs.\n\n## Alternatives considered")
+        self.assertEqual(self.errors(), [])
 
     def test_missing_section_fails(self) -> None:
         self.edit(self.RECORD, "## Alternatives considered", "## Other options")
@@ -325,9 +449,9 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.RECORD, "## Owner's words", "<!--\n## Owner's words")
         self.assertTrue(any("needs sections" in e for e in self.errors()))
 
-    def test_comment_opener_inside_code_is_code(self) -> None:
+    def test_comment_opener_inside_code_still_fails(self) -> None:
         self.edit(self.RECORD, "## Owner's words", "```html\n<!--\n```\n\n## Owner's words")
-        self.assertEqual(self.errors(), [])
+        self.assertTrue(any("no raw HTML or comments, even in code" in e for e in self.errors()))
 
     def replace_evidence(self, body: str) -> None:
         text = (self.root / self.RECORD).read_text()
@@ -406,9 +530,26 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                 self.edit(self.RECORD, "## Owner's words", f"{wrapper}\n\n## Owner's words")
                 self.assertTrue(any("no raw HTML" in e for e in self.errors()))
 
-    def test_html_inside_code_is_allowed(self) -> None:
-        self.replace_evidence("\nThe tag `<approved>` is literal.\n\n```html\n<div hidden>\n```\n")
-        self.assertEqual(self.errors(), [])
+    def test_html_inside_code_still_fails(self) -> None:
+        for body in ("\nThe tag `<approved>` is literal.\n", "\n```html\n<div hidden>\n```\n",
+                     '\n\\`<a href="x">a</a>\\`\n', '\n```<a href="x">a</a>``\n'):
+            with self.subTest(body=body):
+                self.setUp()
+                self.replace_evidence(body)
+                self.assertTrue(any("no raw HTML or comments, even in code" in e for e in self.errors()))
+
+    def test_source_with_invisible_or_transformed_text_does_not_count(self) -> None:
+        for source, quote in (("> ~~~ Approved every proposed decision.\n> harmless example\n> ~~~\n",
+                               "> Approved every proposed decision.\n"),
+                              ("> &NotEqual;\n", "> NotEqual\n"), ("> &ZeroWidthSpace;\n", "> ZeroWidthSpace\n"),
+                              ("> ``` Approved every proposed decision.\n", "> Approved every proposed decision.\n"),
+                              ("> a | b\n> - | -\n> Approved every proposed decision. | x\n",
+                               "> Approved every proposed decision.\n")):
+            with self.subTest(source=source):
+                self.setUp()
+                self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
+                self.edit(self.QUOTED, "## Alternatives considered", quote + "\n## Alternatives considered")
+                self.assertTrue(any("is not word for word" in e for e in self.errors()))
 
 if __name__ == "__main__":
     unittest.main()

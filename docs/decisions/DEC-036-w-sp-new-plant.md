@@ -18,7 +18,7 @@ The owner accepted the recommendation given with Q24:
 
 The option it chose reads:
 
-> - (b) A new, hand-authored plant about R0's size, under its own facility context (for example `DEMO-LEKKI/UNIT-B`). It would cover what only SmartPlant stores differently:
+> - (b) A new, hand-authored plant about R0's size, under its own facility context (for example DEMO-LEKKI/UNIT-B). It would cover what only SmartPlant stores differently:
 >   - one pipeline made of several pipe runs that share a line number, so the pipeline must be derived;
 >   - several inline components on one run, so the connectors split more than once;
 >   - one cross-sheet pair;
