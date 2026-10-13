@@ -84,7 +84,7 @@ its stage:
 
 | Stage | What it checks | What a failure means |
 | --- | --- | --- |
-| 1. Schema | The file validates against the pinned XSD. | The file is not well-formed exchange XML. |
+| 1. Schema | The file validates against the pinned XSD. | The file does not match the exchange format's schema. A file that is not well-formed XML fails here too. |
 | 2. References | Every import maps to a pinned file, and every local and named reference resolves. | The file points at something that is not there. |
 | 3. Model | Every class exists and is not abstract. Every property is declared for its class, with the right kind and data type. Every property has an allowed number of values. | The file breaks the standard's information model. |
 | 4. Project rules | Rules that are yours and not the standard's, such as unique tags or required units. | The file breaks your project's rules, not the standard. |
@@ -106,7 +106,7 @@ Practices that go with the stages:
 4. **Report unsupported content.** Anything outside the classes and properties
    you support is listed, never dropped silently.
 5. **Claim only the stages that ran.** If stages 1, 2 and 4 ran, the claim is
-   "passes the schema and the project's rules". Never write "conformant" or
+   "passes the schema, the reference checks and the project's rules". Never write "conformant" or
    "certified" unless an official conformance test exists and passed.
 
 Worked example: the team's first plan had three checks: the schema, its own subset
@@ -115,8 +115,8 @@ failures, so the plan moved to the four stages above.
 
 ## 4. Build synthetic worlds with hidden answer keys
 
-Status: Proposed for the graph comparison. A synthetic backend, its generator and
-its loader are built and tested, and the end-to-end comparison is not built yet.
+Status: Proposed. It rests on a design review of how to test a pipeline without
+letting it read the truth it is scored against.
 
 1. **Hand-author one small, complete world first.** Write it as a data file checked
    against a schema. It holds the full engineering truth, including its intended
