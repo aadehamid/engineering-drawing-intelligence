@@ -18,7 +18,7 @@ The approved requirements remain unchanged. The backend path requires an enginee
 
 All new selection rules, mapping details, and acceptance checks below are Proposals, pending review. Source observations report what was inspected; they do not approve adoption. Record parent proposals and their disposition in [LIONG-REG-001](LIONG-REG-001-decisions.md).
 
-LIONG is independent of PPC. Cloudflare and Databricks Free Edition remain approved exceptions to the open-source condition, not required providers. SQL Server, hosted on an Azure SQL Database free-offer database, is a further exception: both synthetic vendor-style backends run on it (DEC-027). This document authorizes no implementation, deployment, spending, or external submission of private data.
+LIONG is independent of PPC. The exceptions to the open-source condition are listed once, in [REQUIREMENTS.md](../REQUIREMENTS.md#context). This document authorizes no implementation, deployment, spending, or external submission of private data.
 
 ## 2. Source eligibility proposals
 

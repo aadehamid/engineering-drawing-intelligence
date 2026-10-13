@@ -89,10 +89,8 @@ artifacts, and isolated evaluation truth. Adapt them to P&IDs and revision appro
 
 Do not inherit commercial KPIs, broad source-system simulation, separate analytical
 and semantic services without a need, or the assumption that local disk is always
-disposable. Cloudflare and Databricks Free Edition are allowed exceptions, not
-mandatory services. SQL Server, hosted on an Azure SQL Database free-offer
-database, is a further exception: both synthetic vendor-style backends run on it
-(DEC-027). Component choices and gates are in LIONG-007.
+disposable. The exceptions to the open-source condition, and their limits, are listed once, in
+[REQUIREMENTS.md](../REQUIREMENTS.md#context). Component choices and gates are in LIONG-007.
 
 ## Current evidence
 
