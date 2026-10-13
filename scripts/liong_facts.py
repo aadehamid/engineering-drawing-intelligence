@@ -427,8 +427,9 @@ def owner_quotes_render_plain(section: str) -> bool:
     code or HTML block passes at any depth. Quotes before it may hold the agent's question.
 
     The phrase is matched as written in ordinary characters. Invisible format characters
-    fail the section on their own (see check_record); look-alike letters from another
-    script are outside what this check can see.
+    fail the section on their own (see check_record). Look-alike letters from another
+    script, and blank characters outside that category (variation selectors, fillers
+    such as U+3164, the Braille blank), are outside what this check can see.
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
