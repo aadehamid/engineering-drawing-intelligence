@@ -1,0 +1,50 @@
+# W-SP: the hand-authored canonical world that the SmartPlant backend is generated from
+# (DEC-035, DEC-036). It is a new plant about R0's size, built around what SmartPlant
+# stores differently: one pipeline made of two pipe runs that share line number 301,
+# so the pipeline must be derived; two inline valves on run A, so its connectors split
+# twice; one cross-sheet pair; and one instrument with a parent. It holds only the
+# SCN-001 equivalent, its baseline W0 (DEC-042). It has no seed (DEC-016).
+# DEC-052 records the contents, chosen under the owner's delegation (DEC-048).
+schema_version: 1
+world: W-SP
+tag_context: DEMO-LEKKI/UNIT-B
+
+nodes:
+  E1: {class: equipment, role: supply vessel, tag: TK-301, sheet: S1}
+  E2: {class: equipment, role: receiving vessel, tag: TK-302, sheet: S2}
+  V1: {class: valve, role: inline isolation, tag: HV-301, sheet: S1}
+  V2: {class: valve, role: inline isolation, tag: HV-302, sheet: S1}
+  V3: {class: valve, role: inline isolation, tag: HV-303, sheet: S2}
+  I1: {class: instrument, role: level transmission, tag: LT-302, sheet: S2, attributes: {unit: "%"}}
+  X1: {class: connection_point, role: outgoing sheet reference, tag: TO-S2/B, sheet: S1}
+  X2: {class: connection_point, role: incoming sheet reference, tag: FROM-S1/B, sheet: S2}
+  P1: {class: pipe_segment, tag: L-301-1, sheet: S1, attributes: {nominal_diameter_mm: 80, line_number: "301", run: A}}
+  P2: {class: pipe_segment, tag: L-301-2, sheet: S1, attributes: {nominal_diameter_mm: 80, line_number: "301", run: A}}
+  P3: {class: pipe_segment, tag: L-301-3, sheet: S1, attributes: {nominal_diameter_mm: 80, line_number: "301", run: A}}
+  P4: {class: pipe_segment, tag: L-301-4, sheet: S2, attributes: {nominal_diameter_mm: 80, line_number: "301", run: B}}
+  P5: {class: pipe_segment, tag: L-301-5, sheet: S2, attributes: {nominal_diameter_mm: 80, line_number: "301", run: B}}
+  S1: {class: drawing, name: DEMO-PID-101}
+  S2: {class: drawing, name: DEMO-PID-102}
+
+edges:
+  FLOW:
+    - [E1, P1]
+    - [P1, V1]
+    - [V1, P2]
+    - [P2, V2]
+    - [V2, P3]
+    - [P3, X1]
+    - [X1, X2]
+    - [X2, P4]
+    - [P4, V3]
+    - [V3, P5]
+    - [P5, E2]
+  INSTRUMENT_PARENT:
+    - [I1, E2]
+  CROSS_SHEET_REFERENCE:
+    - [X1, X2]
+
+revisions:
+  W0:
+    base: null
+    moc: null
