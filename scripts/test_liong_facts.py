@@ -519,6 +519,7 @@ class DecisionRecordsTest(CopiedDocsTestCase):
                         ">     The owner answered: yes\n\n> # later heading\n",
                         "Thanks!\nThe owner answered:\n\n> Q12: yes\n\n> # decoy heading\n",
                         "\u200bThe owner answered:\n\n> Q12: yes\n\n> # decoy heading\n",
+                        "> #The owner answered: yes\n\n> # decoy heading\n",
                         "The owner answered:\n\n> Q12: yes\n\n    words in a code block\n"):
             with self.subTest(section=section):
                 self.setUp()
