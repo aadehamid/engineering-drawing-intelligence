@@ -17,10 +17,13 @@ BASELINE = (
 
 # A destination may sit on the next line, behind that line's quote markers.
 NEXT_LINE = r"[ \t]*(?:\n[ \t>]*)?"
-INLINE_LINK = r"\]\(" + NEXT_LINE + r"(<[^>\n]*>|[^)\s]+)"   # [text](target), even split across lines
+# A bare destination ends at ASCII whitespace or a control character only; CommonMark
+# keeps a no-break space or other Unicode space inside the destination.
+BARE = r"[^\x00-\x20)]+"
+INLINE_LINK = r"\]\(" + NEXT_LINE + r"(<[^>\n]*>|" + BARE + ")"   # [text](target), even split across lines
 # [label]: target, used by reference links. It may sit inside quotes and lists, and its
 # label may escape a bracket; matching too much only checks one more target.
-REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|\S+)"
+REFERENCE = r"^[ \t>*+\-\d.)]*\[(?:\\.|[^\]\\])+\]:" + NEXT_LINE + r"(<[^>\n]*>|[^\x00-\x20]+)"
 
 
 # A fence opens on three backticks or tildes. A backtick fence's info string holds no
@@ -43,7 +46,8 @@ def link_targets(text: str) -> list[str]:
     Raw HTML links are not read; archived Markdown holds no raw HTML (see raw_html).
     """
     found = re.findall(INLINE_LINK, text) + re.findall(REFERENCE, text, re.MULTILINE)
-    return [target.strip("<>") for target in found]
+    # Only a destination written as <...> loses its brackets; "a.md>" names a file "a.md>".
+    return [target[1:-1] if target.startswith("<") else target for target in found]
 
 
 def heading_ids(text: str) -> set[str]:

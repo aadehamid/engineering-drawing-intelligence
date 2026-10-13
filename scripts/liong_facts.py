@@ -345,14 +345,19 @@ def rendered(text: str) -> str:
     """
     kept: list[str] = []
     fence = None
+    fence_indent = 0
     hidden_close = None  # the closing marker of the comment or HTML block we are inside
     for line in text.splitlines():
         if fence is not None:
-            marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line)
-            if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
+            # A fence indented under a list item ends with the item, at a line indented less.
+            if line.strip() and len(line) - len(line.lstrip(" ")) < fence_indent:
                 fence = None
-            kept.append("")
-            continue
+            else:
+                marker = re.match(r" {0,3}(`{3,}|~{3,})\s*$", line.strip(" ") if fence_indent else line)
+                if marker and marker.group(1)[0] == fence[0] and len(marker.group(1)) >= len(fence):
+                    fence = None
+                kept.append("")
+                continue
         visible = ""
         rest = line
         while rest:
@@ -376,6 +381,7 @@ def rendered(text: str) -> str:
         opening = re.match(FENCE_OPEN, visible)
         if opening:
             fence = opening.group(1)
+            fence_indent = len(visible) - len(visible.lstrip(" "))
             kept.append("")
             continue
         kept.append(visible)

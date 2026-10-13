@@ -231,6 +231,12 @@ class DecisionRecordsTest(CopiedDocsTestCase):
         self.edit(self.QUOTED, "## Alternatives considered", "``` `\n" + self.INVENTED + "\n## Alternatives considered")
         self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
 
+    def test_quote_after_a_list_item_fence_is_compared(self) -> None:
+        # The fence ends with its list item, so the quote below it is shown
+        self.edit(self.QUOTED, "## Alternatives considered",
+                  "- Example:\n  ```text\n" + self.INVENTED + "\n- Another example:\n  ```\n\n## Alternatives considered")
+        self.assertTrue(any("the Decision quote \"Ship nothing" in e for e in self.errors()))
+
     def assertInventedQuoteFails(self, source: str) -> None:
         self.edit(self.QUOTED, "## Evidence\n", "## Evidence\n\n" + source + "\n")
         self.edit(self.QUOTED, "## Alternatives considered", self.INVENTED + "\n## Alternatives considered")

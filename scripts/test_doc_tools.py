@@ -100,6 +100,14 @@ class DocumentationToolsTests(unittest.TestCase):
         for name in [f"absent-{n}.md" for n in range(1, 9)]:
             self.assertTrue(any(f"../{name}, which is not in the archive" in e for e in errors), name)
 
+    def test_destination_is_read_as_written(self):
+        # "README.md>" and "README.md<no-break space>x.md" name files that are not README.md
+        path = self.root / "docs/LIONG-REG-001-decisions.md"
+        path.write_text(path.read_text() + "\n[a](../README.md>)\n\n[b](../README.md\u00a0x.md)\n", encoding="utf-8")
+        errors = bundle_docs.broken_links(bundle_docs.payload(self.root))
+        for target in ("../README.md>", "../README.md\u00a0x.md"):
+            self.assertTrue(any(f"{target}, which is not in the archive" in e for e in errors), target)
+
     def test_raw_html_in_archived_markdown_is_refused(self):
         path = self.root / "docs/LIONG-000-index.md"
         html = ('<a href="\n../scripts/world.py">world</a>', '<img srcset="../scripts/world.py 1x">',
