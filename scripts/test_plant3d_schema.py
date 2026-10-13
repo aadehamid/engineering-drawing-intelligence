@@ -16,6 +16,15 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 DDL = ROOT / "schemas" / "plant3d-style.sql"
 CLASS_TABLES = ("Equipment", "Valve", "Instrument", "LineSegment", "Junction", "SheetConnector")
+# Every table DEC-040's patterns and DEC-049 call for, written out so that dropping one fails.
+EXPECTED_TABLES = {
+    "PlantObject", *CLASS_TABLES,
+    "SegmentStart", "SegmentEnd", "ConnectorPair", "Ownership",  # pattern 2 and the ownership row
+    "SheetConnectorLink",                                         # pattern 4
+    "Drawing", "DrawingAppearance",                               # pattern 3
+    "WorkHistory",                                                # DEC-037
+    "ClassDefinition", "PropertyDefinition",                      # pattern 6
+}
 
 
 def batches(text: str) -> list[str]:
@@ -41,6 +50,9 @@ def dictionary_rows(text: str, table: str) -> list[tuple[str, ...]]:
 
 class StaticSchemaTests(unittest.TestCase):
     text = DDL.read_text(encoding="utf-8")
+
+    def test_the_file_creates_exactly_the_expected_tables(self):
+        self.assertEqual(set(tables(self.text)), EXPECTED_TABLES)
 
     def test_no_foreign_keys(self):
         # DEC-043: the product keeps integrity in the application, not the database
@@ -132,7 +144,7 @@ class LiveSchemaTests(unittest.TestCase):
     def test_tables_match_the_file(self):
         found = {row[0] for row in self.query(
             "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'p3d'")}
-        self.assertEqual(found, set(tables(DDL.read_text(encoding="utf-8"))))
+        self.assertEqual(found, EXPECTED_TABLES)
 
     def test_server_holds_no_foreign_keys(self):
         self.assertEqual(self.query("SELECT COUNT(*) FROM sys.foreign_keys")[0][0], 0)
