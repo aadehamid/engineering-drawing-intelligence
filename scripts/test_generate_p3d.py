@@ -83,6 +83,12 @@ class CommittedFixtureTests(unittest.TestCase):
         expected = {t: {p for p in v if not set(p) & bypass} for t, v in R0_ROWS.items()}
         self.assertEqual({t: pairs(rows, t) for t in R0_ROWS}, expected)
 
+    def test_rbad_keeps_every_r0_connection_row_in_its_table(self):
+        # Rbad deletes VB but none of its connections, so each table still holds R0's rows
+        rows = committed("Rbad")
+        self.assertEqual({t: pairs(rows, t) for t in R0_ROWS}, R0_ROWS)
+        self.assertNotIn(EXPECTED_KEYS["VB"], {r["ObjectId"] for r in rows["PlantObject"]})
+
     def test_every_object_keeps_its_key_and_class_in_every_snapshot(self):
         tables = {"E": "Equipment", "V": "Valve", "I": "Instrument", "J": "Junction", "X": "SheetConnector",
                   "P": "LineSegment"}
