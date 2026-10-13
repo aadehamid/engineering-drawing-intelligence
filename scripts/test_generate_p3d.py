@@ -33,6 +33,31 @@ R0_ROWS = {  # each relationship table's rows in R0, as (first column, second co
     "SheetConnectorLink": {("X1", "X2")},
     "Ownership": {("E2", "I1")},
 }
+# Every object row of R0, written from LIONG-006's "Exact baseline R0" table and DEC-049's tag subparts.
+R0_OBJECT_ROWS = {
+    "Equipment": [
+        {"ObjectId": 101, "Tag": "TK-101", "TagType": "TK", "TagNumber": "101", "Description": "supply vessel"},
+        {"ObjectId": 102, "Tag": "TK-102", "TagType": "TK", "TagNumber": "102", "Description": "receiving vessel"},
+    ],
+    "Valve": [
+        {"ObjectId": 103, "Tag": "XV-101", "TagType": "XV", "TagNumber": "101", "Description": None},
+        {"ObjectId": 104, "Tag": "XV-102", "TagType": "XV", "TagNumber": "102", "Description": "bypass branch"},
+    ],
+    "Instrument": [
+        {"ObjectId": 105, "Tag": "PI-102", "TagType": "PI", "LoopNumber": "102", "Description": "pressure indication",
+         "Unit": "bar"},
+    ],
+    "Junction": [{"ObjectId": 106, "Description": "branch junction"}, {"ObjectId": 107, "Description": "branch junction"}],
+    "SheetConnector": [{"ObjectId": 108, "Label": "TO-S2/A", "Direction": "Out"},
+                       {"ObjectId": 109, "Label": "FROM-S1/A", "Direction": "In"}],
+    "LineSegment": [
+        {"ObjectId": key, "Tag": f"L-101-{suffix}", "LinePrefix": "L", "LineNumber": "101", "SegmentSuffix": suffix,
+         "NominalSizeMm": 50}
+        for key, suffix in ((110, "1"), (111, "2"), (112, "3"), (113, "4"), (114, "B"), (115, "5"))
+    ],
+    "Drawing": [{"DrawingId": 901, "FileName": "DEMO-PID-001", "Revision": "R0", "Status": "Approved"},
+                {"DrawingId": 902, "FileName": "DEMO-PID-002", "Revision": "R0", "Status": "Approved"}],
+}
 PAIR_COLUMNS = {"SegmentStart": ("SegmentId", "ObjectId"), "SegmentEnd": ("SegmentId", "ObjectId"),
                 "ConnectorPair": ("Connector1", "Connector2"), "SheetConnectorLink": ("OutConnector", "InConnector"),
                 "Ownership": ("OwnerId", "OwnedId")}
@@ -72,6 +97,22 @@ class CommittedFixtureTests(unittest.TestCase):
 
     def test_answer_key_pins_every_key(self):
         self.assertEqual(json.loads(gen.ANSWER_KEY.read_text(encoding="utf-8"))["keys"], EXPECTED_KEYS)
+
+    def test_r0_object_rows_hold_liong006s_values(self):
+        rows = committed("R0")
+        for table, expected in R0_OBJECT_ROWS.items():
+            with self.subTest(table=table):
+                self.assertEqual(sorted(rows[table], key=str), sorted(expected, key=str))
+
+    def test_plant_object_revision_and_status_follow_the_change(self):
+        # Only E2 changes in R1, so only its row moves to R1; every row is approved (DEC-039)
+        for revision, moved in (("R0", set()), ("R1", {102})):
+            rows = committed(revision)["PlantObject"]
+            self.assertEqual({r["ObjectId"] for r in rows if r["Revision"] != "R0"}, moved, revision)
+            self.assertEqual({r["Status"] for r in rows}, {"Approved"})
+            classes = {r["ObjectId"]: r["ClassName"] for r in rows}
+            self.assertEqual({classes[101], classes[103], classes[105], classes[106], classes[108], classes[110]},
+                             {"Equipment", "Valve", "Instrument", "Junction", "SheetConnector", "LineSegment"})
 
     def test_r0_puts_each_connection_in_its_table(self):
         rows = committed("R0")
