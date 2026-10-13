@@ -26,6 +26,13 @@ The option it chose reads:
 >
 >   Its expected graph lives in its own world file, written by hand like R0's.
 
+The exact contents did not come to the owner as a pull request. The agent chose
+them under [DEC-048](DEC-048-night-delegation.md)'s delegation and recorded them as
+[DEC-052](DEC-052-w-sp-contents.md).
+[DEC-054](DEC-054-delegation-takes-precedence.md) records the owner's answer that
+the delegation takes precedence over this reservation, so DEC-052 stands. The rest
+of this decision, the plant itself, is unchanged.
+
 ## Alternatives considered
 
 - W-SP as a copy of R0's layout with new tags, which the question offered as option
