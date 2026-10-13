@@ -1,7 +1,9 @@
 # DEC-065: A DEXPI validity claim names only the stages that ran, never conformance or certification
 
-Status: Decided
+Status: Superseded
 Date: 2026-10-13
+
+Superseded by DEC-072 on 2026-10-13
 
 ## Context
 

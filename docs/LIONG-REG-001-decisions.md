@@ -89,13 +89,14 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-062 | Pinned copies of the DEXPI model files live in the repository, and validation never fetches over the network | Owner answered Q8 with "yes to all" | [record](decisions/DEC-062-vendored-model-files.md) |
 | DEC-063 | LIONG writes its own DEXPI 2.0.1 generator and parser for the supported subset, on lxml | Owner answered Q9 with "yes to all" | [record](decisions/DEC-063-own-dexpi-generator-and-parser.md) |
 | DEC-064 | A DEXPI file is valid only when it passes four named validation stages and an exact round trip | Owner accepted Q10 and Q14 ("I am good") | [record](decisions/DEC-064-four-stage-dexpi-validation.md) |
-| DEC-065 | A DEXPI validity claim names only the stages that ran, never conformance or certification | Owner accepted Q10 and Q15 ("I am good") | [record](decisions/DEC-065-claim-names-stages-that-ran.md) |
+| DEC-065 | A DEXPI validity claim names only the stages that ran, never conformance or certification | Superseded by DEC-072 on 2026-10-13 | [record](decisions/DEC-065-claim-names-stages-that-ran.md) |
 | DEC-066 | The parser also reads DEXPI's own 2.0.1 reference P&ID and reports what it does not support | Owner answered Q11 with "yes to all" | [record](decisions/DEC-066-reference-pid-parser-test.md) |
 | DEC-067 | Every new slice component is pinned exactly, at the latest release at least 14 days old | Owner answered Q12 with "yes to all" | [record](decisions/DEC-067-exact-pins.md) |
 | DEC-068 | The glossary defines supported subset | Owner answered Q13 with "yes to all" | [record](decisions/DEC-068-supported-subset-term.md) |
 | DEC-069 | bpmn2dexpi is recorded as a candidate validator and kept out of the slice | Owner accepted Q16 ("I am good") | [record](decisions/DEC-069-bpmn2dexpi-recorded-not-used.md) |
 | DEC-070 | A general delivery playbook for engineering-data-to-graph projects lives in this repository | Owner accepted Q17 to Q23, with comments that the playbook holds no project-specific items and no pull request references | [record](decisions/DEC-070-delivery-playbook.md) |
 | DEC-071 | A pull request that settles an engineering practice updates the playbook in the same pull request | Owner accepted Q19 and Q22, with the comments recorded in the record | [record](decisions/DEC-071-playbook-grows-with-prs.md) |
+| DEC-072 | A DEXPI validity claim names every stage that ran, including the reference checks | Owner answered: "yes, add it to #32" | [record](decisions/DEC-072-claim-names-every-stage-that-ran.md) |
 
 ## Decisions made under delegation
 

@@ -413,7 +413,7 @@ def has_content(body: str) -> bool:
     )
 
 
-PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*"
+PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*"
 
 
 def owner_answer_is_plain(body: str) -> bool:
@@ -426,9 +426,10 @@ def owner_answer_is_plain(body: str) -> bool:
     if not answer:
         return False
     lines = [line for line in answer.group(1).splitlines() if line.strip() != ">"]
-    list_item = r"> (?:[-+]|\d+[.)])(\s|$)"
+    # A line that opens a list or a heading is markup, though its characters are allowed.
+    block_start = r"> (?:[-+]|\d+[.)]|#{1,6})(\s|$)"
     return bool(lines) and all(
-        re.fullmatch(PLAIN_QUOTE_LINE, line) and not re.match(list_item, line) for line in lines
+        re.fullmatch(PLAIN_QUOTE_LINE, line) and not re.match(block_start, line) for line in lines
     )
 
 

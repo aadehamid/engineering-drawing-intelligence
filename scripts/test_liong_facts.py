@@ -495,14 +495,15 @@ class DecisionRecordsTest(CopiedDocsTestCase):
 
     def test_markup_in_owner_answer_fails_even_with_words(self) -> None:
         for answer in ("> - Q12: yes", "> > Q12: yes", "> [Q12: yes](../LIONG-REG-001-decisions.md)",
-                       "> Q12&#58; yes", "> `<approved>`", "> [](https://example.com/Approval_(signed).pdf)"):
+                       "> Q12&#58; yes", "> `<approved>`", "> # Q12: yes", "> [](https://example.com/Approval_(signed).pdf)"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)
                 self.assertTrue(any("plain-text" in e for e in self.errors()))
 
     def test_plain_owner_answers_pass(self) -> None:
-        for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon."):
+        for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon.",
+                       "> yes, add it to #32"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)
