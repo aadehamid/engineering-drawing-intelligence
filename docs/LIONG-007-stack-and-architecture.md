@@ -34,6 +34,11 @@ The longer-term gates below (GATE-TECH-001, 005 and 008) stay open beyond the sl
 Exact versions of lxml and the `neo4j` driver, the image digest, and their licenses
 are added to "Version and source evidence" when each component's pull request lands.
 
+The agent decides the slice's build choices under the owner's delegation in
+[DEC-073](decisions/DEC-073-second-night-delegation.md). Step 2's extraction is
+`scripts/extract_p3d.py`, which writes LIONG-005's source records from SQL Server or a
+snapshot folder and never opens an answer key ([DEC-075](decisions/DEC-075-extraction-records.md)).
+
 ## What the PPC reference establishes
 
 Inspection used PPC commit `01027a84be5d453cbb4e2ea091e4884729918b15`, including its README and PPC-002, PPC-007, PPC-010, PPC-013, and PPC-014. The tree contains documentation, archived documentation bundles, and `.gitkeep` placeholders. It does not provide runnable application code or dependency pins. Its README identifies the current stage as architecture baseline and implementation preparation [REF-TECH-001].
