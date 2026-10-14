@@ -247,6 +247,8 @@ class DuplicateRecordsTest(unittest.TestCase):
         cases["assertions holds SegmentStart/1 more than once"] = doubled("assertions", by_id["SegmentStart/1"])
         cases["assertions holds ('p3d:object:110', 'starts_at') more than once"] = doubled(
             "assertions", by_id["SegmentStart/1"], assertion_id="SegmentStart/7", value_or_target="p3d:object:103")
+        cases["assertions holds ('p3d:object:110', 'ends_at') more than once"] = doubled(
+            "assertions", by_id["SegmentEnd/1"], assertion_id="SegmentEnd/7", value_or_target="p3d:object:103")
         cases["assertions holds ('p3d:object:105', 'owned_by') more than once"] = doubled(
             "assertions", by_id["Ownership/1"], assertion_id="Ownership/2", value_or_target="p3d:object:101")
         cases["assertions holds ('p3d:object:108', 'continues_to') more than once"] = doubled(
