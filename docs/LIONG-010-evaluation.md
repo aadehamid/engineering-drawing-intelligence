@@ -1,6 +1,6 @@
 # LIONG-010: Evaluation and acceptance evidence
 
-Status: Proposed draft v0.1. The requirements are user-approved; the fixtures, measurement protocol, controls, numerical gates, and workload below are proposed. No tests, benchmarks, public-data annotation checks, or recovery drills have been executed for this document.
+Status: Proposed draft v0.1. The requirements are user-approved; the fixtures, measurement protocol, controls, numerical gates, and workload below are proposed. Of its checks, only SCN-001's structured route and SCN-005's minimal invalid-reference rejection have run, on the visible R0 development fixture (see "Current evidence"). No benchmarks, public-data annotation checks, or recovery drills have been executed.
 
 ## What acceptance means
 

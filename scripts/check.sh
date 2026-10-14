@@ -9,6 +9,10 @@ if [ "${1:-}" != "--checks" ]; then
   exec python3 scripts/worktree_guard.py -- scripts/check.sh --checks
 fi
 
+# CI provides both servers; without them the server tests would skip and still pass.
+if [ -n "${CI:-}" ]; then
+  : "${LIONG_SQLSERVER:?CI must set LIONG_SQLSERVER}" "${LIONG_NEO4J:?CI must set LIONG_NEO4J}"
+fi
 uv run --locked python scripts/bundle_docs.py --check
 uv run --locked python scripts/check_docs.py
 uv run --locked python scripts/test_doc_tools.py

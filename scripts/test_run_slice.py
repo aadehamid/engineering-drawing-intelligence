@@ -69,6 +69,12 @@ class SliceTest(unittest.TestCase):
         self.assertFalse((self.out / "graph.json").exists())
         self.assertFalse((self.out / "publication-receipt.json").exists())
 
+    def test_a_rejected_run_leaves_no_earlier_run_beside_it(self):
+        run_slice.run("R0", self.out, now=AT)
+        run_slice.run("Rbad", self.out, now=AT)
+        self.assertEqual(sorted(p.name for p in self.out.iterdir()),
+                         ["exchange-manifest.json", "result.json", "source-manifest.json", "source-records.json"])
+
     def test_steps_two_to_five_never_open_an_answer_key(self):
         opened: list[str] = []
         real_open, real_io_open = builtins.open, io.open

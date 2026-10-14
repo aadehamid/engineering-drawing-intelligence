@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import sys
 
 import compare_answer_key
@@ -35,6 +36,8 @@ import dexpi_validate
 import extract_p3d
 
 SNAPSHOTS = extract_p3d.loader.ROOT / "fixtures" / "p3d-r0"
+OUTPUTS = ("source-records.json", "source-manifest.json", "exchange-manifest.json", "dexpi", "graph.json",
+           "graph-manifest.json", "publication-receipt.json", "query.json", "result.json", "comparison")
 
 
 def dump(path: Path, value: object) -> None:
@@ -49,6 +52,12 @@ def run(revision: str, out: Path, database: bool = False, now: str | None = None
     """Run steps 2 to 5 and return the result: accepted with its graph, or rejected with a reason."""
     now = now or datetime.now(timezone.utc).isoformat(timespec="seconds")
     out.mkdir(parents=True, exist_ok=True)
+    for name in OUTPUTS:  # a run's records must all come from this run
+        path = out / name
+        if path.is_dir():
+            shutil.rmtree(path)
+        elif path.exists():
+            path.unlink()
 
     if database:
         with extract_p3d.loader.connect() as conn:
