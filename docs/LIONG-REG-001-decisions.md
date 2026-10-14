@@ -101,8 +101,9 @@ Later provider, independence, role, and drafting confirmations are recorded here
 
 ## Decisions made under delegation
 
-The agent made these during the night run of 2026-10-13, under the owner's delegation
-in [DEC-048](decisions/DEC-048-night-delegation.md). The owner has not reviewed them;
+The agent made these during two night runs, under the owner's delegations. Each row's
+Basis names its run's delegation: [DEC-048](decisions/DEC-048-night-delegation.md) for
+2026-10-13 and [DEC-073](decisions/DEC-073-second-night-delegation.md) for 2026-10-14. The owner has not reviewed them;
 each can be reversed by a later owner decision.
 
 | ID | Decision | Basis | Authoritative location |
@@ -111,6 +112,7 @@ each can be reversed by a later owner decision.
 | DEC-050 | The Plant 3D-style generator writes one JSON file per table per revision, with a separate answer key | Decided by the agent under DEC-048 | [record](decisions/DEC-050-p3d-generator-choices.md) |
 | DEC-051 | The loader replaces the backend's rows with a snapshot and raises one outbox event per revision | Decided by the agent under DEC-048 | [record](decisions/DEC-051-p3d-loader-choices.md) |
 | DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048; stands by DEC-054 | [record](decisions/DEC-052-w-sp-contents.md) |
+| DEC-074 | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided by the agent under DEC-073 | [record](decisions/DEC-074-dexpi-2-0-1-pinned-files.md) |
 
 ## New proposals
 

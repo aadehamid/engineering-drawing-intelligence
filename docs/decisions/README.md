@@ -68,6 +68,7 @@ state; a register row links here when its decision has a record.
 | [DEC-071](DEC-071-playbook-grows-with-prs.md) | A pull request that settles an engineering practice updates the playbook in the same pull request | Decided | 2026-10-13 |
 | [DEC-072](DEC-072-claim-names-every-stage-that-ran.md) | A DEXPI validity claim names every stage that ran, including the reference checks | Decided | 2026-10-13 |
 | [DEC-073](DEC-073-second-night-delegation.md) | The agent decides open questions for the owner during the night run of 2026-10-14 | Decided | 2026-10-14 |
+| [DEC-074](DEC-074-dexpi-2-0-1-pinned-files.md) | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided | 2026-10-14 |
 
 ## Record format
 

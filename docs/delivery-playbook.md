@@ -68,10 +68,18 @@ model files from their published host.
    the failure and use the pinned copy.
 5. **Do not generate a missing official file.** If no official source has the
    file, stop and escalate. A file you wrote yourself is not the standard.
+6. **Check a published copy against the tagged source when you can.** If the release
+   tag holds a file only as source for the standard's own build tool, take the
+   published copy, then build the tag with the tool version the tag names and compare
+   the bytes. A match ties the copy to the release.
 
 Worked example: the standard's example files import their model files from a host
 that first failed certificate checks and later did not respond. The team decided
-to keep pinned copies and validate offline.
+to keep pinned copies and validate offline. The release tag held the models only
+as build-tool source, and the published specification served them as XML. Building
+the tag with the standard's own tool gave byte-identical files, so the published
+copies were pinned. One model they import is defined inside the build tool and
+published nowhere, so the manifest records it as unpublished.
 
 ## 3. Validate in named stages
 

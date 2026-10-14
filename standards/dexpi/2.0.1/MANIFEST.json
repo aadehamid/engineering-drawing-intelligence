@@ -1,0 +1,39 @@
+{
+  "standard": "DEXPI",
+  "release": "2.0.1",
+  "tag": "V2.0.1",
+  "tag_commit": "eef0f0c6e8edfe84582e7a45d109c396bdc544f8",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/legalcode",
+  "retrieved": "2026-10-14",
+  "files": {
+    "DEXPI_XML_Schema.xsd": {
+      "role": "schema",
+      "source": "https://gitlab.com/dexpi/Specification/-/raw/V2.0.1/src/documentation/_static/DEXPI_XML_Schema.xsd",
+      "also_at": "https://dexpi.org/specification/2.0.1/html/_static/DEXPI_XML_Schema.xsd",
+      "sha256": "0bd6568b7c52fd59ac4ef6d8547ab2b2aa890c009a3a1bfbc5d7cc18c53b36e6"
+    },
+    "Core.xml": {
+      "role": "model",
+      "uri": "https://data.dexpi.org/models/2.0.1/Core.xml",
+      "source": "https://dexpi.org/specification/2.0.1/html/_static/Core.xml",
+      "sha256": "7136f8440c08c8bf7759c4e9eb614b046cc3196f2f45695122629a2020e61e4a"
+    },
+    "Plant.xml": {
+      "role": "model",
+      "uri": "https://data.dexpi.org/models/2.0.1/Plant.xml",
+      "source": "https://dexpi.org/specification/2.0.1/html/_static/Plant.xml",
+      "sha256": "0a5175535c1263464fee653c7b99f38eb810c15824f84155748eac165f50edbf"
+    },
+    "reference_pid.xml": {
+      "role": "reference P&ID",
+      "source": "https://gitlab.com/dexpi/Specification/-/raw/V2.0.1/src/documentation/_static/reference_pid.xml",
+      "also_at": "https://dexpi.org/specification/2.0.1/html/_static/reference_pid.xml",
+      "sha256": "acd39c74292aef3f6f00581fc78b05814acf2318815abd28c14ebefba12fdd94"
+    }
+  },
+  "not_published": {
+    "https://data.dexpi.org/models/2.0.1/MetaData.xml": "Imported by Core.xml and Plant.xml for documentation annotations only. DEXPI publishes no such file; the build tool defines it in code."
+  },
+  "notice_sha256": "244071d2cbe4b32e6649bf13f41d1561f0e7f68a6cc636ce9c0c61ded8a04f88"
+}
