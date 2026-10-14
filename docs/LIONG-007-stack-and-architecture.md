@@ -40,6 +40,9 @@ The agent decides the slice's build choices under the owner's delegation in
 snapshot folder and never opens an answer key ([DEC-075](decisions/DEC-075-extraction-records.md)).
 Steps 4 and 5 publish through `scripts/graph_publish.py`, which stores each snapshot once
 under its content hash and runs the cross-sheet query ([DEC-076](decisions/DEC-076-graph-publication.md)).
+Step 3 writes the records as one DEXPI 2.0.1 file per drawing with `scripts/dexpi_generate.py`,
+validates them in four stages with `scripts/dexpi_validate.py`, and parses them back into the graph
+with `scripts/dexpi_parse.py` ([DEC-077](decisions/DEC-077-dexpi-mapping.md)).
 
 ## What the PPC reference establishes
 
@@ -254,7 +257,7 @@ Follow the [index](LIONG-000-index.md) for the complete documentation set. [LION
 
 ## Version and source evidence
 
-All sources below were accessed on 2026-10-05 UTC. An inspected release is not an implementation lock or a compatibility test. Rolling documentation and hosted-service limits must be rechecked before implementation.
+All sources below were accessed on 2026-10-05 UTC, except where a row names a later date of inspection or pinning. An inspected release is not an implementation lock or a compatibility test. Rolling documentation and hosted-service limits must be rechecked before implementation.
 
 | Reference | Official or pinned source | Exact inspected version or document state | What remains unlocked |
 | --- | --- | --- | --- |
@@ -265,5 +268,6 @@ All sources below were accessed on 2026-10-05 UTC. An inspected release is not a
 | REF-TECH-005 | Cloudflare [R2 pricing](https://developers.cloudflare.com/r2/pricing/) | Rolling service page, updated 2026-10-01; Standard and Infrequent Access distinguished | Service terms/account billing, SDK, S3 subset, authorization, and cost controls |
 | REF-TECH-006 | Databricks [Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition) and [limitations](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations) | Rolling service pages, updated 2026-09-11 and 2026-09-29 respectively; no fixed runtime inspected | Actual account entitlement, runtime, numeric compute quota, connector availability, retention period, and network access |
 | REF-TECH-007 | Databricks [data-source and service connections](https://docs.databricks.com/aws/en/connect/) | General AWS platform documentation, updated 2026-09-11; not Free Edition certification | S3/R2 and other connector compatibility in Free Edition remains an implementation gate |
+| REF-TECH-018 | lxml [6.1.3 on PyPI](https://pypi.org/project/lxml/6.1.3/) and its [license](https://github.com/lxml/lxml/blob/lxml-6.1.3/LICENSE.txt) | 6.1.3, released 2026-09-02, the latest release at least 14 days old on 2026-10-14; BSD-3-Clause. Pinned on 2026-10-14 (DEC-067) for the DEXPI generator, validator and parser | The libxml2 and libxslt versions inside the wheels, and platforms without a wheel |
 
-Python, lxml, OpenCV, Tesseract, Dash, FastAPI, Cytoscape.js, and Apache AGE have no exact inspected dependency versions in this document. Their presence in a candidate list is not evidence of selection, license verification, or DEXPI compatibility. lxml is selected for the slice (DEC-063), but its version and license are recorded only when its pull request lands. Resolve those checks before publishing an executable build plan.
+Python, OpenCV, Tesseract, Dash, FastAPI, Cytoscape.js, and Apache AGE have no exact inspected dependency versions in this document. Their presence in a candidate list is not evidence of selection, license verification, or DEXPI compatibility. lxml is selected for the slice (DEC-063) and pinned at 6.1.3 [REF-TECH-018]. Resolve those checks before publishing an executable build plan.

@@ -156,6 +156,7 @@ Provider documentation is rolling and must be rechecked before use.
 | REF-TECH-005 | Cloudflare [R2 pricing](https://developers.cloudflare.com/r2/pricing/), rolling page | Tier-specific allowances and operations pricing; free allowance is not a spending cap, retention policy, or authorization |
 | REF-TECH-006 | Databricks [Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition) and [limitations](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations), rolling pages | Edition limits and usage conditions; numeric account quota, runtime, persistence, and required connectivity remain unverified |
 | REF-TECH-007 | Databricks [general connection documentation](https://docs.databricks.com/aws/en/connect/), rolling page | General platform capability only; does not certify R2/S3 connectivity in Free Edition |
+| REF-TECH-018 | lxml [6.1.3 on PyPI](https://pypi.org/project/lxml/6.1.3/) and its [license](https://github.com/lxml/lxml/blob/lxml-6.1.3/LICENSE.txt), inspected 2026-10-14 | BSD-3-Clause, released 2026-09-02; pinned for the DEXPI scripts (DEC-067). The bundled libxml2 and libxslt versions are not recorded |
 
 Referenced software/service names do not waive licensing or provider terms.
 No third-party packages, specifications, or example datasets are redistributed

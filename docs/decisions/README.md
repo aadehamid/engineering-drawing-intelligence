@@ -71,6 +71,7 @@ state; a register row links here when its decision has a record.
 | [DEC-074](DEC-074-dexpi-2-0-1-pinned-files.md) | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided | 2026-10-14 |
 | [DEC-075](DEC-075-extraction-records.md) | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided | 2026-10-14 |
 | [DEC-076](DEC-076-graph-publication.md) | A graph snapshot is published once to Neo4j under its content hash, and the cross-sheet query reads one snapshot | Decided | 2026-10-14 |
+| [DEC-077](DEC-077-dexpi-mapping.md) | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided | 2026-10-14 |
 
 ## Record format
 

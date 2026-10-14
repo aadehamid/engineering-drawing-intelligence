@@ -115,6 +115,7 @@ each can be reversed by a later owner decision.
 | DEC-074 | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided by the agent under DEC-073 | [record](decisions/DEC-074-dexpi-2-0-1-pinned-files.md) |
 | DEC-075 | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided by the agent under DEC-073 | [record](decisions/DEC-075-extraction-records.md) |
 | DEC-076 | A graph snapshot is published once to Neo4j under its content hash, and the cross-sheet query reads one snapshot | Decided by the agent under DEC-073 | [record](decisions/DEC-076-graph-publication.md) |
+| DEC-077 | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided by the agent under DEC-073 | [record](decisions/DEC-077-dexpi-mapping.md) |
 
 ## New proposals
 
