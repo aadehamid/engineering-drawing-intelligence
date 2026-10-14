@@ -97,11 +97,13 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-070 | A general delivery playbook for engineering-data-to-graph projects lives in this repository | Owner accepted Q17 to Q23, with comments that the playbook holds no project-specific items and no pull request references | [record](decisions/DEC-070-delivery-playbook.md) |
 | DEC-071 | A pull request that settles an engineering practice updates the playbook in the same pull request | Owner accepted Q19 and Q22, with the comments recorded in the record | [record](decisions/DEC-071-playbook-grows-with-prs.md) |
 | DEC-072 | A DEXPI validity claim names every stage that ran, including the reference checks | Owner answered: "yes, add it to #32" | [record](decisions/DEC-072-claim-names-every-stage-that-ran.md) |
+| DEC-073 | The agent decides open questions for the owner while building MILESTONE-001's slice | Owner answered: "you have my permission to decide for me using every available data and external search of hgih quality sources to resolve any ambiquity" | [record](decisions/DEC-073-second-night-delegation.md) |
 
 ## Decisions made under delegation
 
-The agent made these during the night run of 2026-10-13, under the owner's delegation
-in [DEC-048](decisions/DEC-048-night-delegation.md). The owner has not reviewed them;
+The agent made these during the night runs, under the owner's delegations: the run of
+2026-10-13 under [DEC-048](decisions/DEC-048-night-delegation.md), and the run of 2026-10-14
+under [DEC-073](decisions/DEC-073-second-night-delegation.md). The owner has not reviewed them;
 each can be reversed by a later owner decision.
 
 | ID | Decision | Basis | Authoritative location |

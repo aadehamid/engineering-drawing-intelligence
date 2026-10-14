@@ -67,6 +67,7 @@ state; a register row links here when its decision has a record.
 | [DEC-070](DEC-070-delivery-playbook.md) | A general delivery playbook for engineering-data-to-graph projects lives in this repository | Decided | 2026-10-13 |
 | [DEC-071](DEC-071-playbook-grows-with-prs.md) | A pull request that settles an engineering practice updates the playbook in the same pull request | Decided | 2026-10-13 |
 | [DEC-072](DEC-072-claim-names-every-stage-that-ran.md) | A DEXPI validity claim names every stage that ran, including the reference checks | Decided | 2026-10-13 |
+| [DEC-073](DEC-073-second-night-delegation.md) | The agent decides open questions for the owner while building MILESTONE-001's slice | Decided | 2026-10-14 |
 
 ## Record format
 
