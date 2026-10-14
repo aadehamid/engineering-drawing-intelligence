@@ -59,13 +59,14 @@ state; a register row links here when its decision has a record.
 | [DEC-062](DEC-062-vendored-model-files.md) | Pinned copies of the DEXPI model files live in the repository, and validation never fetches over the network | Decided | 2026-10-13 |
 | [DEC-063](DEC-063-own-dexpi-generator-and-parser.md) | LIONG writes its own DEXPI 2.0.1 generator and parser for the supported subset, on lxml | Decided | 2026-10-13 |
 | [DEC-064](DEC-064-four-stage-dexpi-validation.md) | A DEXPI file is valid only when it passes four named validation stages and an exact round trip | Decided | 2026-10-13 |
-| [DEC-065](DEC-065-claim-names-stages-that-ran.md) | A DEXPI validity claim names only the stages that ran, never conformance or certification | Decided | 2026-10-13 |
+| [DEC-065](DEC-065-claim-names-stages-that-ran.md) | A DEXPI validity claim names only the stages that ran, never conformance or certification | Superseded | 2026-10-13 |
 | [DEC-066](DEC-066-reference-pid-parser-test.md) | The parser also reads DEXPI's own 2.0.1 reference P&ID and reports what it does not support | Decided | 2026-10-13 |
 | [DEC-067](DEC-067-exact-pins.md) | Every new slice component is pinned exactly, at the latest release at least 14 days old | Decided | 2026-10-13 |
 | [DEC-068](DEC-068-supported-subset-term.md) | The glossary defines supported subset | Decided | 2026-10-13 |
 | [DEC-069](DEC-069-bpmn2dexpi-recorded-not-used.md) | bpmn2dexpi is recorded as a candidate validator and kept out of the slice | Decided | 2026-10-13 |
 | [DEC-070](DEC-070-delivery-playbook.md) | A general delivery playbook for engineering-data-to-graph projects lives in this repository | Decided | 2026-10-13 |
 | [DEC-071](DEC-071-playbook-grows-with-prs.md) | A pull request that settles an engineering practice updates the playbook in the same pull request | Decided | 2026-10-13 |
+| [DEC-072](DEC-072-claim-names-every-stage-that-ran.md) | A DEXPI validity claim names every stage that ran, including the reference checks | Decided | 2026-10-13 |
 
 ## Record format
 

@@ -495,14 +495,74 @@ class DecisionRecordsTest(CopiedDocsTestCase):
 
     def test_markup_in_owner_answer_fails_even_with_words(self) -> None:
         for answer in ("> - Q12: yes", "> > Q12: yes", "> [Q12: yes](../LIONG-REG-001-decisions.md)",
-                       "> Q12&#58; yes", "> `<approved>`", "> [](https://example.com/Approval_(signed).pdf)"):
+                       "> Q12&#58; yes", "> `<approved>`", "> # Q12: yes", "> [](https://example.com/Approval_(signed).pdf)"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)
                 self.assertTrue(any("plain-text" in e for e in self.errors()))
 
+    def test_markup_rendered_in_owner_quote_fails_however_spelled(self) -> None:
+        for answer in (">  # Q12: yes", ">   ## Q12: yes", ">  - Q12: yes", ">    - Q12: yes", ">  1. Q12: yes",
+                       "> Q12: yes\n>\n>     words in a code block", ">\t- Q12: yes", "> \t- Q12: yes",
+                       "> Q12: yes\n   >  # inner heading", "> Q12: yes\n\n>  # decoy heading"):
+            for status in ("Decided", "Proposed"):
+                with self.subTest(answer=answer, status=status):
+                    self.setUp()
+                    self.edit(self.RECORD, "> Q12: yes", answer)
+                    self.edit(self.RECORD, "Status: Decided", f"Status: {status}")
+                    self.assertTrue(any("renders markup" in e for e in self.errors()))
+
+    def test_answer_line_hidden_by_markup_is_still_found(self) -> None:
+        for section in ("> > The owner answered: yes\n",
+                        "> The owner **answered**: yes\n\n> agreed, with **emphasis**\n",
+                        "> [The owner answered:](https://example.com/x)\n\n> # later heading\n",
+                        ">     The owner answered: yes\n\n> # later heading\n",
+                        "Thanks!\nThe owner answered:\n\n> Q12: yes\n\n> # decoy heading\n",
+                        "\u200bThe owner answered:\n\n> Q12: yes\n\n> # decoy heading\n",
+                        "> #The owner answered: yes\n\n> # decoy heading\n",
+                        "The owner answered:\n\n> Q12: yes\n\n    words in a code block\n"):
+            with self.subTest(section=section):
+                self.setUp()
+                self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+                self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n", section)
+                self.assertTrue(any("renders markup" in e for e in self.errors()))
+
+    def test_invisible_format_character_in_owner_words_fails(self) -> None:
+        for char in ("\u200b", "\u200c", "\u2060", "\ufeff"):
+            for spot in ("The{c} owner answered:", "The owner {c}answered:", "The owner answered{c}:"):
+                with self.subTest(char=hex(ord(char)), spot=spot):
+                    self.setUp()
+                    self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+                    self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                              spot.format(c=char) + "\n\n> # later heading\n")
+                    self.assertTrue(any("invisible format character" in e for e in self.errors()))
+
+    def test_inserted_blank_character_cannot_hide_the_answer_phrase(self) -> None:
+        for char in ("\ufe0e", "\u034f", "\u3164", "\u2800", "\x0b", "\x0c", "\x1c", "\x85", "\u2028", "\u2029"):
+            for spot in ("The{c} owner answered:", "The owner {c}answered:", "The owner answered{c}:",
+                         "T{c}he owner answered:", "The ow{c}ner answered:", "The owner answ{c}ered:",
+                         "The{c}owner answered:", "The owner{c}answered:"):
+                with self.subTest(char=hex(ord(char)), spot=spot):
+                    self.setUp()
+                    self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+                    self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                              spot.format(c=char) + "\n\n> # later heading\n")
+                    self.assertTrue(any("renders markup" in e for e in self.errors()))
+
+    def test_markup_on_a_quoted_answer_line_fails(self) -> None:
+        self.edit(self.RECORD, "Status: Decided", "Status: Proposed")
+        self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                  "> The owner answered: **approved**, [see the register](../LIONG-REG-001-decisions.md)\n")
+        self.assertTrue(any("renders markup" in e for e in self.errors()))
+
+    def test_answer_line_inside_a_quote_still_checks_later_quotes(self) -> None:
+        self.edit(self.RECORD, "The owner answered:\n\n> Q12: yes\n",
+                  "> The owner answered:\n\n> Q12: yes\n\n> agreed, with **emphasis** and [a link](https://example.com/x)\n")
+        self.assertTrue(any("renders markup" in e for e in self.errors()))
+
     def test_plain_owner_answers_pass(self) -> None:
-        for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon."):
+        for answer in ("> Q12: yes", "> Yes, agreed. Use SQL Server on Azure.", "> I'm not married to Neon.",
+                       "> yes, add it to #32"):
             with self.subTest(answer=answer):
                 self.setUp()
                 self.edit(self.RECORD, "> Q12: yes", answer)

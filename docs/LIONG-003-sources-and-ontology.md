@@ -76,7 +76,7 @@ The current official landing page recommends DEXPI 2.0.1, released on 2026-09-30
 
 These are proposed test details for existing requirements. They do not assert full DEXPI compliance or replace human review.
 
-For the slice, [DEC-064](decisions/DEC-064-four-stage-dexpi-validation.md) decides gate 3's validation as four named stages (schema, references, model, LIONG rules) plus an exact round trip, and [DEC-065](decisions/DEC-065-claim-names-stages-that-ran.md) limits each claim to the stages that ran. None of this is built yet. The parser will also read DEXPI's 2.0.1 reference P&ID ([DEC-066](decisions/DEC-066-reference-pid-parser-test.md)).
+For the slice, [DEC-064](decisions/DEC-064-four-stage-dexpi-validation.md) decides gate 3's validation as four named stages (schema, references, model, LIONG rules) plus an exact round trip, and [DEC-072](decisions/DEC-072-claim-names-every-stage-that-ran.md) limits each claim to the stages that ran and names each one. None of this is built yet. The parser will also read DEXPI's 2.0.1 reference P&ID ([DEC-066](decisions/DEC-066-reference-pid-parser-test.md)).
 
 ## 4. Dataset assessment
 

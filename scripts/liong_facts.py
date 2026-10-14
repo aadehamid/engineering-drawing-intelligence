@@ -17,6 +17,7 @@ import re
 import subprocess
 import sys
 from typing import NamedTuple
+import unicodedata
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_docs import MARKDOWN, raw_html  # noqa: E402
@@ -413,7 +414,49 @@ def has_content(body: str) -> bool:
     )
 
 
-PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@-]*"
+PLAIN_QUOTE_LINE = r"> [A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*[A-Za-z0-9][A-Za-z0-9 .,:;?!'\"’‘“”/%+=@#-]*"
+
+
+def owner_quotes_render_plain(section: str) -> bool:
+    """Every quote from 'The owner answered:' (or said/wrote) on renders as plain paragraphs.
+
+    The CommonMark parser decides, so no spelling of a heading, list, code block, nested
+    quote, link or emphasis inside the owner's words passes, however it is indented or
+    split by blank lines. The answer phrase is found anywhere in the text a reader sees,
+    in any block, so markup or a preceding line cannot hide it. From that block on, no
+    code or HTML block passes at any depth. Quotes before it may hold the agent's question.
+
+    Every character except ASCII letters and the colon is deleted, and the words are
+    matched with nothing between them, so no other character between or inside the words
+    can hide the phrase. A letter or colon kept there breaks the phrase for the reader too.
+    That can also start the check on text a reader would not take for the phrase, which
+    only makes it stricter. A letter or colon replaced by a look-alike from another script,
+    such as the full-width colon U+FF1A, is outside what this check can see.
+    """
+    started, depth = False, 0
+    for token in MARKDOWN.parse(section):
+        if token.type in ("blockquote_open", "blockquote_close"):
+            depth += 1 if token.type == "blockquote_open" else -1
+            if started and depth > 1:
+                return False
+            continue
+        if not started:
+            seen = shown(token.children, False) if token.type == "inline" else token.content
+            letters = re.sub(r"[^A-Za-z:]", "", seen)
+            started = bool(re.search(r"Theowner(?:answered|said|wrote):", letters))
+            if not started:
+                continue
+            if depth > 1:
+                return False
+        if token.type in ("code_block", "fence", "html_block"):
+            return False
+        if depth and token.type not in ("paragraph_open", "paragraph_close"):
+            plain = token.type == "inline" and all(
+                child.type in ("text", "softbreak", "hardbreak") for child in token.children or []
+            )
+            if not plain:
+                return False
+    return True
 
 
 def owner_answer_is_plain(body: str) -> bool:
@@ -426,9 +469,10 @@ def owner_answer_is_plain(body: str) -> bool:
     if not answer:
         return False
     lines = [line for line in answer.group(1).splitlines() if line.strip() != ">"]
-    list_item = r"> (?:[-+]|\d+[.)])(\s|$)"
+    # A line that opens a list or a heading is markup, though its characters are allowed.
+    block_start = r"> (?:[-+]|\d+[.)]|#{1,6})(\s|$)"
     return bool(lines) and all(
-        re.fullmatch(PLAIN_QUOTE_LINE, line) and not re.match(list_item, line) for line in lines
+        re.fullmatch(PLAIN_QUOTE_LINE, line) and not re.match(block_start, line) for line in lines
     )
 
 
@@ -499,6 +543,10 @@ def check_record(record: Record, label: str, records: dict[str, Record]) -> list
     status = record.statuses[0] if record.statuses else None
     if re.search(r"[<&`]|~~~", record.raw_owner_words):
         errors.append(f"{label}: the Owner's words section holds plain text only: no HTML, entities, or code")
+    if any(unicodedata.category(char) == "Cf" for char in record.raw_owner_words):
+        errors.append(f"{label}: the Owner's words section holds an invisible format character")
+    if not owner_quotes_render_plain(record.raw_owner_words):
+        errors.append(f"{label}: a quote after the owner's answer line renders markup, not plain paragraphs")
     if status == "Decided" and not owner_answer_is_plain(bodies["## Owner's words"]):
         errors.append(
             f"{label}: a Decided record quotes the owner after 'The owner answered:' in a plain-text '>' block"
