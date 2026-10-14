@@ -101,9 +101,8 @@ Later provider, independence, role, and drafting confirmations are recorded here
 
 ## Decisions made under delegation
 
-The agent made these during the night runs, under the owner's delegations: the run of
-2026-10-13 under [DEC-048](decisions/DEC-048-night-delegation.md), and the run of 2026-10-14
-under [DEC-073](decisions/DEC-073-second-night-delegation.md). The owner has not reviewed them;
+The agent made these during the night run of 2026-10-13, under the owner's delegation
+in [DEC-048](decisions/DEC-048-night-delegation.md). The owner has not reviewed them;
 each can be reversed by a later owner decision.
 
 | ID | Decision | Basis | Authoritative location |

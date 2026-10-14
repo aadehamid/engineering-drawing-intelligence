@@ -26,8 +26,9 @@ evidence, and lists it in the morning log. The owner can reverse any of them.
 
 ## Decision
 
-The owner delegated the open questions of this run to the agent, to be settled from the
-project's data and from high-quality external sources.
+The owner delegated the open questions of this run to the agent:
+
+> you have my permission to decide for me using every available data and external search of hgih quality sources to resolve any ambiquity
 
 ## Alternatives considered
 
