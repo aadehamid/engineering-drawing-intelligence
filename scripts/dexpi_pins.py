@@ -3,7 +3,8 @@
 
 `standards/dexpi/2.0.1/MANIFEST.json` lists each pinned file with its SHA-256 and source.
 `check` fails unless the folder holds exactly the manifest's files, plus MANIFEST.json and
-NOTICE.md, and each file's hash matches. `local_path` maps an import URI to its pinned
+NOTICE.md, and each file's hash matches. NOTICE.md, the CC BY 4.0 attribution, is pinned
+by the manifest's `notice_sha256`, so deleting or rewriting it fails too. `local_path` maps an import URI to its pinned
 copy, so no DEXPI check ever reads the network. A URI the manifest records as not
 published, or that it does not list at all, has no local copy and raises UnpinnedImport.
 """
@@ -29,9 +30,16 @@ def manifest(pin_dir: Path = PIN_DIR) -> dict:
 
 def errors(pin_dir: Path = PIN_DIR) -> list[str]:
     """Every way the pinned folder differs from its manifest."""
-    files = manifest(pin_dir)["files"]
+    pins = manifest(pin_dir)
+    files = pins["files"]
     found = {path.name for path in pin_dir.iterdir()} - OWN_FILES
-    problems = [f"{name}: not listed in MANIFEST.json" for name in sorted(found - set(files))]
+    notice = pin_dir / "NOTICE.md"
+    problems = []
+    if not notice.is_file():
+        problems.append("NOTICE.md: the attribution notice is missing")
+    elif hashlib.sha256(notice.read_bytes()).hexdigest() != pins.get("notice_sha256"):
+        problems.append("NOTICE.md: SHA-256 does not match the manifest's notice_sha256")
+    problems += [f"{name}: not listed in MANIFEST.json" for name in sorted(found - set(files))]
     problems += [f"{name}: listed in MANIFEST.json but missing" for name in sorted(set(files) - found)]
     for name in sorted(set(files) & found):
         digest = hashlib.sha256((pin_dir / name).read_bytes()).hexdigest()

@@ -34,5 +34,6 @@
   },
   "not_published": {
     "https://data.dexpi.org/models/2.0.1/MetaData.xml": "Imported by Core.xml and Plant.xml for documentation annotations only. DEXPI publishes no such file; the build tool defines it in code."
-  }
+  },
+  "notice_sha256": "244071d2cbe4b32e6649bf13f41d1561f0e7f68a6cc636ce9c0c61ded8a04f88"
 }

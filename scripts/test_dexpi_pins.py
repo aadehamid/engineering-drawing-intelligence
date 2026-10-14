@@ -34,6 +34,10 @@ class PinnedFilesTest(unittest.TestCase):
         files = dexpi_pins.manifest()["files"]
         self.assertEqual({name: entry["sha256"] for name, entry in files.items()}, EXPECTED_SHA256)
 
+    def test_manifest_holds_the_reviewed_notice_hash(self):
+        self.assertEqual(dexpi_pins.manifest()["notice_sha256"],
+                         "244071d2cbe4b32e6649bf13f41d1561f0e7f68a6cc636ce9c0c61ded8a04f88")
+
     def test_manifest_names_the_release_and_license(self):
         pins = dexpi_pins.manifest()
         self.assertEqual((pins["release"], pins["tag"], pins["license"]), ("2.0.1", "V2.0.1", "CC BY 4.0"))
@@ -80,6 +84,14 @@ class CheckFailsTest(unittest.TestCase):
     def test_a_missing_file_fails(self):
         (self.dir / "Core.xml").unlink()
         self.assertEqual(dexpi_pins.errors(self.dir), ["Core.xml: listed in MANIFEST.json but missing"])
+
+    def test_a_missing_notice_fails(self):
+        (self.dir / "NOTICE.md").unlink()
+        self.assertEqual(dexpi_pins.errors(self.dir), ["NOTICE.md: the attribution notice is missing"])
+
+    def test_a_rewritten_notice_fails(self):
+        (self.dir / "NOTICE.md").write_text("These files are ours.\n")
+        self.assertEqual(dexpi_pins.errors(self.dir), ["NOTICE.md: SHA-256 does not match the manifest's notice_sha256"])
 
     def test_an_extra_file_fails(self):
         (self.dir / "Process.xml").write_text("<Model/>")
