@@ -131,6 +131,17 @@ class NamedReferenceTest(unittest.TestCase):
         result = validate.validate(negative(self, "model-named-reference-wrong-class"))
         self.assertEqual((result["passed"], result["failed"]), (["schema", "references"], "model"))
 
+    def test_named_references_count_toward_no_opposite_bound(self):
+        folder = written("R0")
+        self.addCleanup(shutil.rmtree, folder)
+        path = folder / "DEMO-PID-001.xml"
+        text = path.read_text(encoding="utf-8")
+        for target in ("#Valve_104_Node_Junction_107", "#Equipment_101_Nozzle_LineSegment_110_Node"):
+            text = text.replace(f'property="SourceNode" objects="{target}"', 'property="SourceNode" objects="Plant/Piping.PipingNode"')
+        path.write_text(text, encoding="utf-8")
+        result = validate.validate(folder)
+        self.assertEqual((result["passed"], result["failed"]), (["schema", "references", "model"], "liong_rules"))
+
     def test_a_resolvable_named_reference_passes_stage_two_and_fails_liong_rules(self):
         result = validate.validate(negative(self, "liong_rules-named-reference"))
         self.assertIn("liong_rules: DEMO-PID-002.xml line 129: Plant/ProcessEquipment.Nozzle is a named reference, "
