@@ -113,6 +113,7 @@ each can be reversed by a later owner decision.
 | DEC-051 | The loader replaces the backend's rows with a snapshot and raises one outbox event per revision | Decided by the agent under DEC-048 | [record](decisions/DEC-051-p3d-loader-choices.md) |
 | DEC-052 | W-SP is a two-sheet transfer line whose one pipeline is two runs, with three inline valves | Decided by the agent under DEC-048; stands by DEC-054 | [record](decisions/DEC-052-w-sp-contents.md) |
 | DEC-074 | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided by the agent under DEC-073 | [record](decisions/DEC-074-dexpi-2-0-1-pinned-files.md) |
+| DEC-075 | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided by the agent under DEC-073 | [record](decisions/DEC-075-extraction-records.md) |
 
 ## New proposals
 

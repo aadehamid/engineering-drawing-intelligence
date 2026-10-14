@@ -69,6 +69,7 @@ state; a register row links here when its decision has a record.
 | [DEC-072](DEC-072-claim-names-every-stage-that-ran.md) | A DEXPI validity claim names every stage that ran, including the reference checks | Decided | 2026-10-13 |
 | [DEC-073](DEC-073-second-night-delegation.md) | The agent decides open questions for the owner during the night run of 2026-10-14 | Decided | 2026-10-14 |
 | [DEC-074](DEC-074-dexpi-2-0-1-pinned-files.md) | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided | 2026-10-14 |
+| [DEC-075](DEC-075-extraction-records.md) | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided | 2026-10-14 |
 
 ## Record format
 
