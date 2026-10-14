@@ -12,10 +12,12 @@ The repository contains documentation, documentation-checking utilities, and the
 first synthetic backend: R0's canonical world file, the Plant 3D-style schema, a
 generator that writes R0's backend snapshots and answer key, and a loader that applies
 a snapshot and its outbox event to SQL Server. CI applies the schema and loads the
-snapshots on a SQL Server container. The repository does not contain an engineering
-pipeline, deployed graph, or executed engineering acceptance tests, and no hosted
-database has been provisioned. The steps below are future implementation work, not
-commands already executed.
+snapshots on a SQL Server container. MILESTONE-001's structured slice is built:
+`scripts/run_slice.py` runs steps 2 to 6 below on R0 to R2, publishing each to a Neo4j
+service in CI, and rejects Rbad before publication ([LIONG-010](LIONG-010-evaluation.md#current-evidence-and-implementation-handoff)).
+Step 1 runs in CI too, as the schema and snapshot loads on a throwaway SQL Server
+database. Nothing else here is built, and no hosted database has been provisioned. The
+stages after MILESTONE-001 are future implementation work, not commands already executed.
 
 Document approval and gate closure precede dependent build work. No step here
 authorizes cloud provisioning, charges, sensitive data, or publishing datasets.

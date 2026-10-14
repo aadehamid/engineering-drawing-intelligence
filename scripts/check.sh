@@ -9,6 +9,7 @@ if [ "${1:-}" != "--checks" ]; then
   exec python3 scripts/worktree_guard.py -- scripts/check.sh --checks
 fi
 
+scripts/require_ci_services.sh
 uv run --locked python scripts/bundle_docs.py --check
 uv run --locked python scripts/check_docs.py
 uv run --locked python scripts/test_doc_tools.py
@@ -28,3 +29,5 @@ uv run --locked python scripts/test_graph_publish.py
 uv run --locked python scripts/test_dexpi_generate.py
 uv run --locked python scripts/test_dexpi_parse.py
 uv run --locked python scripts/test_dexpi_validate.py
+uv run --locked python scripts/test_compare_answer_key.py
+uv run --locked python scripts/test_run_slice.py

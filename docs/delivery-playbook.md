@@ -128,8 +128,8 @@ failures, so the plan moved to the four stages above.
 
 ## 4. Build synthetic worlds with hidden answer keys
 
-Status: Proposed. It rests on a design review of how to test a pipeline without
-letting it read the truth it is scored against.
+Status: Proven. A merged pipeline runs every revision of one world end to end and
+matches its answer key exactly, and tests show the pipeline never opens the key.
 
 1. **Hand-author one small, complete world first.** Write it as a data file checked
    against a schema. It holds the full engineering truth, including its intended
@@ -149,7 +149,10 @@ letting it read the truth it is scored against.
 Worked example: the team's first world is a small two-sheet P&ID with one
 cross-sheet connection. One of its revisions has a flow line whose endpoint is
 missing. The loader loads it, and the pipeline must reject it with a message that
-names the missing endpoint.
+names the missing endpoint. The finished pipeline matched every accepted revision
+exactly and rejected the bad one before publishing anything. A test records every
+file the pipeline opens and fails if one is an answer key, so the separation is
+checked, not assumed.
 
 ## 5. Publish each graph snapshot once, under a hash of its content
 
@@ -171,6 +174,23 @@ database.
 Worked example: the team's graph database holds every published snapshot side by
 side. A test alters one stored node's tag and publishes the same graph again; the
 publish is refused because the stored content no longer hashes to its name.
+
+## 6. Keep a run's records honest
+
+Status: Proven. Merged tests fail when either guard below is removed: one runs a rejection
+into a folder that held an accepted run, and one runs the CI check without a server setting.
+
+1. **A run's output folder holds only that run's records.** Before a run writes
+   anything, remove every file it could write. Otherwise a rejected run beside an
+   earlier accepted one leaves the accepted run's graph next to the rejection.
+2. **Make CI fail when a test service's settings are missing.** Tests that need a
+   database usually skip when its connection setting is absent, which is right on a
+   laptop. In CI, check the settings first and fail without them, so a removed service
+   cannot turn those tests into silent skips.
+
+Worked example: the team ran an accepted revision and then a rejected one into the
+same folder. Before the fix, the accepted run's published graph sat beside the
+rejection's result.
 
 ## Appendix: notes on DEXPI as of 2026-10
 

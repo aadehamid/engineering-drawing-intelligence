@@ -224,6 +224,8 @@ CLAIMS: list[tuple[Path, str, tuple[str, ...]]] = [
     (FIXTURES, r"current state has (\d+) nodes, (\d+) edges, and tag", ("r0.nodes", "r0.edges")),
     (FIXTURES, r"and all (\d+) FLOW edges, with identifiers", ("scn012.export_flow_edges",)),
     (EVALUATION, r"(\d+) nodes and (\d+) edges, not merely", ("r0.nodes", "r0.edges")),
+    (EVALUATION, r"exactly: (\d+) nodes and (\d+) edges for R0 and R1, (\d+) and (\d+) for R2",
+     ("r0.nodes", "r0.edges", "r2.nodes", "r2.edges")),
     (EVALUATION, r"(\w+)-node/(\w+)-edge contextual diff", ("scn011.contextual_nodes", "scn011.contextual_edges")),
     (EVALUATION, r"entity recall has (\d+) expected nodes", ("r0.nodes",)),
     (EVALUATION, r"edge recall has (\d+) expected edges", ("r0.edges",)),
