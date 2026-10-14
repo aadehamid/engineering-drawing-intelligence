@@ -36,9 +36,10 @@ any of them.
    to revision handling in later milestones. So do these LIONG-005 fields, which the
    records leave out: facility and scope IDs, the predecessor revision, artifact
    references, tag validity intervals and drawing page IDs. The SourceRevision's
-   approval reference is `baseline_import` for R0 and empty for later revisions: the
-   MOC that approved them is in the generator's manifest and the vendor status fields,
-   and reading it belongs to the same later work.
+   approval reference is `baseline_import` for R0 and empty for later revisions. The MOC
+   references are in the generator's manifest, and the vendor status fields carry only
+   the source approval status (DEC-039); reading an approval reference belongs to the
+   same later work.
 6. **No answer key.** A test records every file the extractor opens through Python's
    open functions, for all four revisions, and fails if any is an answer key.
 
