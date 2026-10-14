@@ -30,7 +30,8 @@ reverse any of it.
 4. **Query.** `scripts/graph_publish.py query` runs one Cypher query, parameterized by
    snapshot ID and an optional connector label. It returns each cross-sheet connection
    with both ends' sheets and the evidence of the ends and the link.
-5. **Pins.** The `neo4j` driver is 6.3.1 (Apache-2.0), released 2026-09-15: 6.4.0, of
+5. **Pins.** The `neo4j` driver is 6.3.1, released 2026-09-15, under Apache-2.0 with parts under
+   the PSF Python-2.0 license (its metadata: `Apache-2.0 AND Python-2.0`): 6.4.0, of
    2026-10-05, is younger than DEC-067's 14 days. The image is
    `neo4j@sha256:6f3f17e72d69bb6f26b03f6186f5afb15a201f8b460bb69b0cd8030717f9f01a`,
    the multi-architecture index Docker Hub served for `2026.09.0-community` on
@@ -57,3 +58,5 @@ The owner answered:
   publish changes nothing, a changed stored snapshot is refused, a failed publish leaves
   nothing, and the query returns R0's cross-sheet connection with its evidence.
 - REF-TECH-003 in [LIONG-007](../LIONG-007-stack-and-architecture.md).
+- The [delivery playbook](../delivery-playbook.md)'s section 5, added in this decision's
+  pull request as DEC-071 requires.
