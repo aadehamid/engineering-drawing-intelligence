@@ -37,6 +37,13 @@
       "replace": "type=\"Plant/ProcessEquipment.Tankk\""
     },
     {
+      "name": "references-unresolved-named-reference",
+      "stage": "references",
+      "file": "DEMO-PID-002.xml",
+      "find": "objects=\"#Equipment_102_Nozzle_Instrument_105\"",
+      "replace": "objects=\"Plant/ProcessEquipment.Tankk\""
+    },
+    {
       "name": "model-abstract-class",
       "stage": "model",
       "file": "DEMO-PID-002.xml",
@@ -70,6 +77,13 @@
       "file": "DEMO-PID-002.xml",
       "find": "<String>TK-102</String>",
       "replace": "<String>L-101-5</String>"
+    },
+    {
+      "name": "liong_rules-named-reference",
+      "stage": "liong_rules",
+      "file": "DEMO-PID-002.xml",
+      "find": "objects=\"#Equipment_102_Nozzle_Instrument_105\"",
+      "replace": "objects=\"Plant/ProcessEquipment.Tank\""
     },
     {
       "name": "liong_rules-missing-sidecar-entry",

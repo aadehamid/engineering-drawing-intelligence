@@ -29,11 +29,13 @@ NEGATIVES = {
     "schema-document-type": ("schema", "schema: DEMO-PID-002.xml: has a document type declaration, which DEXPI files do not use"),
     "references-dangling-id": ("references", "references: DEMO-PID-002.xml line 129: #Equipment_102_Nozzle_Instrument_999 does not resolve"),
     "references-unpinned-import": ("references", "references: DEMO-PID-002.xml: import Plant: https://data.dexpi.org/models/2.0.1/MetaData.xml has no pinned copy"),
+    "references-unresolved-named-reference": ("references", "references: DEMO-PID-002.xml line 129: Plant/ProcessEquipment.Tankk does not resolve in the pinned models"),
     "references-unknown-class": ("references", "references: DEMO-PID-002.xml line 135: type Plant/ProcessEquipment.Tankk is not in the pinned models"),
     "model-abstract-class": ("model", "model: DEMO-PID-002.xml line 135: Plant/ProcessEquipment.ProcessEquipment is not a concrete class"),
     "model-missing-required-property": ("model", "model: DEMO-PID-002.xml line 182: Core/Diagram.Diagram.Name has 0 values, allowed 1..1"),
     "model-undeclared-property": ("model", "model: DEMO-PID-002.xml line 135: Plant/ProcessEquipment.Tank declares no property TagPrefix"),
     "liong_rules-unsupported-class": ("liong_rules", "liong_rules: Plant/ProcessEquipment.Vessel: 1 objects outside the supported subset"),
+    "liong_rules-named-reference": ("liong_rules", "liong_rules: p3d:object:105 senses at None, which is no supported node"),
     "liong_rules-duplicate-tag": ("liong_rules", "liong_rules: tag L-101-5 is on 2 nodes"),
     "liong_rules-missing-sidecar-entry": ("liong_rules", "liong_rules: p3d:object:105 has no sidecar entry"),
 }
@@ -84,6 +86,8 @@ class AcceptedTest(unittest.TestCase):
         result = validate.validate(folder)
         self.assertIsNone(result["failed"])
         self.assertEqual(result["round_trip"], ["DEMO-PID-002.xml differs when generated again"])
+        self.assertEqual(validate.claim(result), ALL_PASS.split(" Generating")[0][:-1]
+                         + "; fails the round trip, so it is not valid under DEC-064.")
 
 
 class NegativeTest(unittest.TestCase):
@@ -119,6 +123,13 @@ class ClaimTest(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertNotIn("conform", claim)
                 self.assertNotIn("certif", claim)
+
+
+class NamedReferenceTest(unittest.TestCase):
+    def test_a_resolvable_named_reference_passes_stage_two_and_fails_liong_rules(self):
+        result = validate.validate(negative(self, "liong_rules-named-reference"))
+        self.assertIn("liong_rules: DEMO-PID-002.xml line 129: Plant/ProcessEquipment.Tank is a named reference, "
+                      "outside the supported subset", result["problems"])
 
 
 class ReferencePidTest(unittest.TestCase):

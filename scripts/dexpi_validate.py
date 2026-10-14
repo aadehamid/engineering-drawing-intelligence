@@ -9,14 +9,15 @@ The stages stop at the first one that fails, and every failure names its stage.
    is read with only its own internal entities resolved, which its patterns need; a
    DEXPI file is read with no entity resolution and no network, and may not have a DTD.
 2. references: every Import maps to a pinned model through dexpi_pins.local_path, every
-   "#id" reference resolves in its file, and every class and enumeration literal a file
-   names exists in the pinned Core and Plant models.
+   "#id" reference resolves in its file, and every class, enumeration literal and named
+   reference a file names exists in the pinned Core and Plant models.
 3. model: every class is concrete; every property is declared on the class or a
    supertype, with the right kind and a value of an allowed type; every property has an
    allowed number of values, and no object is referenced more often than a reference
-   property's opposite bound allows. The models' documentation annotations are ignored.
-4. liong_rules: only classes of the supported subset, in the shapes the parser reads;
-   unique tags; a sidecar entry for every node, drawing, appearance and relationship;
+   property's opposite bound allows. The models' documentation annotations are ignored,
+   and a named reference's target class is not checked, since stage 4 refuses it anyway.
+4. liong_rules: only classes of the supported subset, in the shapes the parser reads, and
+   no named references; unique tags; a sidecar entry for every node, drawing, appearance and relationship;
    and an ExportDateTime equal to the source revision's recorded time.
 After all four pass, the round trip parses the folder, generates it again, and requires
 identical bytes for every file.
@@ -159,7 +160,10 @@ def check_references(path: Path) -> list[str]:
     for element in root.iter("References", "ObjectReference"):
         for target in (element.get("objects") or element.get("object") or "").split():
             if not target.startswith("#"):
-                problems.append(f"{path.name} line {element.sourceline}: {target} is a named reference, outside the supported subset")
+                full = resolve(target) or ""
+                enumeration, _, literal = full.rpartition(".")
+                if full not in m.types and literal not in m.types.get(enumeration, {}).get("literals", ()):
+                    problems.append(f"{path.name} line {element.sourceline}: {target} does not resolve in the pinned models")
             elif target[1:] not in ids:
                 problems.append(f"{path.name} line {element.sourceline}: {target} does not resolve")
     return problems
@@ -196,6 +200,8 @@ def check_model(path: Path) -> list[str]:
             elif kind == "Reference":
                 values = child.get("objects").split()
                 for v in values:
+                    if not v.startswith("#"):
+                        continue  # a named reference: stage 2 resolved it, and stage 4 refuses it
                     target = resolve(byid[v[1:]].get("type"))
                     if not any(m.is_a(target, t) for t in spec["types"]):
                         problems.append(f"{where}: {cls}.{name} refers to a {target}")
@@ -254,6 +260,12 @@ def check_liong_rules(folder: Path) -> list[str]:
     facts, sidecar = parse.read(folder), parse.load_sidecar(folder)
     problems = [f"{cls}: {count} objects outside the supported subset" for cls, count in sorted(facts["unsupported"].items())]
     problems += facts["problems"]
+    for path in parse.dexpi_files(folder):
+        for element in parse.parse_xml(path).getroot().iter("References", "ObjectReference"):
+            for target in (element.get("objects") or element.get("object") or "").split():
+                if not target.startswith("#"):
+                    problems.append(f"{path.name} line {element.sourceline}: {target} is a named reference, "
+                                    "outside the supported subset")
     tags = Counter(n["tag"] for n in facts["nodes"].values() if n.get("tag"))
     problems += [f"tag {tag} is on {count} nodes" for tag, count in sorted(tags.items()) if count > 1]
     if sidecar is None or sidecar.get("format") != gen.SIDECAR_FORMAT:
@@ -307,6 +319,8 @@ def claim(result: dict) -> str:
         text = f"Valid against {', '.join(passed[:-1])} and {passed[-1]}, and passes LIONG's rules."
         if result["round_trip"] == []:
             text += " Generating it again gives identical bytes."
+        elif result["round_trip"]:
+            text = text[:-1] + "; fails the round trip, so it is not valid under DEC-064."
         return text
     if not passed:
         return f"Fails the {result['failed']} stage; no stage passed."
