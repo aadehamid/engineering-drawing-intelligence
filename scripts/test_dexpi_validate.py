@@ -35,6 +35,7 @@ NEGATIVES = {
     "model-missing-required-property": ("model", "model: DEMO-PID-002.xml line 182: Core/Diagram.Diagram.Name has 0 values, allowed 1..1"),
     "model-undeclared-property": ("model", "model: DEMO-PID-002.xml line 135: Plant/ProcessEquipment.Tank declares no property TagPrefix"),
     "liong_rules-unsupported-class": ("liong_rules", "liong_rules: Plant/ProcessEquipment.Vessel: 1 objects outside the supported subset"),
+    "model-named-reference-wrong-class": ("model", "model: DEMO-PID-002.xml line 128: Plant/Instrumentation.ProcessSignalGeneratingFunction.SensingLocation refers to a Plant/ProcessEquipment.Tank"),
     "liong_rules-named-reference": ("liong_rules", "liong_rules: p3d:object:105 senses at None, which is no supported node"),
     "liong_rules-duplicate-tag": ("liong_rules", "liong_rules: tag L-101-5 is on 2 nodes"),
     "liong_rules-missing-sidecar-entry": ("liong_rules", "liong_rules: p3d:object:105 has no sidecar entry"),
@@ -126,9 +127,13 @@ class ClaimTest(unittest.TestCase):
 
 
 class NamedReferenceTest(unittest.TestCase):
+    def test_a_named_reference_of_the_wrong_class_fails_the_model_stage(self):
+        result = validate.validate(negative(self, "model-named-reference-wrong-class"))
+        self.assertEqual((result["passed"], result["failed"]), (["schema", "references"], "model"))
+
     def test_a_resolvable_named_reference_passes_stage_two_and_fails_liong_rules(self):
         result = validate.validate(negative(self, "liong_rules-named-reference"))
-        self.assertIn("liong_rules: DEMO-PID-002.xml line 129: Plant/ProcessEquipment.Tank is a named reference, "
+        self.assertIn("liong_rules: DEMO-PID-002.xml line 129: Plant/ProcessEquipment.Nozzle is a named reference, "
                       "outside the supported subset", result["problems"])
 
 

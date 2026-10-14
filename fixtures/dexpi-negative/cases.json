@@ -65,6 +65,13 @@
       "replace": "<Data property=\"TagPrefix\">"
     },
     {
+      "name": "model-named-reference-wrong-class",
+      "stage": "model",
+      "file": "DEMO-PID-002.xml",
+      "find": "objects=\"#Equipment_102_Nozzle_Instrument_105\"",
+      "replace": "objects=\"Plant/ProcessEquipment.Tank\""
+    },
+    {
       "name": "liong_rules-unsupported-class",
       "stage": "liong_rules",
       "file": "DEMO-PID-002.xml",
@@ -83,7 +90,7 @@
       "stage": "liong_rules",
       "file": "DEMO-PID-002.xml",
       "find": "objects=\"#Equipment_102_Nozzle_Instrument_105\"",
-      "replace": "objects=\"Plant/ProcessEquipment.Tank\""
+      "replace": "objects=\"Plant/ProcessEquipment.Nozzle\""
     },
     {
       "name": "liong_rules-missing-sidecar-entry",

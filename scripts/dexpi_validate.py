@@ -14,8 +14,8 @@ The stages stop at the first one that fails, and every failure names its stage.
 3. model: every class is concrete; every property is declared on the class or a
    supertype, with the right kind and a value of an allowed type; every property has an
    allowed number of values, and no object is referenced more often than a reference
-   property's opposite bound allows. The models' documentation annotations are ignored,
-   and a named reference's target class is not checked, since stage 4 refuses it anyway.
+   property's opposite bound allows; a named reference is checked by the class it names.
+   The models' documentation annotations are ignored.
 4. liong_rules: only classes of the supported subset, in the shapes the parser reads, and
    no named references; unique tags; a sidecar entry for every node, drawing, appearance and relationship;
    and an ExportDateTime equal to the source revision's recorded time.
@@ -200,9 +200,11 @@ def check_model(path: Path) -> list[str]:
             elif kind == "Reference":
                 values = child.get("objects").split()
                 for v in values:
-                    if not v.startswith("#"):
-                        continue  # a named reference: stage 2 resolved it, and stage 4 refuses it
-                    target = resolve(byid[v[1:]].get("type"))
+                    if v.startswith("#"):
+                        target = resolve(byid[v[1:]].get("type"))
+                    else:  # a named reference, which stage 2 resolved to a class or a literal
+                        named = resolve(v)
+                        target = named if named in m.types else named.rpartition(".")[0]
                     if not any(m.is_a(target, t) for t in spec["types"]):
                         problems.append(f"{where}: {cls}.{name} refers to a {target}")
                     referrers[(spec["owner"], name, v)] += 1
