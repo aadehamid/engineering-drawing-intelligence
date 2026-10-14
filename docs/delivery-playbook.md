@@ -175,6 +175,22 @@ Worked example: the team's graph database holds every published snapshot side by
 side. A test alters one stored node's tag and publishes the same graph again; the
 publish is refused because the stored content no longer hashes to its name.
 
+## 6. Keep a run's records honest
+
+Status: Proven. Merged tests show both points below failing when the guard is removed.
+
+1. **A run's output folder holds only that run's records.** Before a run writes
+   anything, remove every file it could write. Otherwise a rejected run beside an
+   earlier accepted one leaves the accepted run's graph next to the rejection.
+2. **Make CI fail when a test service's settings are missing.** Tests that need a
+   database usually skip when its connection setting is absent, which is right on a
+   laptop. In CI, check the settings first and fail without them, so a removed service
+   cannot turn those tests into silent skips.
+
+Worked example: the team ran an accepted revision and then a rejected one into the
+same folder. Before the fix, the accepted run's published graph sat beside the
+rejection's result.
+
 ## Appendix: notes on DEXPI as of 2026-10
 
 These are facts about the standard as checked on 2026-10-13. Check them again

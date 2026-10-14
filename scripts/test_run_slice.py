@@ -112,6 +112,8 @@ class PublishedSliceTest(unittest.TestCase):
         self.assertEqual([(q["from_label"], q["from_sheet"], q["to_label"], q["to_sheet"]) for q in query],
                          [("TO-S2/A", "DEMO-PID-001", "FROM-S1/A", "DEMO-PID-002")])
         self.assertEqual(query[0]["evidence"], [{"RowId": 1, "table": "SheetConnectorLink"}])
+        run_slice.run("Rbad", out, now=AT)
+        self.assertFalse((out / "query.json").exists())
 
 
 @unittest.skipUnless(os.environ.get("LIONG_SQLSERVER"), "LIONG_SQLSERVER is not set; CI runs these against SQL Server")

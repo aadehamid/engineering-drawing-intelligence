@@ -15,8 +15,9 @@ a snapshot and its outbox event to SQL Server. CI applies the schema and loads t
 snapshots on a SQL Server container. MILESTONE-001's structured slice is built:
 `scripts/run_slice.py` runs steps 2 to 6 below on R0 to R2 and Rbad, in `scripts/check.sh`
 and CI, with a local Neo4j graph ([LIONG-010](LIONG-010-evaluation.md#current-evidence-and-implementation-handoff)).
-Nothing else here is built, and no hosted database has been provisioned. The other steps
-and stages below are future implementation work, not commands already executed.
+Step 1 runs in CI too, as the schema and snapshot loads on a throwaway SQL Server
+database. Nothing else here is built, and no hosted database has been provisioned. The
+stages after MILESTONE-001 are future implementation work, not commands already executed.
 
 Document approval and gate closure precede dependent build work. No step here
 authorizes cloud provisioning, charges, sensitive data, or publishing datasets.
