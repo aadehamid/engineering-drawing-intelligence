@@ -177,7 +177,8 @@ publish is refused because the stored content no longer hashes to its name.
 
 ## 6. Keep a run's records honest
 
-Status: Proven. Merged tests show both points below failing when the guard is removed.
+Status: Proven. Merged tests fail when either guard below is removed: one runs a rejection
+into a folder that held an accepted run, and one runs the CI check without a server setting.
 
 1. **A run's output folder holds only that run's records.** Before a run writes
    anything, remove every file it could write. Otherwise a rejected run beside an

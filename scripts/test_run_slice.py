@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -100,6 +101,17 @@ class SliceTest(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("LIONG_NEO4J"), "LIONG_NEO4J is not set; CI runs these against Neo4j")
 class PublishedSliceTest(unittest.TestCase):
+    def test_every_accepted_revision_is_published_and_matches_when_read_back(self):
+        for revision, (nodes, edges) in COUNTS.items():
+            out = Path(tempfile.mkdtemp())
+            self.addCleanup(shutil.rmtree, out)
+            result = run_slice.run(revision, out, now=AT)
+            receipt = json.loads((out / "publication-receipt.json").read_text())
+            with self.subTest(revision=revision):
+                self.assertIn(receipt["outcome"], ("published", "unchanged"))
+                self.assertEqual((receipt["node_count"], receipt["edge_count"]), (nodes, edges))
+                self.assertTrue(compare_answer_key.compare(result, KEY, revision)["match"])
+
     def test_r0_is_published_read_back_and_queried(self):
         out = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, out)
@@ -114,6 +126,33 @@ class PublishedSliceTest(unittest.TestCase):
         self.assertEqual(query[0]["evidence"], [{"RowId": 1, "table": "SheetConnectorLink"}])
         run_slice.run("Rbad", out, now=AT)
         self.assertFalse((out / "query.json").exists())
+
+
+class CiServicesTest(unittest.TestCase):
+    """CI cannot run the checks without both servers, so their tests cannot silently skip there."""
+
+    def run_guard(self, **env) -> subprocess.CompletedProcess:
+        base = {k: v for k, v in os.environ.items() if k not in ("CI", "LIONG_SQLSERVER", "LIONG_NEO4J")}
+        return subprocess.run(["bash", str(ROOT / "scripts" / "require_ci_services.sh")], env=base | env,
+                              capture_output=True, text=True)
+
+    def test_ci_without_a_server_setting_fails(self):
+        for env, missing in (({"CI": "true", "LIONG_NEO4J": "x"}, "LIONG_SQLSERVER"),
+                             ({"CI": "true", "LIONG_SQLSERVER": "x"}, "LIONG_NEO4J"),
+                             ({"CI": "true", "LIONG_SQLSERVER": "x", "LIONG_NEO4J": ""}, "LIONG_NEO4J")):
+            result = self.run_guard(**env)
+            with self.subTest(missing=missing):
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(f"CI must set {missing}", result.stderr)
+
+    def test_ci_with_both_settings_and_a_laptop_pass(self):
+        self.assertEqual(self.run_guard(CI="true", LIONG_SQLSERVER="x", LIONG_NEO4J="y").returncode, 0)
+        self.assertEqual(self.run_guard().returncode, 0)
+
+    def test_the_check_script_runs_the_guard_before_any_check(self):
+        lines = (ROOT / "scripts" / "check.sh").read_text(encoding="utf-8").splitlines()
+        first_check = next(i for i, line in enumerate(lines) if line.startswith("uv run"))
+        self.assertIn("scripts/require_ci_services.sh", lines[:first_check])
 
 
 @unittest.skipUnless(os.environ.get("LIONG_SQLSERVER"), "LIONG_SQLSERVER is not set; CI runs these against SQL Server")
