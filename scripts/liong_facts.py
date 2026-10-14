@@ -427,10 +427,11 @@ def owner_quotes_render_plain(section: str) -> bool:
     code or HTML block passes at any depth. Quotes before it may hold the agent's question.
 
     Every character except ASCII letters and the colon is deleted, and the words are
-    matched with nothing between them, so no character between or inside the words can
-    hide the phrase. That can also start the check on text a reader would not take for
-    the phrase, which only makes it stricter. A letter replaced by a look-alike from
-    another script is outside what this check can see.
+    matched with nothing between them, so no other character between or inside the words
+    can hide the phrase. A letter or colon kept there breaks the phrase for the reader too.
+    That can also start the check on text a reader would not take for the phrase, which
+    only makes it stricter. A letter or colon replaced by a look-alike from another script,
+    such as the full-width colon U+FF1A, is outside what this check can see.
     """
     started, depth = False, 0
     for token in MARKDOWN.parse(section):
