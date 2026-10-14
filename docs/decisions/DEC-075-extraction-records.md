@@ -35,7 +35,10 @@ any of them.
 5. **Not extracted yet.** WorkHistory and the PlantObject bookkeeping columns belong
    to revision handling in later milestones. So do these LIONG-005 fields, which the
    records leave out: facility and scope IDs, the predecessor revision, artifact
-   references, tag validity intervals and drawing page IDs.
+   references, tag validity intervals and drawing page IDs. The SourceRevision's
+   approval reference is `baseline_import` for R0 and empty for later revisions: the
+   MOC that approved them is in the generator's manifest and the vendor status fields,
+   and reading it belongs to the same later work.
 6. **No answer key.** A test records every file the extractor opens through Python's
    open functions, for all four revisions, and fails if any is an answer key.
 

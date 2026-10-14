@@ -147,6 +147,20 @@ class SnapshotExtractionTest(unittest.TestCase):
             identifiers = [record[field] for record in records[group]]
             self.assertEqual(len(identifiers), len(set(identifiers)), group)
 
+    def test_every_record_names_its_own_row(self):
+        records = from_snapshot("R0")
+        tables = {"equipment": "Equipment", "valve": "Valve", "instrument": "Instrument",
+                  "pipe_segment": "LineSegment"}
+        for record in records["tag_assignments"]:
+            subject = key(record["object_id"])
+            self.assertEqual(record["source_locator"], {"table": tables[R0_KINDS[subject]], "ObjectId": subject})
+        for record in records["objects"]:
+            self.assertEqual(record["source_locator"], {"table": "PlantObject", "ObjectId": key(record["object_id"])})
+        for record in records["drawings"]:
+            self.assertEqual(record["source_locator"], {"table": "Drawing", "DrawingId": key(record["artifact_id"])})
+        for record in records["appearances"]:
+            self.assertEqual(record["source_locator"], {"table": "DrawingAppearance", "RowId": key(record["appearance_id"])})
+
     def test_record_shapes_and_identifiers(self):
         records = from_snapshot("R0")
         self.assertEqual(records["source_revision"], {
