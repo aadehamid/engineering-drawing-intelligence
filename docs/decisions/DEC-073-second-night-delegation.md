@@ -1,4 +1,4 @@
-# DEC-073: The agent decides open questions for the owner while building MILESTONE-001's slice
+# DEC-073: The agent decides open questions for the owner during the night run of 2026-10-14
 
 Status: Decided
 Date: 2026-10-14
@@ -16,8 +16,9 @@ them. The goal: vendor the pinned DEXPI 2.0.1 files; extract source records with
 reading the answer key; an lxml generator and parser; the four-stage validation; a
 Neo4j publish with the cross-sheet query; an exact comparison with the answer key,
 including the Rbad rejection; and the gates' closure evidence. The run stops for a
-question the evidence cannot settle, and for anything irreversible outside the
-repository: spending money, publishing, deleting remote data, or rewriting main.
+question the evidence cannot settle; for anything irreversible outside the
+repository, such as spending money, publishing or deleting remote data; and for
+rewriting main's history.
 
 How the agent applies the delegation is its own practice, as under DEC-048: it records
 each decision as Decided, citing this record, where the question lives, with its
@@ -25,7 +26,7 @@ evidence, and lists it in the morning log. The owner can reverse any of them.
 
 ## Decision
 
-The owner delegated the run's open questions to the agent, to be settled from the
+The owner delegated the open questions of this run to the agent, to be settled from the
 project's data and from high-quality external sources.
 
 ## Alternatives considered
