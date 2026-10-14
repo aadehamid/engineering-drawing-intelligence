@@ -40,6 +40,9 @@ The agent decides the slice's build choices under the owner's delegation in
 snapshot folder and never opens an answer key ([DEC-075](decisions/DEC-075-extraction-records.md)).
 Steps 4 and 5 publish through `scripts/graph_publish.py`, which stores each snapshot once
 under its content hash and runs the cross-sheet query ([DEC-076](decisions/DEC-076-graph-publication.md)).
+`scripts/run_slice.py` chains the steps ([DEC-060](decisions/DEC-060-plain-python-orchestration.md)),
+and `scripts/compare_answer_key.py` compares the result with the answer key exactly
+([DEC-059](decisions/DEC-059-exact-answer-key-comparison.md)).
 Step 3 writes the records as one DEXPI 2.0.1 file per drawing with `scripts/dexpi_generate.py`,
 validates them in four stages with `scripts/dexpi_validate.py`, and parses them back into the graph
 with `scripts/dexpi_parse.py` ([DEC-077](decisions/DEC-077-dexpi-mapping.md)).

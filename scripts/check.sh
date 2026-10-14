@@ -28,3 +28,5 @@ uv run --locked python scripts/test_graph_publish.py
 uv run --locked python scripts/test_dexpi_generate.py
 uv run --locked python scripts/test_dexpi_parse.py
 uv run --locked python scripts/test_dexpi_validate.py
+uv run --locked python scripts/test_compare_answer_key.py
+uv run --locked python scripts/test_run_slice.py

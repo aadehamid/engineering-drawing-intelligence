@@ -128,8 +128,8 @@ failures, so the plan moved to the four stages above.
 
 ## 4. Build synthetic worlds with hidden answer keys
 
-Status: Proposed. It rests on a design review of how to test a pipeline without
-letting it read the truth it is scored against.
+Status: Proven. A merged pipeline runs every revision of one world end to end and
+matches its answer key exactly, and tests show the pipeline never opens the key.
 
 1. **Hand-author one small, complete world first.** Write it as a data file checked
    against a schema. It holds the full engineering truth, including its intended
@@ -149,7 +149,10 @@ letting it read the truth it is scored against.
 Worked example: the team's first world is a small two-sheet P&ID with one
 cross-sheet connection. One of its revisions has a flow line whose endpoint is
 missing. The loader loads it, and the pipeline must reject it with a message that
-names the missing endpoint.
+names the missing endpoint. The finished pipeline matched every accepted revision
+exactly and rejected the bad one before publishing anything. A test records every
+file the pipeline opens and fails if one is an answer key, so the separation is
+checked, not assumed.
 
 ## 5. Publish each graph snapshot once, under a hash of its content
 

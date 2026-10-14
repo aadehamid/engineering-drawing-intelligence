@@ -163,6 +163,18 @@ DEC-055 to DEC-069 choose the components for MILESTONE-001's slice under GATE-00
 and GATE-003. Both gates stay open until a pull request lands their closure
 evidence ([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)).
 
+The evidence DEC-055 names is now on `main`, for the slice's supported subset. For
+GATE-001: the pinned artifacts and their license record in `standards/dexpi/2.0.1`
+([DEC-074](decisions/DEC-074-dexpi-2-0-1-pinned-files.md)); positive round-trip fixtures,
+R0 to R2, which pass all four validation stages and regenerate byte for byte; and
+the negative cases in `fixtures/dexpi-negative/cases.json`, each one planted fault, covering all four stages
+([DEC-077](decisions/DEC-077-dexpi-mapping.md)). For the slice's part of GATE-003: the
+exact pins in `pyproject.toml` and `uv.lock` and the pinned Neo4j image
+([DEC-076](decisions/DEC-076-graph-publication.md)), and the compatibility tests that run
+the whole slice in CI: one run publishes through Neo4j, and another reads the loaded
+SQL Server backend. Neither gate is closed here; closing
+them is a separate pull request.
+
 Source-specific gates in LIONG-003, technology gates in LIONG-007, and operational
 gates in LIONG-009 refine this list. Closing one gate does not close the others.
 
