@@ -7,7 +7,7 @@
     "worlds/R0.yaml": "a0f8e6d293d7fcad251b5bd69d7bc7ff37533b8272d40430bdf0486e9e863eee",
     "schemas/plant3d-style.sql": "3ac975d38af828f2ebacb082e9e04a55fa959cfa3d140beea7be91ce05ff071b",
     "scripts/generate_p3d.py": "2ece4de6a15aee416765d6b7ffb106edd19c2f5d4efc98236f4e8102703ae80d",
-    "uv.lock": "006f48d26723e26806726d9ce698270a35690d26c18da2df1759ac230e638500"
+    "uv.lock": "2603fb5e85731fe162664ecf5331fcf3857d35f3f914062e7816b6927be2afad"
   },
   "revisions": {
     "R0": {
