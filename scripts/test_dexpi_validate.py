@@ -15,6 +15,8 @@ import sys
 import tempfile
 import unittest
 
+from lxml import etree
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dexpi_validate as validate  # noqa: E402
 from test_dexpi_generate import records, written  # noqa: E402
@@ -141,6 +143,25 @@ class NamedReferenceTest(unittest.TestCase):
         path.write_text(text, encoding="utf-8")
         result = validate.validate(folder)
         self.assertEqual((result["passed"], result["failed"]), (["schema", "references", "model"], "liong_rules"))
+
+    def composition_reference(self, target: str) -> dict:
+        """R0 with the first segment of line L-101 held by an ObjectReference to `target`."""
+        folder = written("R0")
+        self.addCleanup(shutil.rmtree, folder)
+        path = folder / "DEMO-PID-001.xml"
+        root = etree.fromstring(path.read_bytes())
+        segments = root.find(".//Object[@id='PipingNetworkSystem_L_101']/Components[@property='Segments']")
+        segments.replace(segments[0], etree.Element("ObjectReference", object=target))
+        path.write_bytes(etree.tostring(root, xml_declaration=True, encoding="UTF-8"))
+        return validate.validate(folder)
+
+    def test_a_reference_held_in_a_composition_is_checked_by_its_class(self):
+        named = self.composition_reference("Plant/Piping.PipingNetworkSegment")
+        self.assertEqual((named["passed"], named["failed"]), (["schema", "references", "model"], "liong_rules"))
+        wrong = self.composition_reference("Plant/ProcessEquipment.Tank")
+        self.assertEqual(wrong["failed"], "model")
+        self.assertTrue(any(p.endswith("Segments holds a Plant/ProcessEquipment.Tank") for p in wrong["problems"]),
+                        wrong["problems"])
 
     def test_a_resolvable_named_reference_passes_stage_two_and_fails_liong_rules(self):
         result = validate.validate(negative(self, "liong_rules-named-reference"))

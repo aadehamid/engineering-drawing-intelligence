@@ -14,8 +14,10 @@ The stages stop at the first one that fails, and every failure names its stage.
 3. model: every class is concrete; every property is declared on the class or a
    supertype, with the right kind and a value of an allowed type; every property has an
    allowed number of values, and no object is referenced more often than a reference
-   property's opposite bound allows; a named reference is checked by the class it names,
-   and, naming no object in the file, counts toward no opposite bound.
+   property's opposite bound allows. A reference, whether a References value or an
+   ObjectReference held in a composition, is checked by the class it points at: its
+   object's class for "#id", or the class it names. A named reference names no object in
+   the file, so it counts toward no opposite bound.
    The models' documentation annotations are ignored.
 4. liong_rules: only classes of the supported subset, in the shapes the parser reads, and
    no named references; unique tags; a sidecar entry for every node, drawing, appearance and relationship;
@@ -170,6 +172,18 @@ def check_references(path: Path) -> list[str]:
     return problems
 
 
+def target_class(reference: str, byid: dict, resolve, m: Models) -> str | None:
+    """The class a reference points at: its object's class for "#id", else the class it names.
+
+    A named reference was resolved in stage 2 to a class or an enumeration literal; a
+    literal stands for its enumeration.
+    """
+    if reference.startswith("#"):
+        return resolve(byid[reference[1:]].get("type"))
+    named = resolve(reference)
+    return named if named in m.types else named.rpartition(".")[0]
+
+
 def check_model(path: Path) -> list[str]:
     root = parse.parse_xml(path).getroot()
     resolve, m = resolver(root), models()
@@ -196,16 +210,14 @@ def check_model(path: Path) -> list[str]:
             if kind == "Composition":
                 values = list(child)
                 for v in values:
-                    if not any(m.is_a(resolve(v.get("type")), t) for t in spec["types"]):
-                        problems.append(f"{where}: {cls}.{name} holds a {resolve(v.get('type'))}")
+                    held = target_class(v.get("object"), byid, resolve, m) if v.tag == "ObjectReference" \
+                        else resolve(v.get("type"))
+                    if not any(m.is_a(held, t) for t in spec["types"]):
+                        problems.append(f"{where}: {cls}.{name} holds a {held}")
             elif kind == "Reference":
                 values = child.get("objects").split()
                 for v in values:
-                    if v.startswith("#"):
-                        target = resolve(byid[v[1:]].get("type"))
-                    else:  # a named reference, which stage 2 resolved to a class or a literal
-                        named = resolve(v)
-                        target = named if named in m.types else named.rpartition(".")[0]
+                    target = target_class(v, byid, resolve, m)
                     if not any(m.is_a(target, t) for t in spec["types"]):
                         problems.append(f"{where}: {cls}.{name} refers to a {target}")
                     if v.startswith("#"):  # a named class is not an object, so no opposite bound applies
