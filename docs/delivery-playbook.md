@@ -83,8 +83,9 @@ published nowhere, so the manifest records it as unpublished.
 
 ## 3. Validate in named stages
 
-Status: Proposed. It rests on the absence of any official validator for the
-release, and on a review of what XML schema validation can and cannot detect.
+Status: Proven. A test runs the four stages on generated files, on hand-built
+negative fixtures that each fail in their named stage, and on the standard's own
+reference example.
 
 An XML file can be valid against its schema and still describe an impossible
 engineering model. Validate in stages, in this order, and make every failure name
@@ -116,6 +117,10 @@ Practices that go with the stages:
 5. **Claim only the stages that ran.** If stages 1, 2 and 4 ran, the claim is
    "passes the schema, the reference checks and the project's rules". Never write "conformant" or
    "certified" unless an official conformance test exists and passed.
+6. **Resolve only the schema's own entities.** The DEXPI XSD builds its name and
+   ID patterns from entities in its internal DTD. Read with no entity resolution,
+   it compiles but rejects every file. Read the XSD with internal entities only,
+   and read data files with none and with no DTD.
 
 Worked example: the team's first plan had three checks: the schema, its own subset
 rules, and a round trip. Its subset rules mixed standard failures with project
