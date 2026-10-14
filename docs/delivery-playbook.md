@@ -146,6 +146,27 @@ cross-sheet connection. One of its revisions has a flow line whose endpoint is
 missing. The loader loads it, and the pipeline must reject it with a message that
 names the missing endpoint.
 
+## 5. Publish each graph snapshot once, under a hash of its content
+
+Status: Proven. A merged test shows each point below working against a real graph
+database.
+
+1. **Name a snapshot by a hash of its content.** Hash the source revision, every
+   node and every edge, with their evidence, in a fixed order. The same graph always
+   gets the same name, and any changed fact gets a new one.
+2. **Publish in one transaction.** A reader then sees the whole snapshot or none of
+   it. Test it by failing the transaction on purpose partway through, and check that
+   nothing was stored.
+3. **Make publishing again a no-op, and check it.** When the name already exists,
+   read the stored snapshot back, hash it, and refuse it if the hash no longer matches
+   its name. That turns "immutable" into something a test can fail.
+4. **Scope every query to one snapshot.** Pass the snapshot's name as a parameter,
+   and build nothing in the query text from data.
+
+Worked example: the team's graph database holds every published snapshot side by
+side. A test alters one stored node's tag and publishes the same graph again; the
+publish is refused because the stored content no longer hashes to its name.
+
 ## Appendix: notes on DEXPI as of 2026-10
 
 These are facts about the standard as checked on 2026-10-13. Check them again
