@@ -1,0 +1,27 @@
+[
+  {
+    "DepictionGuid": "74F77CC3-8886-5025-98FD-1082B26736F6",
+    "LabelledDepiction": "A80BEDD0-89BE-54F9-831D-DA6574D126FC",
+    "LabelText": "L-301-1"
+  },
+  {
+    "DepictionGuid": "E29CD28D-6F3E-5A91-81F4-A96C49AEA440",
+    "LabelledDepiction": "D410EBE1-247A-5511-A67B-CB063802D015",
+    "LabelText": "L-301-2"
+  },
+  {
+    "DepictionGuid": "D71F3AE7-3629-5A7A-871B-05D3BCE6510C",
+    "LabelledDepiction": "87F2AF9E-A408-5639-99A4-1D34ED0936B3",
+    "LabelText": "L-301-3"
+  },
+  {
+    "DepictionGuid": "5809B78D-A537-536F-8F7F-F7A597B07B00",
+    "LabelledDepiction": "E29B63F7-B8D4-5B2A-9AFB-624797FDFA54",
+    "LabelText": "L-301-4"
+  },
+  {
+    "DepictionGuid": "FB49B636-21B4-530C-A12A-C0C6E4B4B45E",
+    "LabelledDepiction": "4F28FEA3-45E7-574F-B0BE-294867898C20",
+    "LabelText": "L-301-5"
+  }
+]

@@ -280,7 +280,8 @@ def main(argv: list[str]) -> int:
         return 1
     if args.check:
         stale = [p for p, b in files.items() if not p.is_file() or p.read_bytes() != b]
-        extra = [p for folder in (OUT, ANSWER_KEY.parent) for p in folder.rglob("*") if p.is_file() and p not in files]
+        # Other generators' answer keys share the folder, so only this generator's files count
+        extra = [p for p in OUT.rglob("*") if p.is_file() and p not in files]
         for p in stale + extra:
             print(f"stale or extra: {p.relative_to(ROOT)}", file=sys.stderr)
         if stale or extra:

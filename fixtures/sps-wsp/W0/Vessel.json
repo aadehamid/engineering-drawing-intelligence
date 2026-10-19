@@ -1,0 +1,18 @@
+[
+  {
+    "ItemGuid": "4E781C49-8383-541C-A3BB-A881AA4E3A40",
+    "ItemTag": "TK-301",
+    "TagLead": "TK",
+    "TagNumber": "301",
+    "TagTail": null,
+    "Description": "supply vessel"
+  },
+  {
+    "ItemGuid": "3BDC3007-A1CA-5FD4-9A4B-C12B14E4605A",
+    "ItemTag": "TK-302",
+    "TagLead": "TK",
+    "TagNumber": "302",
+    "TagTail": null,
+    "Description": "receiving vessel"
+  }
+]

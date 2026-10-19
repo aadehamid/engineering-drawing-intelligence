@@ -1,0 +1,52 @@
+[
+  {
+    "PointGuid": "2BACF240-9D01-52FD-898A-EA6571985561",
+    "OwnerItem": "E5531D47-5180-598A-B6F8-63EF2DC29531",
+    "PointNo": 1
+  },
+  {
+    "PointGuid": "26EDB6F7-3D22-5421-A336-5D87E014DAA0",
+    "OwnerItem": "E5531D47-5180-598A-B6F8-63EF2DC29531",
+    "PointNo": 2
+  },
+  {
+    "PointGuid": "88E1A8C6-2E84-520D-B53D-75242509DFB7",
+    "OwnerItem": "AA396C4B-92E2-57AC-9B8F-AF12BD9C4EBD",
+    "PointNo": 1
+  },
+  {
+    "PointGuid": "26E0EA77-298B-5BCC-849F-41D50E27394C",
+    "OwnerItem": "AA396C4B-92E2-57AC-9B8F-AF12BD9C4EBD",
+    "PointNo": 2
+  },
+  {
+    "PointGuid": "BFFBE7ED-9F62-5150-9998-4DC13C97AF8C",
+    "OwnerItem": "C41295BE-6C23-50BE-925A-3506CFBE5051",
+    "PointNo": 1
+  },
+  {
+    "PointGuid": "568D1164-CE04-568C-8FF6-CED10D876A21",
+    "OwnerItem": "C41295BE-6C23-50BE-925A-3506CFBE5051",
+    "PointNo": 2
+  },
+  {
+    "PointGuid": "11067199-EE2B-5206-A032-9BE2ADD4898D",
+    "OwnerItem": "89DF1AA8-BF4A-5B88-A93E-87705C43B9C4",
+    "PointNo": 1
+  },
+  {
+    "PointGuid": "D5F2A36A-AAE8-589A-94AF-25B68F711D01",
+    "OwnerItem": "B6929D8E-2B34-5C15-BEF4-42E8F23D349C",
+    "PointNo": 1
+  },
+  {
+    "PointGuid": "78BE9D5F-4BCE-55FD-8613-BA0166F6DDB5",
+    "OwnerItem": "E8C11A23-8C7F-5B34-97AF-C76AB90ED759",
+    "PointNo": 1
+  },
+  {
+    "PointGuid": "D1ABB036-C33E-5560-93DA-8197BFF58DED",
+    "OwnerItem": "6AEC7954-1C00-57A4-842D-731DBDF4ACB9",
+    "PointNo": 1
+  }
+]
