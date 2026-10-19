@@ -25,6 +25,7 @@ uv run --locked python scripts/test_generate_p3d.py
 uv run --locked python scripts/generate_sps.py --check
 uv run --locked python scripts/test_generate_sps.py
 uv run --locked python scripts/test_load_p3d.py
+uv run --locked python scripts/test_load_sps.py
 uv run --locked python scripts/dexpi_pins.py check
 uv run --locked python scripts/test_dexpi_pins.py
 uv run --locked python scripts/test_extract_p3d.py
