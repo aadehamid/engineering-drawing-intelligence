@@ -256,6 +256,8 @@ class LiveSchemaTests(unittest.TestCase):
         try:
             cursor.execute(insert, (str(uuid.uuid4()), first))
             cursor.execute(insert, (str(uuid.uuid4()), second))  # the same tag on another vessel
+            cursor.execute("INSERT INTO sps.Nozzle (ItemGuid, ItemTag, ParentItem) VALUES (%s, N'N2', %s)",
+                           (str(uuid.uuid4()), first))  # another tag on the same vessel
             with self.assertRaises(pytds.IntegrityError):
                 cursor.execute(insert, (str(uuid.uuid4()), first))
         finally:
@@ -266,13 +268,15 @@ class LiveSchemaTests(unittest.TestCase):
 
         cursor = self.conn.cursor()
         insert = ("INSERT INTO sps.SheetRevision (RevisionGuid, SheetGuid, MajorRev, MinorRev, RevisedOn, ApprovalState) "
-                  "VALUES (%s, %s, N'W0', N'0', '2030-02-01T08:00:00', N'Approved')")
+                  "VALUES (%s, %s, %s, %s, '2030-02-01T08:00:00', N'Approved')")
         first, second = str(uuid.uuid4()), str(uuid.uuid4())
         try:
-            cursor.execute(insert, (str(uuid.uuid4()), first))
-            cursor.execute(insert, (str(uuid.uuid4()), second))  # the same numbers on another sheet
+            cursor.execute(insert, (str(uuid.uuid4()), first, "W0", "0"))
+            cursor.execute(insert, (str(uuid.uuid4()), second, "W0", "0"))  # the same numbers on another sheet
+            cursor.execute(insert, (str(uuid.uuid4()), first, "W0", "1"))  # a new minor under the same major
+            cursor.execute(insert, (str(uuid.uuid4()), first, "W1", "0"))  # a new major with the same minor
             with self.assertRaises(pytds.IntegrityError):
-                cursor.execute(insert, (str(uuid.uuid4()), first))
+                cursor.execute(insert, (str(uuid.uuid4()), first, "W0", "0"))
         finally:
             cursor.execute("DELETE FROM sps.SheetRevision")
 
@@ -280,12 +284,14 @@ class LiveSchemaTests(unittest.TestCase):
         import pytds
 
         cursor = self.conn.cursor()
-        owner = str(uuid.uuid4())
-        insert = "INSERT INTO sps.PortPoint (PointGuid, OwnerItem, PointNo) VALUES (%s, %s, 1)"
+        owner, other = str(uuid.uuid4()), str(uuid.uuid4())
+        insert = "INSERT INTO sps.PortPoint (PointGuid, OwnerItem, PointNo) VALUES (%s, %s, %s)"
         try:
-            cursor.execute(insert, (str(uuid.uuid4()), owner))
+            cursor.execute(insert, (str(uuid.uuid4()), owner, 1))
+            cursor.execute(insert, (str(uuid.uuid4()), owner, 2))  # another number on the same owner
+            cursor.execute(insert, (str(uuid.uuid4()), other, 1))  # the same number on another owner
             with self.assertRaises(pytds.IntegrityError):
-                cursor.execute(insert, (str(uuid.uuid4()), owner))
+                cursor.execute(insert, (str(uuid.uuid4()), owner, 1))
         finally:
             cursor.execute("DELETE FROM sps.PortPoint")
 
