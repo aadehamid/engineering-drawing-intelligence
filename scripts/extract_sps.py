@@ -271,10 +271,14 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
         # The latest revision is the one the source recorded last (DEC-045); revision
         # labels are text and do not sort as numbers. The source approval is that
         # revision's approver and approval date (DEC-039): with both it is "Approved",
-        # without them it has no status. The numbers break a tie in recorded time.
+        # without them it has no status. Two revisions recorded at the same latest time
+        # leave the latest unknown, so extraction stops rather than guess from the labels.
         revisions = sorted((str(x["RevisedOn"]), x["MajorRev"], x["MinorRev"],
                             "Approved" if x["Approver"] is not None and x["ApprovedOn"] is not None else None)
                            for x in rows["SheetRevision"] if x["SheetGuid"] == sheet["SheetGuid"])
+        if len(revisions) > 1 and revisions[-1][0] == revisions[-2][0]:
+            raise ExtractionError(f"sheet {sheet['SheetNo']} has two revisions recorded at {revisions[-1][0]}; "
+                                  "the latest is unknown")
         latest = revisions[-1][1:] if revisions else (None, None, None)
         drawings.append({"artifact_id": sheet_id(sheet["SheetGuid"]), "name": sheet["SheetNo"],
                          "revision": f"{latest[0]}.{latest[1]}" if latest[0] else None, "status": latest[2],

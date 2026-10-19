@@ -63,7 +63,8 @@ owner can reverse any of it.
    names the nozzle.
 7. **Drawing approval.** A drawing's latest revision is the row the source recorded
    last, by its recorded time; its labels are text, so they are not sorted as
-   numbers. A drawing's status is `Approved` when that latest revision row
+   numbers. When two revisions share the latest recorded time, the latest is unknown
+   and extraction stops. A drawing's status is `Approved` when that latest revision row
    has both an approver and an approval date, the fields
    [DEC-039](DEC-039-approval-in-vendor-fields.md) names, and empty otherwise.
 8. **No answer key.** The extractor never opens one. A test runs it in a fresh

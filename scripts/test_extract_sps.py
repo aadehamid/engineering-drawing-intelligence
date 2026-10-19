@@ -227,6 +227,18 @@ class DerivationTest(unittest.TestCase):
         drawing = next(d for d in results[0]["drawings"] if d["artifact_id"] == extract.sheet_id(sheet))
         self.assertEqual((drawing["revision"], drawing["status"]), ("W0.10", None))
 
+    def test_two_revisions_recorded_at_the_same_latest_time_stop_extraction(self):
+        # W0.2 approved and W0.10 not, both recorded in the same second: no rule says
+        # which is latest, and "2" sorts after "10" as text, so extraction must not guess
+        rows = snapshot_rows()
+        sheet = rows["Sheet"][0]["SheetGuid"]
+        rows["SheetRevision"] += [
+            {"RevisionGuid": str(uuid.uuid4()).upper(), "SheetGuid": sheet, "MajorRev": "W0", "MinorRev": "10",
+             "RevisedOn": "2030-02-03T08:00:00", "Approver": None, "ApprovedOn": None},
+            {"RevisionGuid": str(uuid.uuid4()).upper(), "SheetGuid": sheet, "MajorRev": "W0", "MinorRev": "2",
+             "RevisedOn": "2030-02-03T08:00:00", "Approver": "DEMO-APPROVER", "ApprovedOn": "2030-02-03T09:00:00"}]
+        self.assertEqual(self.in_both_orders(rows), ["ExtractionError", "ExtractionError"])
+
     def test_a_to_side_that_lost_its_mate_stops_extraction(self):
         # The From side still names the To side, which names nobody: the sides disagree
         rows = snapshot_rows()
