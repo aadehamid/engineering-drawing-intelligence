@@ -138,6 +138,10 @@ class SnapshotRowsTest(unittest.TestCase):
         labels = [d for d in ROWS["Depiction"] if d["DepictionKind"] == "Label"]
         self.assertTrue(all(d["ItemGuid"] is None for d in labels))
         self.assertEqual(sorted(r["LabelText"] for r in ROWS["LabelDepiction"]), [f"L-301-{n}" for n in range(1, 6)])
+        sheet_of = {d["DepictionGuid"]: NAME[d["SheetGuid"]] for d in labels}
+        self.assertEqual({r["LabelText"]: sheet_of[r["DepictionGuid"]] for r in ROWS["LabelDepiction"]},
+                         {"L-301-1": "DEMO-PID-101", "L-301-2": "DEMO-PID-101", "L-301-3": "DEMO-PID-101",
+                          "L-301-4": "DEMO-PID-102", "L-301-5": "DEMO-PID-102"})
 
     def test_inline_placements_name_each_fittings_run(self):
         self.assertEqual({NAME[r["ItemGuid"]]: NAME[r["RunGuid"]] for r in ROWS["InlinePlacement"]},
