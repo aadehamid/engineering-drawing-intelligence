@@ -47,8 +47,8 @@ database ([DEC-028](DEC-028-one-database-two-schemas.md)), and borrows these pat
 5. **Sheet links stored on both sides.** Each off-page connector of a pair stores its
    mate and its mate's sheet, with a to or from orientation. The pair is two rows that
    point to each other, and no row stores the flow between them (REF-TECH-019,
-   REF-TECH-020, REF-TECH-021, REF-TECH-024). The sources disagree on whether the
-   mating property holds the mate's drawing ID; the backend stores the mate's sheet
+   REF-TECH-020, REF-TECH-021, REF-TECH-024). The sources describe the mating
+   property differently; the backend stores the mate's sheet
    key, which W-SP's cross-sheet pair needs.
 6. **Tag parts with per-class uniqueness.** Tagged classes store their parts next to
    the composed tag. The composed tag is unique for vessels and instruments, unique
