@@ -34,12 +34,12 @@ COLUMNS = {
     "ProcessConnection": ("ItemGuid", "Description"),
     "SheetLink": ("ItemGuid", "LinkLabel", "LinkSense", "MateItem", "MateSheet"),
     "Depiction": ("DepictionGuid", "ItemGuid", "SheetGuid", "DepictionKind"),
-    "LineDepiction": ("DepictionGuid", "End1Mark", "End2Mark"),
+    "LineDepiction": ("DepictionGuid", "End1Item", "End2Item"),
     "LabelDepiction": ("DepictionGuid", "LabelledDepiction", "LabelText"),
     "InlinePlacement": ("PlacementGuid", "ItemGuid", "RunGuid"),
     "PortPoint": ("PointGuid", "OwnerItem", "PointNo"),
     "Sheet": ("SheetGuid", "SheetNo"),
-    "SheetRevision": ("RevisionGuid", "SheetGuid", "MajorRev", "MinorRev", "RevisedOn", "ApprovalState"),
+    "SheetRevision": ("RevisionGuid", "SheetGuid", "MajorRev", "MinorRev", "RevisedOn", "Approver", "ApprovedOn"),
 }
 
 
