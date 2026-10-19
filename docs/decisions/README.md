@@ -72,6 +72,8 @@ state; a register row links here when its decision has a record.
 | [DEC-075](DEC-075-extraction-records.md) | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided | 2026-10-14 |
 | [DEC-076](DEC-076-graph-publication.md) | A graph snapshot is published once to Neo4j under its content hash, and the cross-sheet query reads one snapshot | Decided | 2026-10-14 |
 | [DEC-077](DEC-077-dexpi-mapping.md) | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided | 2026-10-14 |
+| [DEC-078](DEC-078-dec-077-choices-approved.md) | The owner approves DEC-077's three least-settled mapping choices | Decided | 2026-10-18 |
+| [DEC-079](DEC-079-gate-001-003-closed-for-slice.md) | GATE-001 and the slice's part of GATE-003 are closed | Decided | 2026-10-18 |
 
 ## Record format
 

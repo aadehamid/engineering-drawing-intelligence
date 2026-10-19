@@ -31,8 +31,9 @@ of PPC, which is a documentation and architecture reference.
 
 This repository contains documentation and documentation-checking utilities, not
 a working engineering pipeline. Public-source research and a PPC stack assessment
-are recorded in the package. Dataset admission, DEXPI interoperability tests,
-component locks, and deployment remain implementation gates.
+are recorded in the package. Dataset admission and deployment remain implementation
+gates. DEXPI interoperability and component locks are closed for MILESTONE-001's slice
+only ([DEC-079](docs/decisions/DEC-079-gate-001-003-closed-for-slice.md)).
 
 Cloudflare services and Databricks Free Edition are permitted exceptions to the
 open-source condition. Their use is optional and requires verified fit and separate

@@ -38,7 +38,8 @@ SCN-005. It does not establish flat-file accuracy, live synchronization,
 production readiness, or safe isolation.
 
 Before starting, close GATE-001 and the component subset of GATE-003 needed for
-this slice. If available tooling supports only older DEXPI formats, stop that
+this slice. Both are closed for this slice
+([DEC-079](decisions/DEC-079-gate-001-003-closed-for-slice.md)). If available tooling supports only older DEXPI formats, stop that
 compatibility claim and propose a documented change; do not silently downgrade.
 
 ## Build sequence
