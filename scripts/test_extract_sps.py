@@ -273,6 +273,7 @@ class DerivationTest(unittest.TestCase):
         rows["Depiction"].append({"DepictionGuid": str(uuid.uuid4()).upper(), "ItemGuid": from_side,
                                   "SheetGuid": first_sheet, "DepictionKind": "Mark"})
         results = self.in_both_orders(rows)
+        self.assertNotIsInstance(results[0], str, f"extraction failed: {results[0]}")
         self.assertEqual(results[0], results[1])
 
     def test_the_flow_sense_sets_the_direction(self):
