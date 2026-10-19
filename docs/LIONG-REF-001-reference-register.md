@@ -168,7 +168,8 @@ REF-TECH-015 to REF-TECH-017 support the Plant 3D-style backend in
 `schemas/plant3d-style.sql` ([DEC-040](decisions/DEC-040-plant-3d-patterns.md),
 [DEC-049](decisions/DEC-049-plant-3d-schema-choices.md)), accessed 2026-10-13 UTC.
 REF-TECH-019 to REF-TECH-029 support the SmartPlant-style backend
-([DEC-081](decisions/DEC-081-smartplant-style-patterns.md)), accessed 2026-10-19 UTC;
+in `schemas/smartplant-style.sql` ([DEC-081](decisions/DEC-081-smartplant-style-patterns.md),
+[DEC-082](decisions/DEC-082-smartplant-style-schema-choices.md)), accessed 2026-10-19 UTC;
 Hexagon's pages were read through its documentation site's public search.
 They describe how the products store saved data; the backend copies the patterns
 under its own names and copies no vendor schema.

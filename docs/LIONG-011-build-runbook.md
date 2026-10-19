@@ -16,8 +16,10 @@ snapshots on a SQL Server container. MILESTONE-001's structured slice is built:
 `scripts/run_slice.py` runs steps 2 to 6 below on R0 to R2, publishing each to a Neo4j
 service in CI, and rejects Rbad before publication ([LIONG-010](LIONG-010-evaluation.md#current-evidence-and-implementation-handoff)).
 Step 1 runs in CI too, as the schema and snapshot loads on a throwaway SQL Server
-database. Nothing else here is built, and no hosted database has been provisioned. The
-stages after MILESTONE-001 are future implementation work, not commands already executed.
+database. For W-SP, the SmartPlant-style schema is written, and CI applies it to SQL
+Server ([DEC-082](decisions/DEC-082-smartplant-style-schema-choices.md)). Nothing else
+here is built, and no hosted database has been provisioned. The rest of MILESTONE-001b
+and the stages after it are future implementation work, not commands already executed.
 
 Document approval and gate closure precede dependent build work. No step here
 authorizes cloud provisioning, charges, sensitive data, or publishing datasets.
