@@ -9,9 +9,7 @@ match exactly. The database tests need a server: set LIONG_SQLSERVER to
 """
 from __future__ import annotations
 
-import builtins
 import copy
-import io
 import json
 import os
 from pathlib import Path
@@ -23,6 +21,7 @@ import uuid
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compare_answer_key  # noqa: E402
 import dexpi_generate  # noqa: E402
+import answer_key_guard  # noqa: E402
 import extract_sps as extract  # noqa: E402
 import load_sps as loader  # noqa: E402
 
@@ -193,19 +192,10 @@ class SnapshotExtractionTest(unittest.TestCase):
         self.assertEqual(from_snapshot(rows), from_snapshot(shuffled))
 
     def test_extraction_never_opens_an_answer_key(self):
-        opened: list[str] = []
-        real_open, real_io_open = builtins.open, io.open
-
-        def spy(file, *args, **kwargs):
-            opened.append(str(file))
-            return real_open(file, *args, **kwargs)
-
-        builtins.open = io.open = spy
-        try:
-            from_snapshot()
-        finally:
-            builtins.open, io.open = real_open, real_io_open
-        self.assertTrue(opened, "the spy saw no file opened, so it proves nothing")
+        # The guard watches from before the extractor's import, in a fresh process, so a
+        # read at import time counts as well as one during extraction
+        opened = answer_key_guard.files_opened(answer_key_guard.extraction("extract_sps", [SNAPSHOT]))
+        self.assertTrue(opened, "the guard saw no file opened, so it proves nothing")
         self.assertFalse([path for path in opened if "answer-keys" in path])
 
 

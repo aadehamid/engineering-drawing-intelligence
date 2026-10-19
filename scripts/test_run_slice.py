@@ -6,8 +6,6 @@ The Neo4j and database tests need servers: LIONG_NEO4J and LIONG_SQLSERVER; CI s
 """
 from __future__ import annotations
 
-import builtins
-import io
 import json
 import os
 from pathlib import Path
@@ -20,6 +18,7 @@ import unittest
 import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import answer_key_guard  # noqa: E402
 import compare_answer_key  # noqa: E402
 import run_slice  # noqa: E402
 
@@ -77,20 +76,12 @@ class SliceTest(unittest.TestCase):
                          ["exchange-manifest.json", "result.json", "source-manifest.json", "source-records.json"])
 
     def test_steps_two_to_five_never_open_an_answer_key(self):
-        opened: list[str] = []
-        real_open, real_io_open = builtins.open, io.open
-
-        def spy(file, *args, **kwargs):
-            opened.append(str(file))
-            return real_open(file, *args, **kwargs)
-
-        builtins.open = io.open = spy
-        try:
-            for revision in ("R0", "Rbad"):
-                run_slice.run(revision, self.out / revision, now=AT)
-        finally:
-            builtins.open, io.open = real_open, real_io_open
-        self.assertTrue(opened, "the spy saw no file opened, so it proves nothing")
+        # Watched from before run_slice's import, in a fresh process, so a read at import
+        # time counts as well as one during the run
+        opened = answer_key_guard.files_opened(
+            "import run_slice\nfrom pathlib import Path\n"
+            f"for revision in ('R0', 'Rbad'):\n    run_slice.run(revision, Path({str(self.out)!r}) / revision, now={AT!r})\n")
+        self.assertTrue(opened, "the guard saw no file opened, so it proves nothing")
         self.assertFalse([path for path in opened if "answer-keys" in path])
 
     def test_the_command_compares_and_exits_by_the_result(self):

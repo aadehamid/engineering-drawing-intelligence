@@ -66,8 +66,9 @@ owner can reverse any of it.
    numbers. A drawing's status is `Approved` when that latest revision row
    has both an approver and an approval date, the fields
    [DEC-039](DEC-039-approval-in-vendor-fields.md) names, and empty otherwise.
-8. **No answer key.** The extractor never opens one; a test records every file it
-   opens and fails if any is an answer key.
+8. **No answer key.** The extractor never opens one. A test runs it in a fresh
+   process with an audit hook installed before its import, records every file it
+   opens, at import time or while extracting, and fails if any is an answer key.
 
 ## Alternatives considered
 
