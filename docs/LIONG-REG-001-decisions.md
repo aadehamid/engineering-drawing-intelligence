@@ -104,9 +104,10 @@ Later provider, independence, role, and drafting confirmations are recorded here
 
 ## Decisions made under delegation
 
-The agent made these during two night runs, under the owner's delegations. Each row's
+The agent made these during three night runs, under the owner's delegations. Each row's
 Basis names its run's delegation: [DEC-048](decisions/DEC-048-night-delegation.md) for
-2026-10-13 and [DEC-073](decisions/DEC-073-second-night-delegation.md) for 2026-10-14. The owner has not reviewed them,
+2026-10-13, [DEC-073](decisions/DEC-073-second-night-delegation.md) for 2026-10-14, and
+[DEC-080](decisions/DEC-080-milestone-001b-night-delegation.md) for the MILESTONE-001b run. The owner has not reviewed them,
 except DEC-077's three least-settled choices, which the owner approved in
 [DEC-078](decisions/DEC-078-dec-077-choices-approved.md). Each can be reversed by a later owner decision.
 
@@ -120,6 +121,7 @@ except DEC-077's three least-settled choices, which the owner approved in
 | DEC-075 | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided by the agent under DEC-073 | [record](decisions/DEC-075-extraction-records.md) |
 | DEC-076 | A graph snapshot is published once to Neo4j under its content hash, and the cross-sheet query reads one snapshot | Decided by the agent under DEC-073 | [record](decisions/DEC-076-graph-publication.md) |
 | DEC-077 | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided by the agent under DEC-073; three choices approved by the owner in DEC-078 | [record](decisions/DEC-077-dexpi-mapping.md) |
+| DEC-081 | The SmartPlant-style schema borrows seven storage patterns from Smart P&ID, renamed, with nozzle rows and an implied pipeline | Decided by the agent under DEC-080 | [record](decisions/DEC-081-smartplant-style-patterns.md) |
 
 ## New proposals
 
