@@ -47,10 +47,9 @@ database ([DEC-028](DEC-028-one-database-two-schemas.md)), and borrows these pat
    point to each other, and no row stores the flow between them (REF-TECH-019,
    REF-TECH-024).
 6. **Tag parts with per-class uniqueness.** Tagged classes store their parts next to
-   the composed tag. The composed tag is unique for vessels and instruments and may
-   repeat for pipe runs. Valve tags are one plain column (REF-TECH-019, REF-TECH-025,
-   REF-TECH-027, REF-TECH-028). Nozzle tags carry no uniqueness rule, since no source
-   found states their scope.
+   the composed tag. The composed tag is unique for vessels and instruments, unique
+   within its vessel for a nozzle, and may repeat for pipe runs. Valve tags are one
+   plain column (REF-TECH-019, REF-TECH-022, REF-TECH-025, REF-TECH-027, REF-TECH-028).
 7. **Nozzles.** Piping reaches a vessel through a nozzle, which stores its parent
    vessel. An instrument on a vessel reaches it through a nozzle and a process
    connection (REF-TECH-021, REF-TECH-027). The generator writes nozzle rows W-SP's world file does not list: one on
@@ -68,8 +67,9 @@ unofficial copies of vendor training material.
   vessel symbol. Simpler, but the product does neither, and DEC-020 asks for the
   product's patterns. Collapsing nozzles is a mapping problem the real product poses.
 - Have the generator write a pipeline row for line 301. The sources disagree on when the
-  product writes one: one page says the application adds a pipeline entry as runs are
-  drawn, another that publishing finds or creates it (REF-TECH-022). If the row is
+  product writes one: each of those pages says both that the application adds a
+  pipeline entry as runs are drawn and that publishing finds or creates one
+  (REF-TECH-022). If the row is
   saved drawing data, leaving it out departs from the product. The choice rests on
   W-SP's purpose instead: it exists so that the pipeline must be derived (DEC-052).
 - Relationship rows as the main store of connectivity. The documented connectivity is
