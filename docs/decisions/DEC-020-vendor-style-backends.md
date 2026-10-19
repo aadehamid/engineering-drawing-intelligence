@@ -14,7 +14,8 @@ backend was "not a replica of an undisclosed engineering platform".
 
 The research reported patterns such as these. They are findings, not part of this
 decision. [DEC-040](DEC-040-plant-3d-patterns.md) selects the six patterns the
-Plant 3D-style schema borrows. The SmartPlant-style list waits for MILESTONE-001b.
+Plant 3D-style schema borrows, and [DEC-081](DEC-081-smartplant-style-patterns.md)
+the patterns the SmartPlant-style schema borrows.
 
 - **SmartPlant P&ID:** model items kept apart from their drawing representations,
   connectors split at inline components, pipelines derived from matching

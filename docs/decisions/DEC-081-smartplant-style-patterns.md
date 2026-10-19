@@ -39,13 +39,17 @@ database ([DEC-028](DEC-028-one-database-two-schemas.md)), and borrows these pat
 3. **Inline placement rows.** A valve's membership in its run is a row of its own, not
    a column on the valve, and each valve, instrument and nozzle has numbered port
    points (REF-TECH-019).
-4. **An implied pipeline.** Each run carries the line-number parts. No row groups runs
-   into a pipeline, and the generator writes none: extraction derives line 301 from
-   the runs whose parts match (REF-TECH-022).
+4. **An implied pipeline.** Each run carries the line-number parts. A line-group row
+   holds only the line's key values, and no run stores a key to it. A run belongs to
+   the group whose key values all match; a run with a missing key value belongs to
+   none. The generator writes one line-group row for line 301, and extraction derives
+   its runs by matching (REF-TECH-022).
 5. **Sheet links stored on both sides.** Each off-page connector of a pair stores its
    mate and its mate's sheet, with a to or from orientation. The pair is two rows that
    point to each other, and no row stores the flow between them (REF-TECH-019,
-   REF-TECH-024).
+   REF-TECH-020, REF-TECH-021, REF-TECH-024). The sources disagree on whether the
+   mating property holds the mate's drawing ID; the backend stores the mate's sheet
+   key, which W-SP's cross-sheet pair needs.
 6. **Tag parts with per-class uniqueness.** Tagged classes store their parts next to
    the composed tag. The composed tag is unique for vessels and instruments, unique
    within its vessel for a nozzle, and may repeat for pipe runs. Valve tags are one
@@ -66,12 +70,10 @@ unofficial copies of vendor training material.
 - Store LT-302's parent vessel as a key on the instrument, and connect pipes to the
   vessel symbol. Simpler, but the product does neither, and DEC-020 asks for the
   product's patterns. Collapsing nozzles is a mapping problem the real product poses.
-- Have the generator write a pipeline row for line 301. The sources disagree on when the
-  product writes one: each of those pages says both that the application adds a
-  pipeline entry as runs are drawn and that publishing finds or creates one
-  (REF-TECH-022). If the row is
-  saved drawing data, leaving it out departs from the product. The choice rests on
-  W-SP's purpose instead: it exists so that the pipeline must be derived (DEC-052).
+- Leave the line-group row out, so line 301 exists only as matching run values. The
+  Pipelines topic says the application adds a pipeline entry without the user
+  creating one, so the product stores the row. Its membership stays implicit, so
+  extraction still has to derive the pipeline, as W-SP requires (DEC-052).
 - Relationship rows as the main store of connectivity. The documented connectivity is
   on connector ends and inline placement rows; the relationship table's item columns
   appear in no source found.
