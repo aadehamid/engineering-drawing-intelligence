@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Write extraction records as DEXPI 2.0.1, one file per drawing, plus a sidecar (DEC-077).
+"""Write extraction records as DEXPI 2.0.1, one file per drawing, plus a sidecar (DEC-077, DEC-086).
 
 Usage:
-  dexpi_generate.py RECORDS_FILE OUT_FOLDER   RECORDS_FILE is what extract_p3d.py writes
+  dexpi_generate.py RECORDS_FILE OUT_FOLDER   RECORDS_FILE is what extract_p3d.py or extract_sps.py writes
 
 Each drawing becomes one EngineeringModel file named for the drawing, because a DEXPI
-2.0.1 file holds one diagram. Each plant object carries its ID, such as p3d:object:101,
-in a PersistentIdentifier; each drawing's PlantMetaData carries p3d:drawing:<id>. The
-mapping, the objects DEXPI needs that the source lacks, and their IDs are DEC-077's.
+2.0.1 file holds one diagram. Each plant object carries the key in its ID, such as 101
+in p3d:object:101 or the GUID in sps:item:<GUID>, in a PersistentIdentifier whose
+context names the backend's table and column; each drawing's PlantMetaData does the
+same for its drawing ID. BACKENDS holds what differs between the two backends'
+records. The mapping, the objects DEXPI needs that the source lacks, and their IDs are
+DEC-077's; DEC-086 extends them to the SmartPlant-style backend.
 
 `sidecar.json` is a LIONG manifest, not DEXPI. It holds what DEXPI 2.0.1 has no
 property for (units, the descriptions of valves, junctions and instruments, tag parts,
@@ -32,21 +35,73 @@ from lxml import etree
 
 CORE_URI = "https://data.dexpi.org/models/2.0.1/Core.xml"
 PLANT_URI = "https://data.dexpi.org/models/2.0.1/Plant.xml"
-OBJECT_CONTEXT = "p3d/PlantObject.ObjectId"
-DRAWING_CONTEXT = "p3d/Drawing.DrawingId"
 SIDECAR = "sidecar.json"
 SIDECAR_FORMAT = "liong-dexpi-sidecar/1"
-GENERATOR = ("LIONG p3d-to-DEXPI mapper", "LIONG", "dexpi_generate 1")
 EQUIPMENT_CLASS = {"TK": "Plant/ProcessEquipment.Tank"}
-VALVE_CLASS = {"XV": "Plant/Piping.OperatedValve"}
-INSTRUMENT_LETTERS = {"PI": ("P", "I")}  # tag type -> (ProcessInstrumentationFunctionCategory, ...Functions)
+# XV and HV are both OperatedValve: "a valve that includes an external means of operation
+# (e.g. handwheel / lever / actuator)" in Plant.xml. Neither source states an actuator or a body type.
+VALVE_CLASS = {"XV": "Plant/Piping.OperatedValve", "HV": "Plant/Piping.OperatedValve"}
+# tag type -> (ProcessInstrumentationFunctionCategory, ProcessInstrumentationFunctions)
+INSTRUMENT_LETTERS = {"PI": ("P", "I"), "LT": ("L", "T")}
 CONNECTOR_CLASS = {"Out": "Plant/Piping.FlowOutPipeOffPageConnector", "In": "Plant/Piping.FlowInPipeOffPageConnector"}
-TABLE = {"equipment": "Equipment", "valve": "Valve", "instrument": "Instrument", "pipe_segment": "LineSegment",
-         "junction": "Junction", "sheet_connector": "SheetConnector"}
-# The attribute predicates DEXPI carries for each object kind; every other attribute goes to the sidecar.
-CARRIED = {"equipment": {"tag_type", "tag_number", "description"}, "valve": set(),
-           "instrument": {"tag_type", "loop_number"}, "pipe_segment": {"line_number", "nominal_size_mm"},
-           "junction": set(), "sheet_connector": {"label", "direction"}}
+
+
+@dataclass(frozen=True)
+class Backend:
+    """What differs between two backends' records: IDs, identifier contexts and predicate names.
+
+    `objects` maps each object-ID prefix to its PersistentIdentifier context; the
+    identifier's value is the rest of the ID. `tables` gives each object kind the name
+    its file-local ids start with. `tag_letters`, `tag_number` and `instrument_number`
+    name the predicates that hold a tag's letters and numbers; `valve_letters` is None
+    when a valve's letters come from its tag, before the first hyphen. `direction`
+    names a sheet connector's direction predicate, and `directions` maps its values to
+    Out and In. `carried` names the attribute predicates DEXPI carries for each kind;
+    every other attribute goes to the sidecar.
+    """
+    source_id: str
+    objects: dict[str, str]
+    drawing: tuple[str, str]  # (drawing-ID prefix, PersistentIdentifier context)
+    drawing_table: str
+    key_type: type
+    tables: dict[str, str]
+    tag_letters: str
+    tag_number: str
+    instrument_number: str
+    valve_letters: str | None
+    direction: str
+    directions: dict[str, str]
+    carried: dict[str, set[str]]
+
+    def generator(self) -> tuple[str, str, str]:
+        return (f"LIONG {self.source_id}-to-DEXPI mapper", "LIONG", "dexpi_generate 1")
+
+
+BACKENDS = {
+    "p3d": Backend(
+        source_id="p3d", objects={"p3d:object:": "p3d/PlantObject.ObjectId"},
+        drawing=("p3d:drawing:", "p3d/Drawing.DrawingId"), drawing_table="Drawing", key_type=int,
+        tables={"equipment": "Equipment", "valve": "Valve", "instrument": "Instrument", "pipe_segment": "LineSegment",
+                "junction": "Junction", "sheet_connector": "SheetConnector"},
+        tag_letters="tag_type", tag_number="tag_number", instrument_number="loop_number", valve_letters="tag_type",
+        direction="direction", directions={"Out": "Out", "In": "In"},
+        carried={"equipment": {"tag_type", "tag_number", "description"}, "valve": set(),
+                 "instrument": {"tag_type", "loop_number"}, "pipe_segment": {"line_number", "nominal_size_mm"},
+                 "junction": set(), "sheet_connector": {"label", "direction"}}),
+    "sps": Backend(
+        source_id="sps", objects={"sps:item:": "sps/DesignItem.ItemGuid", "sps:line:": "sps/LineDepiction.DepictionGuid"},
+        drawing=("sps:sheet:", "sps/Sheet.SheetGuid"), drawing_table="Sheet", key_type=str,
+        tables={"equipment": "Vessel", "valve": "PipingFitting", "instrument": "Instrument",
+                "pipe_segment": "LineDepiction", "sheet_connector": "SheetLink"},
+        tag_letters="tag_lead", tag_number="tag_number", instrument_number="tag_number", valve_letters=None,
+        direction="link_sense", directions={"To": "Out", "From": "In"},
+        carried={"equipment": {"tag_lead", "tag_number", "description"}, "valve": set(),
+                 "instrument": {"tag_lead", "tag_number"}, "pipe_segment": {"line_number", "nominal_size_mm"},
+                 "sheet_connector": {"label", "link_sense"}}),
+}
+# Each PersistentIdentifier context LIONG writes, with the ID prefix it stands for and its backend.
+CONTEXTS = {context: (prefix, backend) for backend in BACKENDS.values()
+            for prefix, context in [*backend.objects.items(), backend.drawing]}
 # Relationship predicates in the order the source tables list them, with the graph edge each one makes.
 RELATIONS = ("starts_at", "ends_at", "connects_to", "continues_to", "owned_by")
 ID_PATTERN = re.compile(r"[A-Za-z_][A-Za-z_0-9]*")
@@ -142,6 +197,19 @@ def identifier(context: str, key: object) -> Obj:
     return Obj("Core/PersistentIdentifier").data("Context", string(context)).data("Value", string(key))
 
 
+def xml_name(text: object) -> str:
+    """`text` with every character a DEXPI id cannot hold replaced by an underscore."""
+    return re.sub(r"[^A-Za-z0-9_]", "_", str(text))
+
+
+def split_id(identifier_: str, prefixes) -> tuple[str, str] | None:
+    """(prefix, key) of an ID that starts with one of `prefixes`, else None."""
+    for prefix in prefixes:
+        if identifier_.startswith(prefix):
+            return prefix, identifier_[len(prefix):]
+    return None
+
+
 # ---------- the source, checked ----------
 
 def once(group: str, keys: list) -> None:
@@ -158,6 +226,10 @@ class Source:
 
     def __init__(self, records: dict):
         self.records = records
+        source_id = records["source_revision"].get("source_id")
+        if source_id not in BACKENDS:
+            raise Unsupported(f"source {source_id!r} has no DEXPI mapping")
+        self.backend = b = BACKENDS[source_id]
         for group, field in (("objects", "object_id"), ("drawings", "artifact_id"), ("drawings", "name"),
                              ("tag_assignments", "object_id"), ("assertions", "assertion_id")):
             once(group, [record[field] for record in records[group]])
@@ -197,8 +269,10 @@ class Source:
                 raise Unsupported(f"{oid} appears on more than one drawing")
             self.sheet[oid] = did
         for oid, obj in self.objects.items():
-            if obj["object_kind"] not in TABLE:
+            if obj["object_kind"] not in b.tables:
                 raise Unsupported(f"{oid} has object kind {obj['object_kind']}, outside the supported subset")
+            if split_id(oid, b.objects) is None or str(obj["source_object_key"]) != split_id(oid, b.objects)[1]:
+                raise Unsupported(f"{oid} is not an object ID of source {b.source_id} with its own key")
             if oid not in self.sheet:
                 raise Unsupported(f"{oid} appears on no drawing")
         for name in (d["name"] for d in self.drawings.values()):
@@ -218,12 +292,14 @@ class Source:
                 if self.sheet[subject] != self.sheet[target]:
                     raise Unsupported(f"{subject} owned_by {target} crosses drawings")
             if predicate == "continues_to":
-                directions = (self.attributes[subject].get("direction"), self.attributes[target].get("direction"))
-                if directions != ("Out", "In"):
+                if (self.direction(subject), self.direction(target)) != ("Out", "In"):
                     raise Unsupported(f"{subject} continues_to {target} does not pair an Out with an In connector")
         for segment in self.of_kind("pipe_segment"):
             if segment not in self.start or segment not in self.end:
                 raise Unsupported(f"{segment} lacks a start or an end")
+        for did in self.drawings:
+            if split_id(did, [b.drawing[0]]) is None:
+                raise Unsupported(f"{did} is not a drawing ID of source {b.source_id}")
         if len({r["revision_id"] for r in records["assertions"]} | {records["source_revision"]["revision_id"]}) != 1:
             raise Unsupported("the assertions name more than one revision")
 
@@ -233,11 +309,21 @@ class Source:
     def of_kind(self, kind: str) -> list[str]:
         return sorted((o for o in self.objects if self.kind(o) == kind), key=self.key)
 
-    def key(self, oid: str) -> int:
+    def key(self, oid: str) -> int | str:
         return self.objects[oid]["source_object_key"]
 
+    def context(self, oid: str) -> str:
+        return self.backend.objects[split_id(oid, self.backend.objects)[0]]
+
     def xml_id(self, oid: str) -> str:
-        return f"{TABLE[self.kind(oid)]}_{self.key(oid)}"
+        return f"{self.backend.tables[self.kind(oid)]}_{xml_name(self.key(oid))}"
+
+    def direction(self, oid: str) -> str | None:
+        """Out or In, from the connector's direction in the backend's own words."""
+        return self.backend.directions.get(self.attributes[oid].get(self.backend.direction))
+
+    def drawing_key(self, did: str) -> int | str:
+        return self.backend.key_type(did.removeprefix(self.backend.drawing[0]))
 
 
 # ---------- writing ----------
@@ -245,6 +331,7 @@ class Source:
 def generate(records: dict) -> dict[str, bytes]:
     """Every output file, by name: one DEXPI file per drawing and the sidecar."""
     src = Source(records)
+    backend = src.backend
     nodes_of: dict[str, list[Obj]] = {}
     nozzles_of: dict[str, list[Obj]] = {}
 
@@ -274,7 +361,7 @@ def generate(records: dict) -> dict[str, bytes]:
         first, last = end(src.start[oid], sid), end(src.end[oid], sid)
         segment_ends[oid] = (first[0], last[0])
         o = ends(Obj("Plant/Piping.PipingNetworkSegment", sid), first, last)
-        o.comp("PersistentIdentifiers", identifier(OBJECT_CONTEXT, src.key(oid)))
+        o.comp("PersistentIdentifiers", identifier(src.context(oid), src.key(oid)))
         if oid in src.tags:
             o.data("SegmentNumber", string(src.tags[oid]))
         if size is not None:
@@ -301,9 +388,10 @@ def generate(records: dict) -> dict[str, bytes]:
     for oid in sorted(src.objects, key=src.key):
         kind, attrs, xid = src.kind(oid), src.attributes[oid], src.xml_id(oid)
         if kind == "valve":
-            cls = VALVE_CLASS.get(attrs.get("tag_type"))
+            letters = attrs.get(backend.valve_letters) if backend.valve_letters else src.tags.get(oid, "").partition("-")[0]
+            cls = VALVE_CLASS.get(letters)
             if cls is None:
-                raise Unsupported(f"{oid} is a valve of tag type {attrs.get('tag_type')!r}, outside the supported subset")
+                raise Unsupported(f"{oid} is a valve of tag type {letters!r}, outside the supported subset")
             o = Obj(cls, xid)
             if oid in src.tags:
                 o.data("PipingComponentNumber", string(src.tags[oid]))
@@ -312,9 +400,9 @@ def generate(records: dict) -> dict[str, bytes]:
                 raise Unsupported(f"{oid} has more than three connection ends, so it cannot be a tee")
             o = Obj("Plant/Piping.PipeTee", xid)
         elif kind == "sheet_connector":
-            if attrs.get("direction") not in CONNECTOR_CLASS:
-                raise Unsupported(f"{oid} has direction {attrs.get('direction')!r}")
-            o = Obj(CONNECTOR_CLASS[attrs["direction"]], xid)
+            if src.direction(oid) not in CONNECTOR_CLASS:
+                raise Unsupported(f"{oid} has direction {attrs.get(backend.direction)!r}")
+            o = Obj(CONNECTOR_CLASS[src.direction(oid)], xid)
             if "label" in attrs:
                 o.data("PipeConnectorNumber", string(attrs["label"]))
             if oid in links:
@@ -331,7 +419,7 @@ def generate(records: dict) -> dict[str, bytes]:
                 o.comp("ConnectorReference", reference)
         else:
             continue
-        o.comp("PersistentIdentifiers", identifier(OBJECT_CONTEXT, src.key(oid)))
+        o.comp("PersistentIdentifiers", identifier(src.context(oid), src.key(oid)))
         o.comp("Nodes", *nodes_of.get(oid, []))
         items[xid] = o
 
@@ -356,29 +444,30 @@ def generate(records: dict) -> dict[str, bytes]:
     for oid in sorted(src.objects, key=src.key):
         kind, attrs, xid = src.kind(oid), src.attributes[oid], src.xml_id(oid)
         if kind == "equipment":
-            cls = EQUIPMENT_CLASS.get(attrs.get("tag_type"))
+            cls = EQUIPMENT_CLASS.get(attrs.get(backend.tag_letters))
             if cls is None:
-                raise Unsupported(f"{oid} is equipment of tag type {attrs.get('tag_type')!r}, outside the supported subset")
-            o = Obj(cls, xid).comp("PersistentIdentifiers", identifier(OBJECT_CONTEXT, src.key(oid)))
+                raise Unsupported(f"{oid} is equipment of tag type {attrs.get(backend.tag_letters)!r}, outside the supported subset")
+            o = Obj(cls, xid).comp("PersistentIdentifiers", identifier(src.context(oid), src.key(oid)))
             if oid in src.tags:
                 o.data("TagName", string(src.tags[oid]))
-            o.data("TagNamePrefix", string(attrs["tag_type"]))
-            if "tag_number" in attrs:
-                o.data("TagNameSequenceNumber", string(attrs["tag_number"]))
+            o.data("TagNamePrefix", string(attrs[backend.tag_letters]))
+            if backend.tag_number in attrs:
+                o.data("TagNameSequenceNumber", string(attrs[backend.tag_number]))
             if "description" in attrs:
                 o.data("EquipmentDescription", text_in_english(attrs["description"]))
             equipment[oid] = o
         elif kind == "instrument":
-            letters = INSTRUMENT_LETTERS.get(attrs.get("tag_type"))
-            if letters is None or "loop_number" not in attrs:
-                raise Unsupported(f"{oid} is an instrument of tag type {attrs.get('tag_type')!r}, outside the supported subset")
-            if src.tags.get(oid) != f"{attrs['tag_type']}-{attrs['loop_number']}":
+            letters = INSTRUMENT_LETTERS.get(attrs.get(backend.tag_letters))
+            if letters is None or backend.instrument_number not in attrs:
+                raise Unsupported(f"{oid} is an instrument of tag type {attrs.get(backend.tag_letters)!r}, outside the supported subset")
+            number = attrs[backend.instrument_number]
+            if src.tags.get(oid) != f"{attrs[backend.tag_letters]}-{number}":
                 raise Unsupported(f"{oid} has tag {src.tags.get(oid)!r}, not its tag type and loop number")
             o = (Obj("Plant/Instrumentation.ProcessInstrumentationFunction", xid)
-                 .comp("PersistentIdentifiers", identifier(OBJECT_CONTEXT, src.key(oid)))
+                 .comp("PersistentIdentifiers", identifier(src.context(oid), src.key(oid)))
                  .data("ProcessInstrumentationFunctionCategory", string(letters[0]))
                  .data("ProcessInstrumentationFunctions", string(letters[1]))
-                 .data("ProcessInstrumentationFunctionNumber", string(attrs["loop_number"])))
+                 .data("ProcessInstrumentationFunctionNumber", string(number)))
             if oid in owned:
                 nozzle = f"{src.xml_id(owned[oid])}_Nozzle_{xid}"
                 nozzles_of.setdefault(owned[oid], []).append(Obj("Plant/ProcessEquipment.InstrumentNozzle", nozzle))
@@ -390,7 +479,7 @@ def generate(records: dict) -> dict[str, bytes]:
 
     files = {}
     revision = records["source_revision"]
-    for did in sorted(src.drawings, key=lambda d: src.drawings[d]["source_locator"].get("DrawingId", 0)):
+    for did in sorted(src.drawings, key=src.drawing_key):
         drawing = src.drawings[did]
         here = lambda oid: src.sheet[oid] == did  # noqa: E731
         systems: dict[tuple, list[Obj]] = {}
@@ -406,7 +495,7 @@ def generate(records: dict) -> dict[str, bytes]:
                 systems.setdefault(key, []).append(o)
         system_objects, system_ids = [], set()
         for (prefix, number), members in sorted(systems.items()):
-            sid = re.sub(r"[^A-Za-z0-9_]", "_", f"PipingNetworkSystem_{prefix}_{number}")
+            sid = xml_name(f"PipingNetworkSystem_{prefix}_{number}")
             if sid in system_ids:
                 raise Unsupported(f"two lines on {drawing['name']} give the same system id {sid}")
             system_ids.add(sid)
@@ -417,13 +506,13 @@ def generate(records: dict) -> dict[str, bytes]:
                 connections, member_items = contents[member.id]
                 member.comp("Connections", *connections).comp("Items", *member_items)
             system_objects.append(o.comp("Segments", *members))
-        key = drawing["source_locator"]["DrawingId"]
-        metadata = (Obj("Plant/Diagram.PlantMetaData", f"Drawing_{key}")
-                    .comp("PersistentIdentifiers", identifier(DRAWING_CONTEXT, key))
+        key = src.drawing_key(did)
+        metadata = (Obj("Plant/Diagram.PlantMetaData", f"{backend.drawing_table}_{xml_name(key)}")
+                    .comp("PersistentIdentifiers", identifier(backend.drawing[1], key))
                     .data("DrawingNumber", string(drawing["name"])).data("FileName", string(drawing["name"])))
         if drawing.get("revision") is not None:
             metadata.data("RevisionNumber", string(drawing["revision"]))
-        plant = (Obj("Plant/PlantModel", f"PlantModel_{key}")
+        plant = (Obj("Plant/PlantModel", f"PlantModel_{xml_name(key)}")
                  .comp("MetaData", metadata)
                  .comp("PipingNetworkSystems", *system_objects)
                  .comp("ProcessInstrumentationFunctions", *[o for oid, o in functions.items() if here(oid)])
@@ -436,15 +525,15 @@ def generate(records: dict) -> dict[str, bytes]:
                    .data("MaxX", value("Double", "420.0")).data("MaxY", value("Double", "297.0"))
                    .data("MinX", value("Double", "0.0")).data("MinY", value("Double", "0.0"))
                    .data("Name", string(drawing["name"]))
-                   .ref("Represents", f"PlantModel_{key}")
+                   .ref("Represents", plant.id)
                    .comp("Groups", *groups, ordered=True))
         model = (Obj("Core/EngineeringModel")
                  .comp("ConceptualModel", plant).comp("Diagram", diagram)
                  .data("ExportDateTime", value("DateTime", revision["recorded_at"]))
-                 .data("OriginatingSystemName", string(GENERATOR[0]))
-                 .data("OriginatingSystemVendorName", string(GENERATOR[1]))
-                 .data("OriginatingSystemVersion", string(GENERATOR[2])))
-        name = re.sub(r"[^A-Za-z0-9_]", "_", f"LIONG_{revision['revision_id']}_{key}")
+                 .data("OriginatingSystemName", string(backend.generator()[0]))
+                 .data("OriginatingSystemVendorName", string(backend.generator()[1]))
+                 .data("OriginatingSystemVersion", string(backend.generator()[2])))
+        name = xml_name(f"LIONG_{revision['revision_id']}_{key}")
         root = etree.Element("Model", name=name, uri=f"urn:liong:dexpi:{revision['revision_id']}:{drawing['name']}")
         etree.SubElement(root, "Import", prefix="Core", source=CORE_URI)
         etree.SubElement(root, "Import", prefix="Plant", source=PLANT_URI)
@@ -471,7 +560,7 @@ def sidecar(src: Source, files: dict[str, bytes]) -> bytes:
     assertions = {}
     for a in records["assertions"]:
         entry = {k: v for k, v in a.items() if k != "assertion_id"}
-        if a["predicate"] not in RELATIONS and a["predicate"] in CARRIED[src.kind(a["subject_id"])]:
+        if a["predicate"] not in RELATIONS and a["predicate"] in src.backend.carried[src.kind(a["subject_id"])]:
             del entry["value_or_target"]
         assertions[a["assertion_id"]] = entry
     content = {

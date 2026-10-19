@@ -5,7 +5,8 @@ The R0 graph is compared with the answer key, whose aliases map to ObjectIds thr
 "keys". The node fields and evidence below are typed by hand from R0's rows. The
 reference P&ID facts are typed by hand from standards/dexpi/2.0.1/reference_pid.xml:
 one Tank, T4750, five PipeTees, four instrumentation functions, and TT4750.03 sensing at
-the tank's instrument nozzle Nozzle17.
+the tank's instrument nozzle Nozzle17. W-SP's graph is scored with
+scripts/compare_answer_key.py against its answer key, which maps the sps GUIDs.
 """
 from __future__ import annotations
 
@@ -20,9 +21,10 @@ import unittest
 from lxml import etree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import compare_answer_key  # noqa: E402
 import dexpi_parse as parse  # noqa: E402
 import graph_publish  # noqa: E402
-from test_dexpi_generate import records, written  # noqa: E402
+from test_dexpi_generate import GUID, records, written  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 ANSWER_KEY = json.loads((ROOT / "fixtures" / "answer-keys" / "p3d-r0.json").read_text(encoding="utf-8"))
@@ -126,6 +128,59 @@ class R0Test(unittest.TestCase):
         facts = parse.read(alone)
         self.assertEqual(facts["gaps"], ["nothing here continues to p3d:object:109"])
         self.assertNotIn("continues_to", [r[0] for r in facts["relations"]])
+
+
+class WspTest(unittest.TestCase):
+    """W-SP's W0 parses back to its answer-key graph, with sps IDs and the backend's predicate names."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.folder = written("W0")
+        cls.facts = parse.read(cls.folder)
+        cls.graph = parse.graph(cls.facts, parse.load_sidecar(cls.folder))
+        cls.nodes = {n["id"]: n for n in cls.graph["nodes"]}
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.folder)
+
+    def test_the_graph_matches_w_sps_answer_key_exactly(self):
+        key = json.loads((ROOT / "fixtures" / "answer-keys" / "sps-wsp.json").read_text(encoding="utf-8"))
+        report = compare_answer_key.compare({"outcome": "accepted", "graph": graph_publish.canonical(self.graph)}, key, "W0")
+        self.assertEqual((report["match"], report["differences"], report["nodes"], report["edges"]), (True, [], 15, 26))
+        self.assertEqual(self.graph["source_revision"], "sps:revision:W0")
+
+    def test_parsing_gives_back_the_records_it_was_written_from(self):
+        self.assertEqual(parse.records(self.facts, parse.load_sidecar(self.folder)), records("W0"))
+
+    def test_nodes_carry_sps_ids_kinds_tags_and_names(self):
+        expected = {
+            f"sps:sheet:{GUID['DEMO-PID-101']}": {"kind": "drawing", "name": "DEMO-PID-101"},
+            f"sps:item:{GUID['HV-301']}": {"kind": "valve", "tag": "HV-301"},
+            f"sps:item:{GUID['LT-302']}": {"kind": "instrument", "tag": "LT-302"},
+            f"sps:item:{GUID['TO-S2/B']}": {"kind": "sheet_connector", "name": "TO-S2/B"},
+            f"sps:line:{GUID['L-301-4']}": {"kind": "pipe_segment", "tag": "L-301-4"},
+        }
+        for nid, fields in expected.items():
+            with self.subTest(nid=nid):
+                self.assertEqual({k: v for k, v in self.nodes[nid].items() if k in ("kind", "tag", "name")}, fields)
+
+    def test_attributes_take_the_backends_predicate_names(self):
+        facts = self.facts["nodes"]
+        self.assertEqual(facts[f"sps:item:{GUID['LT-302']}"]["attributes"], {"tag_lead": "LT", "tag_number": "302"})
+        self.assertEqual(facts[f"sps:item:{GUID['TK-302']}"]["attributes"],
+                         {"tag_lead": "TK", "tag_number": "302", "description": "receiving vessel"})
+        self.assertEqual(facts[f"sps:item:{GUID['FROM-S1/B']}"]["attributes"], {"label": "FROM-S1/B", "link_sense": "From"})
+
+    def test_the_continuation_carries_its_sheet_link_evidence(self):
+        edges = {(e["kind"], e["source"], e["target"]): e["evidence"] for e in self.graph["edges"]}
+        out, into = f"sps:item:{GUID['TO-S2/B']}", f"sps:item:{GUID['FROM-S1/B']}"
+        self.assertEqual(edges[("CROSS_SHEET_REFERENCE", out, into)],
+                         [{"table": "SheetLink", "ItemGuid": GUID["TO-S2/B"],
+                           "via": [{"table": "SheetLink", "ItemGuid": GUID["FROM-S1/B"]}]}])
+
+    def test_nothing_is_unsupported(self):
+        self.assertEqual(parse.report(self.facts), {"unsupported_classes": {}, "problems": [], "gaps": []})
 
 
 class ReferencePidTest(unittest.TestCase):

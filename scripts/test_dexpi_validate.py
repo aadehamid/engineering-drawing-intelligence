@@ -41,6 +41,7 @@ NEGATIVES = {
     "liong_rules-named-reference": ("liong_rules", "liong_rules: p3d:object:105 senses at None, which is no supported node"),
     "liong_rules-duplicate-tag": ("liong_rules", "liong_rules: tag L-101-5 is on 2 nodes"),
     "liong_rules-missing-sidecar-entry": ("liong_rules", "liong_rules: p3d:object:105 has no sidecar entry"),
+    "liong_rules-instrument-letters": ("liong_rules", "liong_rules: p3d:object:105 has instrument letters Q/I, outside the supported subset"),
 }
 
 
@@ -73,6 +74,14 @@ class AcceptedTest(unittest.TestCase):
                 self.assertEqual(result, {"passed": ["schema", "references", "model", "liong_rules"],
                                           "failed": None, "problems": [], "round_trip": []})
                 self.assertEqual(validate.claim(result), ALL_PASS)
+
+    def test_w_sp_passes_every_stage_and_round_trips(self):
+        folder = written("W0")
+        self.addCleanup(shutil.rmtree, folder)
+        result = validate.validate(folder)
+        self.assertEqual(result, {"passed": ["schema", "references", "model", "liong_rules"],
+                                  "failed": None, "problems": [], "round_trip": []})
+        self.assertEqual(validate.claim(result), ALL_PASS)
 
     def test_one_drawing_alone_passes_every_stage(self):
         # The negatives start from this folder, so each fails only through its planted fault.

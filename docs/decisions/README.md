@@ -80,6 +80,7 @@ state; a register row links here when its decision has a record.
 | [DEC-083](DEC-083-sps-generator-choices.md) | The SmartPlant-style generator writes W-SP's W0 as one JSON file per table, keyed by name-based GUIDs, with nozzle rows and one run drawn against its flow | Decided | 2026-10-19 |
 | [DEC-084](DEC-084-sps-loader-choices.md) | The SmartPlant-style loader reuses the Plant 3D loader's code, with the backend and its columns as parameters | Decided | 2026-10-19 |
 | [DEC-085](DEC-085-sps-extraction-records.md) | SmartPlant-style extraction rebuilds W-SP's segments, flows, parent and continuation from the rows, keyed by the backend's GUIDs | Decided | 2026-10-19 |
+| [DEC-086](DEC-086-sps-dexpi-mapping.md) | W-SP's records map to DEXPI 2.0.1 through DEC-077's mapping, with sps identifier contexts, hand valves as OperatedValve and LT as category L | Decided | 2026-10-19 |
 
 ## Record format
 
