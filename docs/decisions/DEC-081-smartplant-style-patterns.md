@@ -37,8 +37,8 @@ database ([DEC-028](DEC-028-one-database-two-schemas.md)), and borrows these pat
    flow direction against those ends. Each inline valve splits a piece in two, so W-SP's
    run A has three pieces and run B two (REF-TECH-019).
 3. **Inline placement rows.** A valve's membership in its run is a row of its own, not
-   a column on the valve, and each valve, instrument and nozzle has numbered port
-   points (REF-TECH-019).
+   a column on the valve, and each valve and instrument has numbered port points
+   (REF-TECH-019). The backend gives nozzles port points too.
 4. **An implied pipeline.** Each run carries the line-number parts. A line-group row
    holds only the line's key values, and no run stores a key to it. A run belongs to
    the group whose key values all match; a run with a missing key value belongs to
@@ -52,8 +52,9 @@ database ([DEC-028](DEC-028-one-database-two-schemas.md)), and borrows these pat
    key, which W-SP's cross-sheet pair needs.
 6. **Tag parts with per-class uniqueness.** Tagged classes store their parts next to
    the composed tag. The composed tag is unique for vessels and instruments, unique
-   within its vessel for a nozzle, and may repeat for pipe runs. Valve tags are one
-   plain column (REF-TECH-019, REF-TECH-022, REF-TECH-025, REF-TECH-027, REF-TECH-028).
+   within its vessel for a nozzle, and may repeat for pipe runs (REF-TECH-019,
+   REF-TECH-022, REF-TECH-025, REF-TECH-027, REF-TECH-028). The backend stores a valve's
+   tag as one plain column; no source found says how the product stores it.
 7. **Nozzles.** Piping reaches a vessel through a nozzle, which stores its parent
    vessel. An instrument on a vessel reaches it through a nozzle and a process
    connection (REF-TECH-021, REF-TECH-027). The generator writes nozzle rows W-SP's world file does not list: one on
