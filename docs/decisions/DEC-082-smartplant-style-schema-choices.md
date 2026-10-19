@@ -8,9 +8,10 @@ Date: 2026-10-19
 [DEC-081](DEC-081-smartplant-style-patterns.md) set the seven patterns the
 SmartPlant-style schema borrows. Writing the schema left choices that DEC-081 does not
 make: how the file is built and tested, the class tables and their columns, where W-SP's
-segment tags live, the scope of the revision-number rule, the pipeline row's columns, and
-the data dictionary that
-[DEC-032](DEC-032-minimal-data-dictionary.md) asks each backend to carry. The agent
+segment tags live, what a line's ends name, the revision's approval columns, the scope of
+the revision-number rule, the pipeline row's columns, and the data dictionary that
+[DEC-032](DEC-032-minimal-data-dictionary.md) asks each backend to carry. DEC-032 was
+asked for R0's classes and left the second world's classes open. The agent
 made them during the MILESTONE-001b night run, under the owner's delegation in
 [DEC-080](DEC-080-milestone-001b-night-delegation.md). The owner can reverse any of
 them.
@@ -32,7 +33,7 @@ them.
 3. **Data rows are keyed by GUIDs.** Each data table's key is a `UNIQUEIDENTIFIER`,
    with no integer key beside it. DEC-081 pattern 1 takes the GUID form from a
    secondary source only. The three dictionary tables are keyed by name instead
-   (choice 8).
+   (choice 10).
 4. **Tag parts.** Vessels, instruments and pipe runs store `TagLead`, `TagNumber` and
    `TagTail` next to the composed `ItemTag`. For a pipe run these are the line-number
    parts that DEC-081 pattern 4 matches on. A fitting's tag is one column. As
@@ -42,11 +43,19 @@ them.
    but a pipe segment is a line depiction, not an item. The schema adds
    `LabelDepiction`: a depiction that belongs to no item and holds text placed on
    another depiction. REF-TECH-019 describes the label representation this way.
-6. **Revision numbers are unique on their sheet.** The major and minor numbers are
+6. **Line ends name items.** A line depiction stores the design item attached at its
+   end 1 and at its end 2, `End1Item` and `End2Item`, as DEC-081 pattern 2 says. A
+   pipe end at a vessel names the nozzle, and a free end is NULL.
+7. **The approval is an approver and a date.** Each revision row stores `Approver` and
+   `ApprovedOn`, the approved-by and approval-date fields that
+   [DEC-039](DEC-039-approval-in-vendor-fields.md) names for the SmartPlant-style
+   backend. Both are NULL on a revision not yet approved. `RevisedOn` stays the time
+   the source recorded the revision ([DEC-045](DEC-045-revision-time-sources.md)).
+8. **Revision numbers are unique on their sheet.** The major and minor numbers are
    unique together for one sheet, not across the plant. REF-TECH-026 says "unique in
    the plant", but a plant-wide rule would stop W-SP's two sheets from both holding
    revision W0.
-7. **The line group.** `LineGroup` is the pipeline's row. It holds only the line key
+9. **The line group.** `LineGroup` is the pipeline's row. It holds only the line key
    values W-SP uses, the line prefix and number, and no run stores a key to it.
    REF-TECH-022 says the application adds a pipeline entry as runs are drawn and that
    the relationship between pipeline and run is implicit. Which runs belong is found
@@ -55,12 +64,13 @@ them.
    sharing the design items' key or their columns. Keeping the line group outside
    `DesignItem` is the agent's choice: nothing in the item tables can then point to
    it, and it adds no item that extraction could mistake for a graph node.
-8. **Data dictionary.** `ItemType`, `ItemProperty` and `SelectEntry` describe the
-   item types W-SP uses, their columns and tag parts, and the select lists for item
-   state, flow sense, link sense and depiction kind. The coded columns hold the
-   select-list values as text. These tables are keyed by name: `ItemType` by item
-   kind, `ItemProperty` by item kind and property, and `SelectEntry` by list and
-   value.
+10. **Data dictionary.** This settles the point DEC-032 left open for the second
+    world: the dictionary covers W-SP's classes. `ItemType`, `ItemProperty` and
+    `SelectEntry` describe the item types W-SP uses, their columns and tag parts,
+    and the select lists for item state, flow sense, link sense and depiction kind.
+    The coded columns hold the select-list values as text. These tables are keyed
+    by name: `ItemType` by item kind, `ItemProperty` by item kind and property, and
+    `SelectEntry` by list and value.
 
 ## Alternatives considered
 

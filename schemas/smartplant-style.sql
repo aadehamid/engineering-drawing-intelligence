@@ -123,13 +123,13 @@ CREATE TABLE sps.Depiction (
     DepictionKind NVARCHAR(8)      NOT NULL  -- select list DepictionKind: 'Mark', 'Line' or 'Label'
 );
 
--- Pattern 2: a line depiction shares its key with a Depiction row and names the mark
--- depiction at each end, in the order the line was drawn. A free end is NULL. Each
--- inline fitting splits a line in two (REF-TECH-019).
+-- Pattern 2: a line depiction shares its key with a Depiction row and names the
+-- design item attached at each end, in the order the line was drawn. A free end is
+-- NULL. Each inline fitting splits a line in two (REF-TECH-019).
 CREATE TABLE sps.LineDepiction (
     DepictionGuid UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
-    End1Mark      UNIQUEIDENTIFIER NULL,
-    End2Mark      UNIQUEIDENTIFIER NULL
+    End1Item      UNIQUEIDENTIFIER NULL,
+    End2Item      UNIQUEIDENTIFIER NULL
 );
 
 -- A label depiction's text and the depiction it labels (REF-TECH-019).
@@ -163,19 +163,22 @@ CREATE TABLE sps.Sheet (
 );
 
 -- Revision rows, many to one sheet, with a major and a minor number unique together
--- on their sheet (REF-TECH-019, REF-TECH-026). ApprovalState is the source approval
--- (DEC-039); RevisedOn is when the source recorded the revision (DEC-045).
+-- on their sheet (REF-TECH-019, REF-TECH-026). The source approval is the revision's
+-- approver and approval date, both NULL until it is approved (DEC-039); RevisedOn is
+-- when the source recorded the revision (DEC-045).
 CREATE TABLE sps.SheetRevision (
     RevisionGuid  UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
     SheetGuid     UNIQUEIDENTIFIER NOT NULL,
     MajorRev      NVARCHAR(8)      NOT NULL,
     MinorRev      NVARCHAR(8)      NOT NULL,
     RevisedOn     DATETIME2(0)     NOT NULL,
-    ApprovalState NVARCHAR(32)     NOT NULL,
+    Approver      NVARCHAR(64)     NULL,
+    ApprovedOn    DATETIME2(0)     NULL,
     CONSTRAINT UQ_SheetRevision_Number UNIQUE (SheetGuid, MajorRev, MinorRev)
 );
 
--- The data dictionary, for W-SP's classes only (DEC-032): item types, their
+-- The data dictionary, for W-SP's classes only (DEC-032; DEC-082 sets the classes):
+-- item types, their
 -- properties, and the select lists that coded columns draw from (REF-TECH-019).
 CREATE TABLE sps.ItemType (
     ItemKind    NVARCHAR(32)  NOT NULL PRIMARY KEY,

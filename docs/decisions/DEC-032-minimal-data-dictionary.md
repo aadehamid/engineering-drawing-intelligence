@@ -40,7 +40,8 @@ The owner answered:
 > Q19: Agreed.
 
 The question predates DEC-029. Which classes the backend of the second world covers
-stays open until that world is specified.
+stayed open until that world was specified. [DEC-082](DEC-082-smartplant-style-schema-choices.md)
+settles it for W-SP: the SmartPlant-style dictionary covers W-SP's classes.
 
 ## Evidence
 

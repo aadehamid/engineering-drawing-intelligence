@@ -24,7 +24,7 @@ EXPECTED_TABLES = {
     "InlinePlacement", "PortPoint",                    # pattern 3
     "LineGroup",                                       # pattern 4
     "Sheet", "SheetRevision",                          # sheets and their revision rows
-    "ItemType", "ItemProperty", "SelectEntry",         # the data dictionary (DEC-032)
+    "ItemType", "ItemProperty", "SelectEntry",         # the data dictionary (DEC-032, DEC-082)
 }
 TYPES = r"INT|BIGINT|NVARCHAR|UNIQUEIDENTIFIER|DATETIME2"
 
@@ -87,9 +87,10 @@ class StaticSchemaTests(unittest.TestCase):
                 self.assertNotIn("SheetGuid", cols, name)
         self.assertIn("MateSheet", tables(self.text)["SheetLink"])
 
-    def test_line_depictions_name_both_end_marks_and_runs_hold_the_flow_sense(self):
+    def test_line_depictions_name_both_end_items_and_runs_hold_the_flow_sense(self):
         cols = tables(self.text)
-        self.assertEqual(cols["LineDepiction"], ["DepictionGuid", "End1Mark", "End2Mark"])
+        # DEC-081 pattern 2: each end names the design item attached there, not a depiction
+        self.assertEqual(cols["LineDepiction"], ["DepictionGuid", "End1Item", "End2Item"])
         self.assertIn("FlowSense", cols["PipeRun"])
 
     def test_run_membership_is_its_own_row(self):
@@ -120,6 +121,18 @@ class StaticSchemaTests(unittest.TestCase):
         self.assertIn("ON sps.Nozzle (ParentItem, ItemTag) WHERE ItemTag IS NOT NULL", self.text)
         # Pipe runs and fittings have none: three unique indexes in all
         self.assertEqual(len(re.findall(r"CREATE UNIQUE INDEX", self.text)), 3)
+
+    def test_the_source_approval_is_the_revisions_approver_and_approval_date(self):
+        # DEC-039: the SmartPlant-style approval lives in the drawing revision's approved-by
+        # and approval-date fields, not in a status value
+        self.assertEqual(tables(self.text)["SheetRevision"],
+                         ["RevisionGuid", "SheetGuid", "MajorRev", "MinorRev", "RevisedOn", "Approver", "ApprovedOn"])
+
+    def test_the_dictionary_comment_cites_the_record_that_sets_w_sps_classes(self):
+        # DEC-032 covers R0's classes and leaves the second world's open; DEC-082 settles them
+        comment = re.search(r"-- The data dictionary, for W-SP's classes only \((.*?)\)", self.text, re.DOTALL)
+        self.assertIsNotNone(comment)
+        self.assertIn("DEC-082", comment.group(1))
 
     def test_revision_numbers_are_unique_together_on_their_sheet(self):
         self.assertIn("CONSTRAINT UQ_SheetRevision_Number UNIQUE (SheetGuid, MajorRev, MinorRev)", self.text)
@@ -267,8 +280,8 @@ class LiveSchemaTests(unittest.TestCase):
         import pytds
 
         cursor = self.conn.cursor()
-        insert = ("INSERT INTO sps.SheetRevision (RevisionGuid, SheetGuid, MajorRev, MinorRev, RevisedOn, ApprovalState) "
-                  "VALUES (%s, %s, %s, %s, '2030-02-01T08:00:00', N'Approved')")
+        insert = ("INSERT INTO sps.SheetRevision (RevisionGuid, SheetGuid, MajorRev, MinorRev, RevisedOn, Approver, "
+                  "ApprovedOn) VALUES (%s, %s, %s, %s, '2030-02-01T08:00:00', N'DEMO-APPROVER', '2030-02-01T08:00:00')")
         first, second = str(uuid.uuid4()), str(uuid.uuid4())
         try:
             cursor.execute(insert, (str(uuid.uuid4()), first, "W0", "0"))
