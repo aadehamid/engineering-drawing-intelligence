@@ -48,9 +48,12 @@ owner can reverse any of it.
    whose evidence names the line group and every member run. The pipeline is not an
    object, so the graph is the world file's.
 6. **Contradictions stop extraction.** A sheet-link pair whose sides do not name each
-   other and each other's sheets, a process connection that does not join one
-   instrument to one nozzle, a line whose labels have different texts, or an unknown
-   flow sense raises an error. Labels and marks are not unique in the schema, so
+   other, with one "To" and one "From" side, and each other's sheets, stops it. That
+   covers a link that names a mate and a link that another link names, so a side that
+   lost its mate is caught; only a link that no row pairs with stays unpaired, with no
+   continuation. A process connection that does not join one instrument to one
+   nozzle, a line whose labels have different texts, or an unknown flow sense also
+   raises an error. Labels and marks are not unique in the schema, so
    extraction reads all of them: a side's sheet matches when any of its mate's marks
    is on it, and a repeated label with the same text is one tag. The result never
    depends on row order. A line end

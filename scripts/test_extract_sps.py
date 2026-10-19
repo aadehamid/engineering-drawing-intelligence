@@ -222,6 +222,25 @@ class DerivationTest(unittest.TestCase):
                 found.append(type(error).__name__)
         return found
 
+    def test_a_to_side_that_lost_its_mate_stops_extraction(self):
+        # The From side still names the To side, which names nobody: the sides disagree
+        rows = snapshot_rows()
+        next(r for r in rows["SheetLink"] if r["LinkSense"] == "To")["MateItem"] = None
+        with self.assertRaises(extract.ExtractionError):
+            from_snapshot(rows)
+
+    def test_a_pair_with_two_from_sides_stops_extraction(self):
+        rows = snapshot_rows()
+        next(r for r in rows["SheetLink"] if r["LinkSense"] == "To")["LinkSense"] = "From"
+        with self.assertRaises(extract.ExtractionError):
+            from_snapshot(rows)
+
+    def test_an_unpaired_sheet_link_gives_no_continuation_and_no_error(self):
+        rows = snapshot_rows()
+        for link in rows["SheetLink"]:
+            link["MateItem"] = link["MateSheet"] = None
+        self.assertNotIn("continues_to", {a["predicate"] for a in from_snapshot(rows)["assertions"]})
+
     def test_two_different_labels_on_one_line_stop_extraction_in_any_order(self):
         # The schema lets a line carry several labels; two texts for one segment's tag
         # are a contradiction, whichever row comes first

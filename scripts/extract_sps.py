@@ -247,15 +247,21 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
 
     # Continuation: each side of a sheet-link pair names the other and the other's sheet.
     links = {g: row for g, row in r.by_class["SheetLink"].items() if r.active(g, "SheetLink")}
-    for guid, link in links.items():
-        if link["LinkSense"] != "To" or link["MateItem"] is None:
+    # Every link that names a mate, and every link that a mate names, is checked from
+    # both sides; only a link no row pairs with stays unpaired, with no continuation.
+    named = {link["MateItem"]: guid for guid, link in links.items() if link["MateItem"] is not None}
+    for guid, link in sorted(links.items()):
+        if link["MateItem"] is None and guid not in named:
             continue
-        mate = links.get(link["MateItem"])
-        if (mate is None or mate["LinkSense"] != "From" or mate["MateItem"] != guid
+        mate = links.get(link["MateItem"] or named[guid])
+        if (link["MateItem"] is None or mate is None or mate["MateItem"] != guid
+                or {link["LinkSense"], mate["LinkSense"]} != {"To", "From"}
                 or link["MateSheet"] not in r.mark_sheets.get(mate["ItemGuid"], set())
                 or mate["MateSheet"] not in r.mark_sheets.get(guid, set())):
-            raise ExtractionError(f"sheet links {guid} and {link['MateItem']} do not name each other "
-                                  "and each other's sheets")
+            raise ExtractionError(f"sheet links {guid} and {link['MateItem'] or named[guid]} do not name each "
+                                  "other, with one To and one From side, and each other's sheets")
+        if link["LinkSense"] != "To":
+            continue
         state(item_id(guid), "continues_to", item_id(mate["ItemGuid"]),
               {"table": "SheetLink", "ItemGuid": guid, "via": [{"table": "SheetLink", "ItemGuid": mate["ItemGuid"]}]},
               "derived", f"SheetLink/{guid}/continues_to")
