@@ -13,8 +13,10 @@ The owner authorized batch drafting and a PR, not automatic approval of new desi
 Read [LIONG-001](LIONG-001-charter.md) for the purpose and boundaries.
 Then review [the decisions](LIONG-REG-001-decisions.md), especially DEC-101 through
 DEC-111 and GATE-001 through GATE-008. All eleven substantive documents are version
-0.1 drafts. Only MILESTONE-001's structured slice is implemented and tested, on the synthetic
-R0 world ([LIONG-010](LIONG-010-evaluation.md#current-evidence-and-implementation-handoff)).
+0.1 drafts. Only the structured slice is implemented and tested: MILESTONE-001 on the
+synthetic R0 world's revisions, and MILESTONE-001b on W-SP's W0 from the SmartPlant-style
+backend ([DEC-087](decisions/DEC-087-slice-backend-parameter.md);
+[LIONG-010](LIONG-010-evaluation.md#current-evidence-and-implementation-handoff)).
 
 The extraction assessment amendment adds modern parsers, vision-language models,
 and optional SAM 3 segmentation. No authoring application is included. Compare
