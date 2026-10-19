@@ -35,7 +35,7 @@ owner can reverse any of it.
    so that both backends' records map to the graph the same way:
    - `starts_at` and `ends_at` for each segment, from its line's end marks, with
      upstream set by the run's flow sense;
-   - a nozzle at a line end counts as its parent vessel;
+   - an active nozzle at a line end counts as its parent vessel;
    - `owned_by` from an instrument to the vessel whose nozzle its process connection
      reaches;
    - `continues_to` from the "To" side of a sheet-link pair to the "From" side.
@@ -51,7 +51,9 @@ owner can reverse any of it.
    other and each other's sheets, a process connection that does not join one
    instrument to one nozzle, or an unknown flow sense raises an error. A line end
    that reaches a missing or deleted item is kept as stated, for validation to
-   reject, as DEC-075 does.
+   reject, as DEC-075 does. A deleted nozzle counts as such an item: it is not
+   collapsed into its vessel, so a segment end or an instrument parent through it
+   names the nozzle.
 7. **No answer key.** The extractor never opens one; a test records every file it
    opens and fails if any is an answer key.
 

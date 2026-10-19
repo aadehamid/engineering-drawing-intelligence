@@ -16,9 +16,10 @@ The SmartPlant-style backend stores W-SP in a different shape from the graph
   placed on it.
 - A segment's flow runs from the end its run's flow sense names as upstream. Each end
   becomes `starts_at` or `ends_at`, the predicates extract_p3d.py uses.
-- A nozzle is collapsed into its parent vessel: a segment ending at a nozzle ends at
-  the vessel, and an instrument whose process connection reaches a vessel's nozzle is
-  `owned_by` that vessel.
+- An active nozzle is collapsed into its parent vessel: a segment ending at a nozzle
+  ends at the vessel, and an instrument whose process connection reaches a vessel's
+  nozzle is `owned_by` that vessel. A deleted nozzle is not collapsed: the fact names
+  the nozzle, which is no object, so validation rejects it.
 - A sheet-link pair whose two sides name each other, and each other's sheets, becomes
   `continues_to` from the "To" side to the "From" side. Sides that disagree stop
   extraction.
@@ -124,8 +125,9 @@ class Rows:
     def end(self, mark: str | None) -> tuple[str | None, list[dict]]:
         """The object a line end reaches, and the rows passed on the way.
 
-        A nozzle collapses into its parent vessel. A mark that names no depiction is
-        kept as an unresolved ID for validation to reject.
+        An active nozzle collapses into its parent vessel. A deleted nozzle does not:
+        the end names the nozzle itself, which is no object, for validation to reject.
+        A mark that names no depiction is kept as an unresolved ID for the same reason.
         """
         if mark is None:
             return None, []
@@ -134,8 +136,14 @@ class Rows:
             return f"{SOURCE_ID}:depiction:{mark}", []
         guid = depiction["ItemGuid"]
         if guid in self.by_class["Nozzle"]:
-            return item_id(self.by_class["Nozzle"][guid]["ParentItem"]), [{"table": "Nozzle", "ItemGuid": guid}]
+            return self.through_nozzle(guid), [{"table": "Nozzle", "ItemGuid": guid}]
         return item_id(guid), []
+
+    def through_nozzle(self, guid: str) -> str:
+        """The vessel an active nozzle belongs to, or the deleted nozzle itself."""
+        if not self.active(guid, "Nozzle"):
+            return item_id(guid)
+        return item_id(self.by_class["Nozzle"][guid]["ParentItem"])
 
 
 def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captured_at: str) -> dict:
@@ -224,7 +232,7 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
             raise ExtractionError(f"process connection {connection['ItemGuid']} does not join one instrument "
                                   "to one nozzle")
         nozzle = r.by_class["Nozzle"][nozzles[0]]
-        state(item_id(instruments[0]), "owned_by", item_id(nozzle["ParentItem"]),
+        state(item_id(instruments[0]), "owned_by", r.through_nozzle(nozzle["ItemGuid"]),
               {"table": "LineDepiction", "DepictionGuid": line["DepictionGuid"],
                "via": [{"table": "ProcessConnection", "ItemGuid": connection["ItemGuid"]},
                        {"table": "Nozzle", "ItemGuid": nozzle["ItemGuid"]}]},

@@ -237,6 +237,47 @@ class DerivationTest(unittest.TestCase):
                 with self.assertRaises(extract.ExtractionError):
                     from_snapshot(rows)
 
+    def deleted_nozzle(self, vessel_tag: str, nozzle_tag: str) -> tuple[dict, str]:
+        rows = snapshot_rows()
+        vessel = next(r["ItemGuid"] for r in rows["Vessel"] if r["ItemTag"] == vessel_tag)
+        nozzle = next(r["ItemGuid"] for r in rows["Nozzle"] if r["ParentItem"] == vessel and r["ItemTag"] == nozzle_tag)
+        next(r for r in rows["DesignItem"] if r["ItemGuid"] == nozzle)["ItemState"] = "Deleted"
+        return from_snapshot(rows), nozzle
+
+    def test_a_deleted_nozzle_at_a_pipe_end_is_not_collapsed(self):
+        # TK-302's N1 takes L-301-5's end. Deleted, the end names the nozzle, not TK-302.
+        records, nozzle = self.deleted_nozzle("TK-302", "N1")
+        ends = {a["value_or_target"] for a in records["assertions"] if a["predicate"] == "ends_at"}
+        self.assertIn(extract.item_id(nozzle), ends)
+        self.assertEqual(score(records)["differences"], [f"{extract.item_id(nozzle)} is not a key in the answer key"])
+
+    def test_a_deleted_nozzle_gives_no_instrument_parent(self):
+        # TK-302's N2 takes LT-302's process connection.
+        records, nozzle = self.deleted_nozzle("TK-302", "N2")
+        parents = [a["value_or_target"] for a in records["assertions"] if a["predicate"] == "owned_by"]
+        self.assertEqual(parents, [extract.item_id(nozzle)])
+        self.assertEqual(score(records)["differences"], [f"{extract.item_id(nozzle)} is not a key in the answer key"])
+
+    def test_an_unknown_flow_sense_stops_extraction(self):
+        rows = snapshot_rows()
+        rows["PipeRun"][0]["FlowSense"] = "Sideways"
+        with self.assertRaises(extract.ExtractionError):
+            from_snapshot(rows)
+
+    def test_a_process_connection_without_an_instrument_and_a_nozzle_stops_extraction(self):
+        rows = snapshot_rows()
+        connection = rows["ProcessConnection"][0]["ItemGuid"]
+        line = next(d["DepictionGuid"] for d in rows["Depiction"] if d["ItemGuid"] == connection)
+        next(r for r in rows["LineDepiction"] if r["DepictionGuid"] == line)["End2Mark"] = None
+        with self.assertRaises(extract.ExtractionError):
+            from_snapshot(rows)
+
+    def test_a_run_matching_two_line_groups_stops_extraction(self):
+        rows = snapshot_rows()
+        rows["LineGroup"].append({"GroupGuid": str(uuid.uuid4()).upper(), "TagLead": "L", "TagNumber": "301"})
+        with self.assertRaises(extract.ExtractionError):
+            from_snapshot(rows)
+
     def test_a_deleted_item_is_not_an_object(self):
         rows = snapshot_rows()
         vessel = rows["Vessel"][0]["ItemGuid"]
