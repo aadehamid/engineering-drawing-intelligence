@@ -77,6 +77,7 @@ state; a register row links here when its decision has a record.
 | [DEC-080](DEC-080-milestone-001b-night-delegation.md) | The agent decides open questions for the owner during the MILESTONE-001b night run | Decided | 2026-10-19 |
 | [DEC-081](DEC-081-smartplant-style-patterns.md) | The SmartPlant-style schema borrows seven storage patterns from Smart P&ID, renamed, with nozzle rows and an implied pipeline | Decided | 2026-10-19 |
 | [DEC-082](DEC-082-smartplant-style-schema-choices.md) | The SmartPlant-style schema is one T-SQL file for schema sps, with GUID keys on its data tables, label depictions and a per-sheet revision rule | Decided | 2026-10-19 |
+| [DEC-083](DEC-083-sps-generator-choices.md) | The SmartPlant-style generator writes W-SP's W0 as one JSON file per table, keyed by name-based GUIDs, with nozzle rows and one run drawn against its flow | Decided | 2026-10-19 |
 
 ## Record format
 

@@ -1,0 +1,72 @@
+[
+  {
+    "ItemGuid": "4E781C49-8383-541C-A3BB-A881AA4E3A40",
+    "ItemKind": "Vessel",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "3BDC3007-A1CA-5FD4-9A4B-C12B14E4605A",
+    "ItemKind": "Vessel",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "E5531D47-5180-598A-B6F8-63EF2DC29531",
+    "ItemKind": "PipingFitting",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "AA396C4B-92E2-57AC-9B8F-AF12BD9C4EBD",
+    "ItemKind": "PipingFitting",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "C41295BE-6C23-50BE-925A-3506CFBE5051",
+    "ItemKind": "PipingFitting",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "89DF1AA8-BF4A-5B88-A93E-87705C43B9C4",
+    "ItemKind": "Instrument",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "18B2755C-0314-5534-B40B-B27928211F1E",
+    "ItemKind": "SheetLink",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "967CF11A-9D5D-5468-A3B2-14A3FB0EC305",
+    "ItemKind": "SheetLink",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "81B51088-2832-52F9-9DF0-E0FF03121B4B",
+    "ItemKind": "PipeRun",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "B6929D8E-2B34-5C15-BEF4-42E8F23D349C",
+    "ItemKind": "Nozzle",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "9CE04853-15DE-54F4-A52E-299BD9C8CEDC",
+    "ItemKind": "PipeRun",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "E8C11A23-8C7F-5B34-97AF-C76AB90ED759",
+    "ItemKind": "Nozzle",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "6AEC7954-1C00-57A4-842D-731DBDF4ACB9",
+    "ItemKind": "Nozzle",
+    "ItemState": "Active"
+  },
+  {
+    "ItemGuid": "C93AA427-C976-508C-AF7B-5D7BC9CB63FA",
+    "ItemKind": "ProcessConnection",
+    "ItemState": "Active"
+  }
+]

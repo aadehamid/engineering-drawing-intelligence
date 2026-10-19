@@ -1,0 +1,20 @@
+[
+  {
+    "ItemGuid": "81B51088-2832-52F9-9DF0-E0FF03121B4B",
+    "ItemTag": "L-301",
+    "TagLead": "L",
+    "TagNumber": "301",
+    "TagTail": null,
+    "NominalSizeMm": 80,
+    "FlowSense": "End1Upstream"
+  },
+  {
+    "ItemGuid": "9CE04853-15DE-54F4-A52E-299BD9C8CEDC",
+    "ItemTag": "L-301",
+    "TagLead": "L",
+    "TagNumber": "301",
+    "TagTail": null,
+    "NominalSizeMm": 80,
+    "FlowSense": "End2Upstream"
+  }
+]

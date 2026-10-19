@@ -1,0 +1,134 @@
+[
+  {
+    "DepictionGuid": "6D794B8D-4D0B-59A1-BDB4-714394B87C86",
+    "ItemGuid": "4E781C49-8383-541C-A3BB-A881AA4E3A40",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "740EFC85-427A-57D5-AAFC-72451D9B92AF",
+    "ItemGuid": "3BDC3007-A1CA-5FD4-9A4B-C12B14E4605A",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "1552930F-0754-57E9-BA16-ECE90B73E42A",
+    "ItemGuid": "E5531D47-5180-598A-B6F8-63EF2DC29531",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "855DC9D5-0605-5EFB-96AF-11F30A6970CC",
+    "ItemGuid": "AA396C4B-92E2-57AC-9B8F-AF12BD9C4EBD",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "43CD4C31-58D0-586F-B357-FD6A4564E474",
+    "ItemGuid": "C41295BE-6C23-50BE-925A-3506CFBE5051",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "4CB5B51D-22BD-5EC3-A536-483C2CAC7C05",
+    "ItemGuid": "89DF1AA8-BF4A-5B88-A93E-87705C43B9C4",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "E4B62558-1388-5278-A76F-035F50767C69",
+    "ItemGuid": "18B2755C-0314-5534-B40B-B27928211F1E",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "89E870AF-E642-51DE-932E-61D3277DB446",
+    "ItemGuid": "967CF11A-9D5D-5468-A3B2-14A3FB0EC305",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "E02AFFF0-B47C-5D11-81A5-C5109FC84479",
+    "ItemGuid": "B6929D8E-2B34-5C15-BEF4-42E8F23D349C",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "A80BEDD0-89BE-54F9-831D-DA6574D126FC",
+    "ItemGuid": "81B51088-2832-52F9-9DF0-E0FF03121B4B",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Line"
+  },
+  {
+    "DepictionGuid": "74F77CC3-8886-5025-98FD-1082B26736F6",
+    "ItemGuid": null,
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Label"
+  },
+  {
+    "DepictionGuid": "D410EBE1-247A-5511-A67B-CB063802D015",
+    "ItemGuid": "81B51088-2832-52F9-9DF0-E0FF03121B4B",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Line"
+  },
+  {
+    "DepictionGuid": "E29CD28D-6F3E-5A91-81F4-A96C49AEA440",
+    "ItemGuid": null,
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Label"
+  },
+  {
+    "DepictionGuid": "87F2AF9E-A408-5639-99A4-1D34ED0936B3",
+    "ItemGuid": "81B51088-2832-52F9-9DF0-E0FF03121B4B",
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Line"
+  },
+  {
+    "DepictionGuid": "D71F3AE7-3629-5A7A-871B-05D3BCE6510C",
+    "ItemGuid": null,
+    "SheetGuid": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38",
+    "DepictionKind": "Label"
+  },
+  {
+    "DepictionGuid": "E29B63F7-B8D4-5B2A-9AFB-624797FDFA54",
+    "ItemGuid": "9CE04853-15DE-54F4-A52E-299BD9C8CEDC",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Line"
+  },
+  {
+    "DepictionGuid": "5809B78D-A537-536F-8F7F-F7A597B07B00",
+    "ItemGuid": null,
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Label"
+  },
+  {
+    "DepictionGuid": "26548BA1-E683-5D1A-98EB-D455661F1620",
+    "ItemGuid": "E8C11A23-8C7F-5B34-97AF-C76AB90ED759",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "4F28FEA3-45E7-574F-B0BE-294867898C20",
+    "ItemGuid": "9CE04853-15DE-54F4-A52E-299BD9C8CEDC",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Line"
+  },
+  {
+    "DepictionGuid": "FB49B636-21B4-530C-A12A-C0C6E4B4B45E",
+    "ItemGuid": null,
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Label"
+  },
+  {
+    "DepictionGuid": "BB852BD8-7EBB-5C63-82B0-B4B4EA7AA3E3",
+    "ItemGuid": "6AEC7954-1C00-57A4-842D-731DBDF4ACB9",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Mark"
+  },
+  {
+    "DepictionGuid": "443DF000-1742-5F9D-BA73-2DB850CAE162",
+    "ItemGuid": "C93AA427-C976-508C-AF7B-5D7BC9CB63FA",
+    "SheetGuid": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+    "DepictionKind": "Line"
+  }
+]
