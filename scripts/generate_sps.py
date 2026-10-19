@@ -38,6 +38,9 @@ ANSWER_KEY = ROOT / "fixtures" / "answer-keys" / "sps-wsp.json"
 # When the source recorded each revision (DEC-045). LIONG-006 gives W-SP no time;
 # DEC-083 places W0 at 08:00 on 2030-02-01, after R0's revisions.
 RECORDED_AT = {"W0": "2030-02-01T08:00:00"}
+# Who approved each revision, in the revision's approved-by field (DEC-039, DEC-083).
+# W-SP names no approver; this fictional one is the synthetic source approval.
+APPROVER = "DEMO-APPROVER"
 # Runs drawn against their flow, so end 2 is upstream (DEC-083). The rest are drawn
 # with it. Drawing one each way makes extraction read the run's flow sense.
 DRAWN_AGAINST_FLOW = {"B"}
@@ -74,7 +77,6 @@ class Snapshot:
         self.world, self.revision = world, revision
         self.current: State = state(world, revision)
         self.rows: dict[str, list[dict]] = {table: [] for table in TABLES}
-        self.marks: dict[str, str] = {}       # item GUID -> its mark depiction GUID
         self.nozzles: dict[str, int] = {}     # vessel alias -> nozzles placed on it so far
 
     def g(self, *parts: object) -> str:
@@ -99,21 +101,22 @@ class Snapshot:
         return depiction_guid
 
     def mark(self, item_guid: str, sheet_guid: str) -> str:
-        self.marks[item_guid] = self.depiction(self.g("mark", item_guid), item_guid, sheet_guid, "Mark")
-        return self.marks[item_guid]
+        return self.depiction(self.g("mark", item_guid), item_guid, sheet_guid, "Mark")
 
     def line(self, depiction_guid: str, item_guid: str, sheet_guid: str, upstream: str | None,
              downstream: str | None, against_flow: bool) -> None:
         self.depiction(depiction_guid, item_guid, sheet_guid, "Line")
+        # Each end names the design item attached there (DEC-081 pattern 2, DEC-082)
         ends = (downstream, upstream) if against_flow else (upstream, downstream)
-        self.rows["LineDepiction"].append({"DepictionGuid": depiction_guid, "End1Mark": ends[0], "End2Mark": ends[1]})
+        self.rows["LineDepiction"].append({"DepictionGuid": depiction_guid, "End1Item": ends[0], "End2Item": ends[1]})
 
     def nozzle(self, vessel: str, purpose: str) -> str:
-        """A nozzle on `vessel` for one pipe end or one instrument; returns its mark (DEC-081 pattern 7)."""
+        """A nozzle on `vessel` for one pipe end or one instrument; returns its item GUID (DEC-081 pattern 7)."""
         self.nozzles[vessel] = self.nozzles.get(vessel, 0) + 1
         item_guid = self.g("nozzle", vessel, purpose)
         self.item(item_guid, "Nozzle", {"ItemTag": f"N{self.nozzles[vessel]}", "ParentItem": self.g("item", vessel)})
-        return self.mark(item_guid, self.sheet(vessel))
+        self.mark(item_guid, self.sheet(vessel))
+        return item_guid
 
 
 def runs(current: State) -> dict[str, list[str]]:
@@ -155,7 +158,8 @@ def snapshot(world: dict, revision: str) -> dict[str, list[dict]]:
             s.rows["Sheet"].append({"SheetGuid": sheet, "SheetNo": node["name"]})
             s.rows["SheetRevision"].append({
                 "RevisionGuid": g("revision", alias, revision), "SheetGuid": sheet, "MajorRev": revision,
-                "MinorRev": "0", "RevisedOn": RECORDED_AT[revision], "ApprovalState": "Approved"})
+                "MinorRev": "0", "RevisedOn": RECORDED_AT[revision],
+                "Approver": APPROVER, "ApprovedOn": RECORDED_AT[revision]})
 
     # Items with a mark: vessels, fittings, instruments and sheet links.
     for alias, node in current.nodes.items():
@@ -205,7 +209,7 @@ def snapshot(world: dict, revision: str) -> dict[str, list[dict]]:
                 if s.node(other)["class"] == "equipment":
                     ends.append(s.nozzle(other, segment))
                 elif s.node(other)["class"] in ("valve", "connection_point"):
-                    ends.append(s.marks[g("item", other)])
+                    ends.append(g("item", other))
                 else:
                     raise GenerationError(f"segment {segment} meets {other} directly; this backend joins runs at items")
             line = g("line", segment)
@@ -229,15 +233,15 @@ def snapshot(world: dict, revision: str) -> dict[str, list[dict]]:
                                               "RunGuid": g("run", joined.pop())})
 
     # An instrument on a vessel: a nozzle on the vessel and a process connection drawn
-    # from the instrument's mark to the nozzle's mark (DEC-081 pattern 7).
+    # from the instrument to the nozzle (DEC-081 pattern 7).
     for instrument, vessel in sorted(parents):
         if s.node(vessel)["class"] != "equipment":
             raise GenerationError(f"{instrument}'s parent {vessel} is not a vessel")
-        nozzle_mark = s.nozzle(vessel, instrument)
+        nozzle = s.nozzle(vessel, instrument)
         connection = g("process", instrument)
         s.item(connection, "ProcessConnection", {"Description": f"process connection for {s.node(instrument)['tag']}"})
         s.line(g("line", "process", instrument), connection, s.sheet(instrument),
-               s.marks[g("item", instrument)], nozzle_mark, against_flow=False)
+               g("item", instrument), nozzle, against_flow=False)
     return s.rows
 
 

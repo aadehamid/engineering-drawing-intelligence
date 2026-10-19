@@ -120,14 +120,14 @@ class SnapshotRowsTest(unittest.TestCase):
         for line in ROWS["LineDepiction"]:
             d = depiction[line["DepictionGuid"]]
             found[NAME[line["DepictionGuid"]]] = (NAME[d["ItemGuid"]], NAME[d["SheetGuid"]],
-                                                  NAME.get(line["End1Mark"]), NAME.get(line["End2Mark"]))
+                                                  NAME.get(line["End1Item"]), NAME.get(line["End2Item"]))
         self.assertEqual(found, {
-            "L-301-1": (RUN_A, "DEMO-PID-101", "mark TK-301/N1", "mark HV-301"),
-            "L-301-2": (RUN_A, "DEMO-PID-101", "mark HV-301", "mark HV-302"),
-            "L-301-3": (RUN_A, "DEMO-PID-101", "mark HV-302", "mark TO-S2/B"),
-            "L-301-4": (RUN_B, "DEMO-PID-102", "mark HV-303", "mark FROM-S1/B"),
-            "L-301-5": (RUN_B, "DEMO-PID-102", "mark TK-302/N1", "mark HV-303"),
-            "line process connection": ("process connection", "DEMO-PID-102", "mark LT-302", "mark TK-302/N2"),
+            "L-301-1": (RUN_A, "DEMO-PID-101", "TK-301/N1", "HV-301"),
+            "L-301-2": (RUN_A, "DEMO-PID-101", "HV-301", "HV-302"),
+            "L-301-3": (RUN_A, "DEMO-PID-101", "HV-302", "TO-S2/B"),
+            "L-301-4": (RUN_B, "DEMO-PID-102", "HV-303", "FROM-S1/B"),
+            "L-301-5": (RUN_B, "DEMO-PID-102", "TK-302/N1", "HV-303"),
+            "line process connection": ("process connection", "DEMO-PID-102", "LT-302", "TK-302/N2"),
         })
 
     def test_marks_and_labels_sit_on_their_sheets(self):
@@ -167,10 +167,11 @@ class SnapshotRowsTest(unittest.TestCase):
 
     def test_sheets_and_revisions(self):
         self.assertEqual(sorted(r["SheetNo"] for r in ROWS["Sheet"]), ["DEMO-PID-101", "DEMO-PID-102"])
-        revisions = [(NAME[r["SheetGuid"]], r["MajorRev"], r["MinorRev"], r["RevisedOn"], r["ApprovalState"])
+        revisions = [(NAME[r["SheetGuid"]], r["MajorRev"], r["MinorRev"], r["RevisedOn"], r["Approver"], r["ApprovedOn"])
                      for r in ROWS["SheetRevision"]]
-        self.assertEqual(revisions, [("DEMO-PID-101", "W0", "0", "2030-02-01T08:00:00", "Approved"),
-                                     ("DEMO-PID-102", "W0", "0", "2030-02-01T08:00:00", "Approved")])
+        # DEC-039: the approval is the revision's approver and approval date (DEC-083)
+        self.assertEqual(revisions, [("DEMO-PID-101", "W0", "0", "2030-02-01T08:00:00", "DEMO-APPROVER", "2030-02-01T08:00:00"),
+                                     ("DEMO-PID-102", "W0", "0", "2030-02-01T08:00:00", "DEMO-APPROVER", "2030-02-01T08:00:00")])
 
     def test_every_row_has_exactly_its_schema_columns(self):
         ddl = gen.SCHEMA.read_text(encoding="utf-8")

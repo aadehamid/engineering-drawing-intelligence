@@ -5,7 +5,8 @@
     "MajorRev": "W0",
     "MinorRev": "0",
     "RevisedOn": "2030-02-01T08:00:00",
-    "ApprovalState": "Approved"
+    "Approver": "DEMO-APPROVER",
+    "ApprovedOn": "2030-02-01T08:00:00"
   },
   {
     "RevisionGuid": "C439A67C-57AB-514C-A6D6-E984AB5C9ED9",
@@ -13,6 +14,7 @@
     "MajorRev": "W0",
     "MinorRev": "0",
     "RevisedOn": "2030-02-01T08:00:00",
-    "ApprovalState": "Approved"
+    "Approver": "DEMO-APPROVER",
+    "ApprovedOn": "2030-02-01T08:00:00"
   }
 ]

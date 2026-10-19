@@ -29,8 +29,8 @@ owner can reverse any of them.
    its sheet's GUID.
 3. **Runs.** The segments that share a `run` attribute form one pipe run. The run's
    tag parts come from the segments' tags and line number, which must agree, and so
-   must their sizes. Each segment becomes one line depiction whose ends are the marks
-   of the items the world's flow edges join it to. Each line carries a label
+   must their sizes. Each segment becomes one line depiction whose ends name the
+   design items the world's flow edges join it to. Each line carries a label
    depiction with the segment's tag. Each distinct line key gets one line group row
    holding the line prefix and number, `L` and `301` for W-SP, and no run points to
    it.
@@ -39,15 +39,15 @@ owner can reverse any of them.
    the flow sense to get the direction right.
 5. **Nozzles and the process connection.** Each pipe end at a vessel gets its own
    nozzle on that vessel. An instrument with a parent vessel gets one more nozzle on
-   the vessel and a process connection drawn from the instrument's mark to that
-   nozzle's mark. Nozzle tags count up per vessel: N1 and N2 on TK-302.
+   the vessel and a process connection drawn from the instrument to that nozzle. Nozzle tags count up per vessel: N1 and N2 on TK-302.
 6. **Fittings and sheet links.** A fitting's inline placement names the run whose
    segments it joins, and the generator refuses a fitting between two runs. Each
    sheet link stores its mate and its mate's sheet. The world's flow between the two
    connectors is not stored, and the generator refuses a cross-sheet pair without
    that flow.
 7. **Revision rows.** Each sheet has one revision row for W0: major `W0`, minor `0`,
-   state `Approved`.
+   approved by `DEMO-APPROVER` on W0's recorded time. W-SP names no approver, so the
+   generator writes a fictional one as the synthetic source approval (DEC-039).
 8. **W0's time.** LIONG-006 gives W-SP no time. W0 is recorded at 08:00 on
    2030-02-01, after R0's revisions.
 9. **The Plant 3D generator's check.** `generate_p3d.py --check` now counts only
