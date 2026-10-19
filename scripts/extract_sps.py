@@ -109,7 +109,15 @@ class Rows:
         self.by_class = {table: {r["ItemGuid"]: r for r in rows[table]} for table in loader.COLUMNS
                          if loader.COLUMNS[table][0] == "ItemGuid" and table != "DesignItem"}
         self.depictions = {r["DepictionGuid"]: r for r in rows["Depiction"]}
-        self.labels = {r["LabelledDepiction"]: r for r in rows["LabelDepiction"]}
+        # Neither a depiction's labels nor an item's marks are unique in the schema, so
+        # both keep every row, sorted, and no lookup depends on row order
+        self.labels: dict[str, list[dict]] = {}
+        for label in sorted(rows["LabelDepiction"], key=lambda x: x["DepictionGuid"]):
+            self.labels.setdefault(label["LabelledDepiction"], []).append(label)
+        self.mark_sheets: dict[str, set[str]] = {}
+        for depiction in rows["Depiction"]:
+            if depiction["DepictionKind"] == "Mark" and depiction["ItemGuid"] is not None:
+                self.mark_sheets.setdefault(depiction["ItemGuid"], set()).add(depiction["SheetGuid"])
 
     def active(self, guid: str, table: str) -> bool:
         item = self.items.get(guid)
@@ -197,11 +205,13 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
         subject, locator = line_id(guid), {"table": "LineDepiction", "DepictionGuid": guid}
         objects.append({"object_id": subject, "object_kind": "pipe_segment", "source_object_key": guid,
                         "source_locator": locator})
-        label = r.labels.get(guid)
-        if label is not None:
-            tags.append({"object_id": subject, "namespace": SOURCE_ID, "tag_value": label["LabelText"],
+        labels = r.labels.get(guid, [])
+        if len({label["LabelText"] for label in labels}) > 1:
+            raise ExtractionError(f"line {guid} carries labels with different texts")
+        if labels:
+            tags.append({"object_id": subject, "namespace": SOURCE_ID, "tag_value": labels[0]["LabelText"],
                          "revision_id": revision_id,
-                         "source_locator": {"table": "LabelDepiction", "DepictionGuid": label["DepictionGuid"]}})
+                         "source_locator": {"table": "LabelDepiction", "DepictionGuid": labels[0]["DepictionGuid"]}})
         run_locator = {"table": "PipeRun", "ItemGuid": run["ItemGuid"]}
         for column, predicate in RUN_ATTRIBUTES:
             if run[column] is not None:
@@ -236,14 +246,14 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
               "derived", f"ProcessConnection/{connection['ItemGuid']}/owned_by")
 
     # Continuation: each side of a sheet-link pair names the other and the other's sheet.
-    sheet_of = {d["ItemGuid"]: d["SheetGuid"] for d in rows["Depiction"] if d["DepictionKind"] == "Mark"}
     links = {g: row for g, row in r.by_class["SheetLink"].items() if r.active(g, "SheetLink")}
     for guid, link in links.items():
         if link["LinkSense"] != "To" or link["MateItem"] is None:
             continue
         mate = links.get(link["MateItem"])
         if (mate is None or mate["LinkSense"] != "From" or mate["MateItem"] != guid
-                or link["MateSheet"] != sheet_of.get(mate["ItemGuid"]) or mate["MateSheet"] != sheet_of.get(guid)):
+                or link["MateSheet"] not in r.mark_sheets.get(mate["ItemGuid"], set())
+                or mate["MateSheet"] not in r.mark_sheets.get(guid, set())):
             raise ExtractionError(f"sheet links {guid} and {link['MateItem']} do not name each other "
                                   "and each other's sheets")
         state(item_id(guid), "continues_to", item_id(mate["ItemGuid"]),

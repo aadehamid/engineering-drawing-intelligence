@@ -49,7 +49,11 @@ owner can reverse any of it.
    object, so the graph is the world file's.
 6. **Contradictions stop extraction.** A sheet-link pair whose sides do not name each
    other and each other's sheets, a process connection that does not join one
-   instrument to one nozzle, or an unknown flow sense raises an error. A line end
+   instrument to one nozzle, a line whose labels have different texts, or an unknown
+   flow sense raises an error. Labels and marks are not unique in the schema, so
+   extraction reads all of them: a side's sheet matches when any of its mate's marks
+   is on it, and a repeated label with the same text is one tag. The result never
+   depends on row order. A line end
    that reaches a missing or deleted item is kept as stated, for validation to
    reject, as DEC-075 does. A deleted nozzle counts as such an item: it is not
    collapsed into its vessel, so a segment end or an instrument parent through it

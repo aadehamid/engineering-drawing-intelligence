@@ -159,10 +159,11 @@ class SnapshotExtractionTest(unittest.TestCase):
         self.assertEqual(sorted((d["name"], d["revision"], d["status"]) for d in self.records["drawings"]),
                          [("DEMO-PID-101", "W0.0", "Approved"), ("DEMO-PID-102", "W0.0", "Approved")])
         names = by_tag(self.records)
-        sheets = {names[a["object_id"]]: names[a["artifact_id"]] for a in self.records["appearances"]}
+        # A list, not a dict, so a second appearance of one object would show
+        sheets = sorted((names[a["object_id"]], names[a["artifact_id"]]) for a in self.records["appearances"])
         on_101 = {"TK-301", "HV-301", "HV-302", "TO-S2/B", "L-301-1", "L-301-2", "L-301-3"}
-        self.assertEqual(sheets, {n: "DEMO-PID-101" if n in on_101 else "DEMO-PID-102"
-                                  for n in on_101 | {"TK-302", "HV-303", "LT-302", "FROM-S1/B", "L-301-4", "L-301-5"}})
+        self.assertEqual(sheets, sorted((n, "DEMO-PID-101" if n in on_101 else "DEMO-PID-102")
+                                        for n in on_101 | {"TK-302", "HV-303", "LT-302", "FROM-S1/B", "L-301-4", "L-301-5"}))
 
     def test_evidence_status_and_locators(self):
         derived = {a["predicate"] for a in self.records["assertions"] if a["evidence_status"] == "derived"}
@@ -210,6 +211,45 @@ class SnapshotExtractionTest(unittest.TestCase):
 
 class DerivationTest(unittest.TestCase):
     """Edit the rows and check each derivation follows them."""
+
+    def in_both_orders(self, rows: dict) -> list:
+        """Extract the rows as given and with every table reversed: the result or the error, each time."""
+        found = []
+        for ordered in (rows, {table: list(reversed(table_rows)) for table, table_rows in rows.items()}):
+            try:
+                found.append(from_snapshot(copy.deepcopy(ordered)))
+            except extract.ExtractionError as error:
+                found.append(type(error).__name__)
+        return found
+
+    def test_two_different_labels_on_one_line_stop_extraction_in_any_order(self):
+        # The schema lets a line carry several labels; two texts for one segment's tag
+        # are a contradiction, whichever row comes first
+        rows = snapshot_rows()
+        first = rows["LabelDepiction"][0]
+        rows["LabelDepiction"].append(first | {"DepictionGuid": str(uuid.uuid4()).upper(), "LabelText": "L-999-9"})
+        self.assertEqual(self.in_both_orders(rows), ["ExtractionError", "ExtractionError"])
+
+    def test_a_repeated_label_with_the_same_text_is_one_tag(self):
+        rows = snapshot_rows()
+        first = rows["LabelDepiction"][0]
+        rows["LabelDepiction"].append(first | {"DepictionGuid": str(uuid.uuid4()).upper()})
+        results = self.in_both_orders(rows)
+        self.assertEqual(results[0], results[1])
+        self.assertEqual(sorted(t["tag_value"] for t in results[0]["tag_assignments"] if t["tag_value"].startswith("L-")),
+                         [f"L-301-{n}" for n in range(1, 6)])
+
+    def test_a_sheet_link_marked_on_two_sheets_extracts_the_same_in_any_order(self):
+        # A second mark of FROM-S1/B on the first sheet: the pair's sheet check must not
+        # depend on which mark row is read last
+        rows = snapshot_rows()
+        to_side = next(r for r in rows["SheetLink"] if r["LinkSense"] == "To")
+        from_side = to_side["MateItem"]
+        first_sheet = next(d["SheetGuid"] for d in rows["Depiction"] if d["ItemGuid"] == to_side["ItemGuid"])
+        rows["Depiction"].append({"DepictionGuid": str(uuid.uuid4()).upper(), "ItemGuid": from_side,
+                                  "SheetGuid": first_sheet, "DepictionKind": "Mark"})
+        results = self.in_both_orders(rows)
+        self.assertEqual(results[0], results[1])
 
     def test_the_flow_sense_sets_the_direction(self):
         rows = snapshot_rows()
