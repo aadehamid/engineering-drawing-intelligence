@@ -250,6 +250,34 @@ class DatabaseSliceTest(unittest.TestCase):
             *run_slice.extract_sps.rows_from_snapshot(ROOT / "fixtures" / "sps-wsp" / "W0"),
             f"sqlserver:{self.database}/sps", AT))
 
+    def assert_rows_come_from_the_database(self, backend: str, loader, snapshot: Path, update: str, label: str) -> None:
+        # A value changed only in SQL Server after the load must reach the source records,
+        # so a runner that connects but reads the snapshot instead fails here.
+        with loader.connect(self.setting) as conn:
+            loader.create(conn)
+            loader.load(conn, snapshot)
+            conn.cursor().execute(update)
+            conn.commit()
+        saved = os.environ["LIONG_SQLSERVER"]
+        os.environ["LIONG_SQLSERVER"] = self.setting
+        self.addCleanup(os.environ.__setitem__, "LIONG_SQLSERVER", saved)
+        out = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, out)
+        run_slice.run(label, out, database=True, now=AT, backend=backend)
+        records = json.loads((out / "source-records.json").read_text())
+        values = {a.get("value_or_target") for a in records["assertions"] if a.get("predicate") == "description"}
+        self.assertIn("LIONG database-only probe", values)
+
+    def test_the_slice_takes_p3d_rows_from_the_database_not_the_snapshot(self):
+        self.assert_rows_come_from_the_database(
+            "p3d", run_slice.extract_p3d.loader, run_slice.SNAPSHOTS / "R0",
+            "UPDATE p3d.Equipment SET Description = N'LIONG database-only probe'", "R0")
+
+    def test_the_slice_takes_sps_rows_from_the_database_not_the_snapshot(self):
+        self.assert_rows_come_from_the_database(
+            "sps", run_slice.extract_sps.loader, ROOT / "fixtures" / "sps-wsp" / "W0",
+            "UPDATE sps.Vessel SET Description = N'LIONG database-only probe'", "W0")
+
 
 if __name__ == "__main__":
     unittest.main()
