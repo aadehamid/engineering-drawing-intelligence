@@ -11,7 +11,7 @@ positive and negative round-trip fixtures. The slice's part of GATE-003 closes w
 pull request lands the dependency lock and the compatibility tests. The rest of
 GATE-003 stays open.
 
-That evidence reached `main` in pull requests #34 to #39, for the slice's supported
+That evidence reached `main` in pull requests #35 to #39, for the slice's supported
 subset, and [the decision register](../LIONG-REG-001-decisions.md) lists where each
 piece lives. Those pull requests left both gates open, so that a separate pull request
 could close them. The night run's summary of 2026-10-14 asked the owner whether to
