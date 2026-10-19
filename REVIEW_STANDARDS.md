@@ -46,5 +46,5 @@ content.
 Taught by: the Cursor review of #50 found LIONG-010 and LIONG-011 joining a snapshot
 run published to Neo4j and a SQL Server run into one (fixed in `0b5ad9c` and
 `385b0ae`). The Cursor review of #43 found register rows citing section pages and
-claims read from neighbouring topics (fixed in `88deb31`). The Cursor review of #46
+claims read from neighbouring topics (fixed in `1dfbd99`). The Cursor review of #46
 found DEC-083 naming the wrong end item for a vessel (fixed in `40c760c`).
