@@ -84,5 +84,6 @@ not deployed services.
 
 No business scope expansion is required to draft the package. Exact public-data
 accuracy targets, runtime performance, dataset permissions, DEXPI tooling, and
-deployment selections remain implementation gates. They cannot be closed by
-approving this requirement catalog alone.
+deployment selections are implementation gates;
+[the decision register](LIONG-REG-001-decisions.md#open-questions-and-package-level-gates)
+holds each one's state. None can be closed by approving this requirement catalog alone.
