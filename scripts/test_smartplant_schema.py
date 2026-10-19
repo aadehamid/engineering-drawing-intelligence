@@ -22,6 +22,7 @@ EXPECTED_TABLES = {
     "DesignItem", *CLASS_TABLES,                       # pattern 1, with patterns 2, 5, 6 and 7's classes
     "Depiction", "LineDepiction", "LabelDepiction",    # patterns 1 and 2
     "InlinePlacement", "PortPoint",                    # pattern 3
+    "LineGroup",                                       # pattern 4
     "Sheet", "SheetRevision",                          # sheets and their revision rows
     "ItemType", "ItemProperty", "SelectEntry",         # the data dictionary (DEC-032)
 }
@@ -97,11 +98,15 @@ class StaticSchemaTests(unittest.TestCase):
         self.assertNotIn("RunGuid", cols["PipingFitting"])
         self.assertIn("CONSTRAINT UQ_PortPoint_Owner UNIQUE (OwnerItem, PointNo)", self.text)
 
-    def test_no_table_records_a_pipeline(self):
-        # Pattern 4: runs carry the line-number parts and no row groups them
-        for name, cols in tables(self.text).items():
-            self.assertNotIn("pipeline", name.lower())
-            self.assertFalse([c for c in cols if "pipeline" in c.lower()], name)
+    def test_the_line_group_holds_only_key_values_and_nothing_points_to_it(self):
+        # Pattern 4: runs carry the line-number parts; membership is found by matching them
+        cols = tables(self.text)
+        self.assertEqual(cols["LineGroup"], ["GroupGuid", "TagLead", "TagNumber"])
+        for part in ("TagLead", "TagNumber"):
+            self.assertIn(part, cols["PipeRun"])
+        for name, columns in cols.items():
+            if name != "LineGroup":
+                self.assertFalse([c for c in columns if "group" in c.lower() or "pipeline" in c.lower()], name)
 
     def test_sheet_links_store_their_mate_on_both_sides(self):
         self.assertEqual(tables(self.text)["SheetLink"], ["ItemGuid", "LinkLabel", "LinkSense", "MateItem", "MateSheet"])

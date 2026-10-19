@@ -52,8 +52,7 @@ CREATE UNIQUE INDEX UX_Instrument_ItemTag ON sps.Instrument (ItemTag) WHERE Item
 
 -- Pattern 2 and pattern 4: a pipe run is one design item. Its tag parts are the
 -- line-number parts, and its composed tag may repeat: runs that share them form one
--- pipeline, and no row records that pipeline (REF-TECH-019, REF-TECH-022,
--- REF-TECH-028). FlowSense says which end of each of the run's line depictions is
+-- pipeline (REF-TECH-019, REF-TECH-022, REF-TECH-028). FlowSense says which end of each of the run's line depictions is
 -- upstream (REF-TECH-019).
 CREATE TABLE sps.PipeRun (
     ItemGuid      UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
@@ -63,6 +62,17 @@ CREATE TABLE sps.PipeRun (
     TagTail       NVARCHAR(8)      NULL,
     NominalSizeMm INT              NULL,
     FlowSense     NVARCHAR(16)     NOT NULL  -- select list FlowSense: 'End1Upstream' or 'End2Upstream'
+);
+
+-- Pattern 4: a line group is the pipeline's row. It holds only the line key values;
+-- no run stores a key to it. A run belongs to the group whose key values its own line
+-- parts match, and a run with a NULL key part belongs to none (REF-TECH-022: the
+-- application adds a pipeline entry as runs are drawn, and the relationship between
+-- pipeline and run is implicit).
+CREATE TABLE sps.LineGroup (
+    GroupGuid UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    TagLead   NVARCHAR(16)     NOT NULL,
+    TagNumber NVARCHAR(16)     NOT NULL
 );
 
 -- A piping fitting, such as a hand valve. Its tag is one plain column: piping

@@ -8,7 +8,8 @@ Date: 2026-10-19
 [DEC-081](DEC-081-smartplant-style-patterns.md) set the seven patterns the
 SmartPlant-style schema borrows. Writing the schema left choices that DEC-081 does not
 make: how the file is built and tested, the class tables and their columns, where W-SP's
-segment tags live, the scope of the revision-number rule, and the data dictionary that
+segment tags live, the scope of the revision-number rule, the pipeline row's columns, and
+the data dictionary that
 [DEC-032](DEC-032-minimal-data-dictionary.md) asks each backend to carry. The agent
 made them during the MILESTONE-001b night run, under the owner's delegation in
 [DEC-080](DEC-080-milestone-001b-night-delegation.md). The owner can reverse any of
@@ -43,7 +44,13 @@ them.
    unique together for one sheet, not across the plant. REF-TECH-026 says "unique in
    the plant", but a plant-wide rule would stop W-SP's two sheets from both holding
    revision W0.
-7. **Data dictionary.** `ItemType`, `ItemProperty` and `SelectEntry` describe the
+7. **The line group.** `LineGroup` is the pipeline's row. It holds only the line key
+   values W-SP uses, the line prefix and number, and no run stores a key to it.
+   REF-TECH-022 says the application adds a pipeline entry as runs are drawn and that
+   the relationship between pipeline and run is implicit. Which runs belong is found
+   by matching their line parts to the group's values. It is not a design item, since
+   no source found gives it a class table of its own.
+8. **Data dictionary.** `ItemType`, `ItemProperty` and `SelectEntry` describe the
    item types W-SP uses, their columns and tag parts, and the select lists for item
    state, flow sense, link sense and depiction kind. The coded columns hold the
    select-list values as text.
@@ -54,6 +61,8 @@ them.
   keeps label text on separate label representations.
 - Leave segment tags out. The extracted graph could then not carry the tags W-SP's
   world file gives the segments.
+- No pipeline row at all, so that the pipeline is wholly implied. The pages behind
+  REF-TECH-022 say a pipeline entry is added as runs are drawn.
 - Make revision numbers unique across the plant, as REF-TECH-026's wording reads. W-SP
   would then need a different revision number on each sheet, and W-SP has one revision.
 
