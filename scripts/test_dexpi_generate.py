@@ -5,6 +5,11 @@ The records come from the R0 snapshot through extract_p3d.py. The expected class
 ends and values are typed by hand from LIONG-006's R0 and DEC-077's mapping: TK-101 feeds
 L-101-1 to the first junction, the bypass valve XV-102 bolts straight onto the second
 junction, and L-101-4 leaves sheet 1 through the off-page connector TO-S2/A.
+
+The W-SP records come from its W0 snapshot through extract_sps.py. Their expected values
+are typed by hand from worlds/W-SP.yaml, the GUIDs in fixtures/sps-wsp/W0 and DEC-086:
+TK-301 feeds run A through HV-301 and HV-302 to TO-S2/B on DEMO-PID-101, and run B
+carries FROM-S1/B through HV-303 to TK-302, whose level LT-302 measures.
 """
 from __future__ import annotations
 
@@ -20,12 +25,18 @@ from lxml import etree
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dexpi_generate as gen  # noqa: E402
 import extract_p3d as extract  # noqa: E402
+import extract_sps  # noqa: E402
 
 SNAPSHOTS = Path(__file__).resolve().parent.parent / "fixtures" / "p3d-r0"
+WSP = Path(__file__).resolve().parent.parent / "fixtures" / "sps-wsp" / "W0"
 AT = "2026-10-14T00:00:00+00:00"
 
 
 def records(revision: str) -> dict:
+    """The records of an R0 revision, or of W-SP's W0."""
+    if revision == "W0":
+        stated, rows = extract_sps.rows_from_snapshot(WSP)
+        return extract_sps.extract(stated, rows, "snapshot:fixtures/sps-wsp/W0", AT)
     stated, rows = extract.rows_from_snapshot(SNAPSHOTS / revision)
     return extract.extract(stated, rows, f"snapshot:fixtures/p3d-r0/{revision}", AT)
 
@@ -222,6 +233,164 @@ class UnsupportedTest(unittest.TestCase):
         with self.assertRaisesRegex(gen.Unsupported, "^p3d:object:105 owned_by p3d:object:102 crosses drawings$"):
             gen.generate(changed)
 
+
+
+# W-SP's GUIDs, from fixtures/sps-wsp/W0, by tag.
+GUID = {
+    "TK-301": "4E781C49-8383-541C-A3BB-A881AA4E3A40", "TK-302": "3BDC3007-A1CA-5FD4-9A4B-C12B14E4605A",
+    "HV-301": "E5531D47-5180-598A-B6F8-63EF2DC29531", "HV-302": "AA396C4B-92E2-57AC-9B8F-AF12BD9C4EBD",
+    "HV-303": "C41295BE-6C23-50BE-925A-3506CFBE5051", "LT-302": "89DF1AA8-BF4A-5B88-A93E-87705C43B9C4",
+    "TO-S2/B": "18B2755C-0314-5534-B40B-B27928211F1E", "FROM-S1/B": "967CF11A-9D5D-5468-A3B2-14A3FB0EC305",
+    "L-301-1": "A80BEDD0-89BE-54F9-831D-DA6574D126FC", "L-301-2": "D410EBE1-247A-5511-A67B-CB063802D015",
+    "L-301-3": "87F2AF9E-A408-5639-99A4-1D34ED0936B3", "L-301-4": "E29B63F7-B8D4-5B2A-9AFB-624797FDFA54",
+    "L-301-5": "4F28FEA3-45E7-574F-B0BE-294867898C20",
+    "DEMO-PID-101": "440AD0B4-53C2-5AE6-BBDC-A935FBB33D38", "DEMO-PID-102": "DBA9DC82-994D-55A7-8A9C-777B288D8A1A",
+}
+TABLE_OF = {"TK": "Vessel", "HV": "PipingFitting", "LT": "Instrument", "TO": "SheetLink", "FR": "SheetLink",
+            "L-": "LineDepiction"}
+
+
+def xml_id(tag: str) -> str:
+    """The file-local id DEC-086 gives a W-SP object: its sps table and GUID, hyphens made underscores."""
+    return f"{TABLE_OF[tag[:2]]}_{GUID[tag].replace('-', '_')}"
+
+
+class WspTest(unittest.TestCase):
+    """W-SP's W0 through the SmartPlant-style extraction, with the classes R0 lacks (DEC-086)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = gen.generate(records("W0"))
+        cls.s1, cls.s2 = objects(cls.files["DEMO-PID-101.xml"]), objects(cls.files["DEMO-PID-102.xml"])
+
+    def sheet(self, tag: str) -> dict:
+        return self.s1 if tag in ("TK-301", "HV-301", "HV-302", "TO-S2/B", "L-301-1", "L-301-2", "L-301-3") else self.s2
+
+    def test_one_file_per_drawing_and_a_sidecar(self):
+        self.assertEqual(set(self.files), {"DEMO-PID-101.xml", "DEMO-PID-102.xml", "sidecar.json"})
+
+    def test_each_object_has_its_class_and_its_sps_identifier(self):
+        classes = {"TK": "Plant/ProcessEquipment.Tank", "HV": "Plant/Piping.OperatedValve",
+                   "LT": "Plant/Instrumentation.ProcessInstrumentationFunction",
+                   "TO": "Plant/Piping.FlowOutPipeOffPageConnector", "FR": "Plant/Piping.FlowInPipeOffPageConnector",
+                   "L-": "Plant/Piping.PipingNetworkSegment"}
+        for tag in GUID:
+            if tag.startswith("DEMO"):
+                continue
+            o = self.sheet(tag)[xml_id(tag)]
+            pid = o.find("Components[@property='PersistentIdentifiers']/Object")
+            context = "sps/LineDepiction.DepictionGuid" if tag.startswith("L-") else "sps/DesignItem.ItemGuid"
+            with self.subTest(tag=tag):
+                self.assertEqual(o.get("type"), classes[tag[:2]])
+                self.assertEqual((text(pid, "Context"), text(pid, "Value")), (context, GUID[tag]))
+
+    def test_hand_valves_carry_their_tags(self):
+        for tag in ("HV-301", "HV-302", "HV-303"):
+            valve = self.sheet(tag)[xml_id(tag)]
+            with self.subTest(tag=tag):
+                self.assertEqual(text(valve, "PipingComponentNumber"), tag)
+                self.assertIsNone(valve.find("Components[@property='ActuatingSystem']"))
+
+    def test_the_level_transmitter_is_category_l_function_t(self):
+        lt = self.s2[xml_id("LT-302")]
+        self.assertEqual([text(lt, p) for p in ("ProcessInstrumentationFunctionCategory", "ProcessInstrumentationFunctions",
+                                                "ProcessInstrumentationFunctionNumber")], ["L", "T", "302"])
+        sensing = self.s2[f"{xml_id('LT-302')}_Sensing"]
+        self.assertEqual(ref(sensing, "SensingLocation"), f"#{xml_id('TK-302')}_Nozzle_{xml_id('LT-302')}")
+
+    def test_both_runs_of_line_301_sit_in_its_system_on_each_drawing(self):
+        for sheet, tags in ((self.s1, ["L-301-1", "L-301-2", "L-301-3"]), (self.s2, ["L-301-4", "L-301-5"])):
+            system = sheet["PipingNetworkSystem_L_301"]
+            members = [o.get("id") for o in system.findall("Components[@property='Segments']/Object")]
+            with self.subTest(tags=tags):
+                self.assertEqual(text(system, "LineNumber"), "301")
+                self.assertEqual(sorted(members), sorted(xml_id(t) for t in tags))
+            systems = [x for x in sheet if x.startswith("PipingNetworkSystem")]
+            self.assertEqual(systems, ["PipingNetworkSystem_L_301"])
+
+    def test_segments_run_with_the_flow(self):
+        ends = {"L-301-1": ("TK-301", "HV-301"), "L-301-2": ("HV-301", "HV-302"), "L-301-3": ("HV-302", "TO-S2/B"),
+                "L-301-4": ("FROM-S1/B", "HV-303"), "L-301-5": ("HV-303", "TK-302")}
+        for segment, (source, target) in ends.items():
+            o = self.sheet(segment)[xml_id(segment)]
+            expected = [f"#{xml_id(source)}" + (f"_Nozzle_{xml_id(segment)}" if source.startswith("TK") else ""),
+                        f"#{xml_id(target)}" + (f"_Nozzle_{xml_id(segment)}" if target.startswith("TK") else "")]
+            with self.subTest(segment=segment):
+                self.assertEqual([ref(o, "SourceItem"), ref(o, "TargetItem")], expected)
+                self.assertEqual(text(o, "SegmentNumber"), segment)
+                self.assertEqual(text(o, "NominalDiameterRepresentation"), "DN 80")
+
+    def test_the_sheet_links_refer_to_each_other_by_drawing_and_number(self):
+        for sheet, tag, drawing, number in ((self.s1, "TO-S2/B", "DEMO-PID-102", "FROM-S1/B"),
+                                            (self.s2, "FROM-S1/B", "DEMO-PID-101", "TO-S2/B")):
+            reference = sheet[f"{xml_id(tag)}_Reference"]
+            with self.subTest(tag=tag):
+                self.assertEqual(text(sheet[xml_id(tag)], "PipeConnectorNumber"), tag)
+                self.assertEqual((text(reference, "ReferencedDrawingNumber"), text(reference, "ReferencedConnectorNumber")),
+                                 (drawing, number))
+
+    def test_each_drawing_carries_its_sheet_guid(self):
+        for name, sheet in (("DEMO-PID-101", self.s1), ("DEMO-PID-102", self.s2)):
+            meta = sheet[f"Sheet_{GUID[name].replace('-', '_')}"]
+            pid = meta.find("Components[@property='PersistentIdentifiers']/Object")
+            with self.subTest(name=name):
+                self.assertEqual((text(pid, "Context"), text(pid, "Value")), ("sps/Sheet.SheetGuid", GUID[name]))
+                self.assertEqual([text(meta, p) for p in ("DrawingNumber", "RevisionNumber")], [name, "W0.0"])
+        root = etree.fromstring(self.files["DEMO-PID-101.xml"])
+        self.assertEqual(root.findtext("Object/Data[@property='ExportDateTime']/DateTime"), "2030-02-01T08:00:00")
+        self.assertEqual(root.findtext("Object/Data[@property='OriginatingSystemName']/String"), "LIONG sps-to-DEXPI mapper")
+
+    def test_the_sidecar_keeps_runs_pipeline_and_derived_status(self):
+        sidecar = json.loads(self.files["sidecar.json"])
+        segment = f"sps:line:{GUID['L-301-4']}"
+        self.assertEqual(sidecar["assertions"][f"{segment}/pipeline"]["value_or_target"], "L-301")
+        self.assertEqual(sidecar["assertions"][f"{segment}/pipeline"]["evidence_status"], "derived")
+        self.assertTrue(sidecar["assertions"][f"{segment}/run"]["value_or_target"].startswith("sps:item:"))
+        self.assertNotIn("value_or_target", sidecar["assertions"][f"sps:item:{GUID['LT-302']}/tag_lead"])
+        self.assertEqual(sidecar["assertions"][f"sps:item:{GUID['LT-302']}/unit"]["value_or_target"], "%")
+        self.assertEqual(sidecar["drawings"][f"sps:sheet:{GUID['DEMO-PID-102']}"]["status"], "Approved")
+
+    def test_output_does_not_depend_on_record_order(self):
+        shuffled = records("W0")
+        for key in ("objects", "tag_assignments", "assertions", "drawings", "appearances"):
+            shuffled[key].reverse()
+        self.assertEqual(gen.generate(shuffled), self.files)
+
+
+class WspUnsupportedTest(unittest.TestCase):
+    """What W-SP's new mapping refuses rather than writes wrongly."""
+
+    def test_a_valve_whose_tag_letters_are_outside_the_table_is_refused(self):
+        changed = records("W0")
+        next(t for t in changed["tag_assignments"] if t["tag_value"] == "HV-303")["tag_value"] = "QV-303"
+        with self.assertRaisesRegex(gen.Unsupported, f"^sps:item:{GUID['HV-303']} is a valve of tag type 'QV'"):
+            gen.generate(changed)
+
+    def test_an_instrument_whose_letters_are_outside_the_table_is_refused(self):
+        changed = records("W0")
+        next(a for a in changed["assertions"] if a["predicate"] == "tag_lead"
+             and a["subject_id"] == f"sps:item:{GUID['LT-302']}")["value_or_target"] = "LX"
+        with self.assertRaisesRegex(gen.Unsupported, f"^sps:item:{GUID['LT-302']} is an instrument of tag type 'LX'"):
+            gen.generate(changed)
+
+    def test_a_sheet_link_of_unknown_sense_is_refused(self):
+        changed = records("W0")
+        next(a for a in changed["assertions"] if a["predicate"] == "link_sense"
+             and a["value_or_target"] == "From")["value_or_target"] = "Both"
+        with self.assertRaisesRegex(gen.Unsupported, "does not pair an Out with an In connector$"):
+            gen.generate(changed)
+
+    def test_a_source_without_a_mapping_is_refused(self):
+        changed = records("W0")
+        changed["source_revision"]["source_id"] = "xyz"
+        with self.assertRaisesRegex(gen.Unsupported, "^source 'xyz' has no DEXPI mapping$"):
+            gen.generate(changed)
+
+    def test_an_object_whose_key_is_not_its_id_is_refused(self):
+        changed = records("W0")
+        changed["objects"][0]["source_object_key"] = "0"
+        with self.assertRaisesRegex(gen.Unsupported, "is not an object ID of source sps with its own key$"):
+            gen.generate(changed)
 
 
 class DuplicateRecordsTest(unittest.TestCase):

@@ -10,8 +10,12 @@ REPORT_FILE, if given, gets the unsupported report.
 
 The graph's nodes, kinds, tags, names and edges come from the DEXPI files. The
 sidecar adds only the evidence and the values DEXPI has no property for. A plant
-object is a node when it is one of the supported classes; it keeps the ID in its
-PersistentIdentifier, or, in a file LIONG did not write, gets "dexpi:<file>#<id>".
+object is a node when it is one of the supported classes; it gets back the ID its
+PersistentIdentifier's context and value name, such as p3d:object:101 or
+sps:item:<GUID>, or, in a file LIONG did not write, "dexpi:<file>#<id>". The context
+of a file's drawing identifier names its backend, and so the predicate names its
+attributes get (dexpi_generate.BACKENDS); a file LIONG did not write gets the p3d
+names.
 Everything else is counted in the unsupported report by class, and the parser never
 fails on it (DEC-066). An off-page connector whose partner cannot be found is reported
 as a gap, with no edge.
@@ -27,7 +31,6 @@ from lxml import etree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dexpi_generate as gen  # noqa: E402
-import extract_p3d as extract  # noqa: E402
 
 MODEL_URIS = {gen.CORE_URI: "Core", gen.PLANT_URI: "Plant"}
 NODE_KIND = {
@@ -51,6 +54,7 @@ STRUCTURE = {
 SUPPORTED_CLASSES = frozenset(NODE_KIND) | frozenset(STRUCTURE)
 NOZZLES = {"Plant/ProcessEquipment.ProcessNozzle", "Plant/ProcessEquipment.InstrumentNozzle"}
 LETTERS_TYPE = {letters: tag_type for tag_type, letters in gen.INSTRUMENT_LETTERS.items()}
+LIONG_IDS = tuple(prefix for prefix, _ in gen.CONTEXTS.values())  # the ID prefixes of nodes LIONG wrote
 SAFE_PARSER = dict(resolve_entities=False, no_network=True, load_dtd=False)
 
 
@@ -82,11 +86,21 @@ def children(o: etree._Element, prop: str) -> list[etree._Element]:
     return o.findall(f"Components[@property='{prop}']/Object")
 
 
-def identity(o: etree._Element, context: str) -> str | None:
+def identity(o: etree._Element) -> str | None:
+    """The ID a LIONG PersistentIdentifier names, such as p3d:object:101, else None."""
     for pid in children(o, "PersistentIdentifiers"):
-        if text(pid, "Context") == context:
-            return text(pid, "Value")
+        context, key = text(pid, "Context"), text(pid, "Value")
+        if context in gen.CONTEXTS and key:
+            return gen.CONTEXTS[context][0] + key
     return None
+
+
+def backend_of(o: etree._Element | None) -> gen.Backend:
+    """The backend whose drawing context the PlantMetaData `o` carries; p3d for any other file."""
+    for pid in children(o, "PersistentIdentifiers") if o is not None else []:
+        if text(pid, "Context") in gen.CONTEXTS:
+            return gen.CONTEXTS[text(pid, "Context")][1]
+    return gen.BACKENDS["p3d"]
 
 
 def read(path: Path) -> dict:
@@ -136,8 +150,8 @@ def read_file(file: Path, facts: dict, connectors: list) -> None:
 
     metadata = next((o for o in root.iter("Object") if kind_of(o) == "Plant/Diagram.PlantMetaData"), None)
     diagram = next((o for o in root.iter("Object") if kind_of(o) == "Core/Diagram.Diagram"), None)
-    key = identity(metadata, gen.DRAWING_CONTEXT) if metadata is not None else None
-    drawing = extract.drawing_id(key) if key else f"dexpi:{file.name}"
+    backend = backend_of(metadata)
+    drawing = (identity(metadata) if metadata is not None else None) or f"dexpi:{file.name}"
     name = (text(metadata, "FileName") if metadata is not None else None) or (
         text(diagram, "Name") if diagram is not None else None) or file.stem
     facts["drawings"][drawing] = {"name": name, "file": file.name,
@@ -151,12 +165,10 @@ def read_file(file: Path, facts: dict, connectors: list) -> None:
             continue
         if kind == "pipe_segment" and not pipe_shaped(o, kind_of):
             continue
-        key = identity(o, gen.OBJECT_CONTEXT)
-        if key is not None:
-            node = extract.object_id(key)
-        elif o.get("id"):
+        node = identity(o)
+        if node is None and o.get("id"):
             node = f"dexpi:{file.name}#{o.get('id')}"
-        else:
+        elif node is None:
             facts["problems"].append(f"a {kind_of(o)} in {file.name} has no id")
             continue
         node_of_element[o] = node
@@ -179,15 +191,18 @@ def read_file(file: Path, facts: dict, connectors: list) -> None:
         attrs = entry["attributes"]
         if kind == "equipment":
             entry["tag"] = text(o, "TagName")
-            attrs.update(tag_type=text(o, "TagNamePrefix"), tag_number=text(o, "TagNameSequenceNumber"),
-                         description=o.findtext("Data[@property='EquipmentDescription']//Data[@property='Value']/String"))
+            attrs.update({backend.tag_letters: text(o, "TagNamePrefix"), backend.tag_number: text(o, "TagNameSequenceNumber"),
+                          "description": o.findtext("Data[@property='EquipmentDescription']//Data[@property='Value']/String")})
         elif kind == "valve":
             entry["tag"] = text(o, "PipingComponentNumber")
         elif kind == "instrument":
             letters = (text(o, "ProcessInstrumentationFunctionCategory"), text(o, "ProcessInstrumentationFunctions"))
             number = text(o, "ProcessInstrumentationFunctionNumber")
             tag_type = LETTERS_TYPE.get(letters)  # letter codes outside the table get no tag type and no tag
-            attrs.update(tag_type=tag_type, loop_number=number)
+            if tag_type is None and node.startswith(LIONG_IDS):
+                facts["problems"].append(f"{node} has instrument letters {'/'.join(map(str, letters))}, "
+                                         "outside the supported subset")
+            attrs.update({backend.tag_letters: tag_type, backend.instrument_number: number})
             entry["tag"] = f"{tag_type}-{number}" if tag_type and number else None
             for sensing in children(o, "ProcessSignalGeneratingFunctions"):
                 owner = node_of(ref(sensing, "SensingLocation"))
@@ -212,7 +227,8 @@ def read_file(file: Path, facts: dict, connectors: list) -> None:
             direction = DIRECTION_OF_CLASS[cls]
             label = text(o, "PipeConnectorNumber")
             entry["name"] = label
-            attrs.update(label=label, direction=direction)
+            words = {value: name for name, value in backend.directions.items()}
+            attrs.update({"label": label, backend.direction: words[direction]})
             target = None
             for reference in children(o, "ConnectorReference"):
                 if kind_of(reference) == "Plant/Piping.PipeOffPageConnectorReferenceByNumber":
@@ -228,7 +244,7 @@ def read_file(file: Path, facts: dict, connectors: list) -> None:
             continue
         connections = children(segment, "Connections")
         direct = all(kind_of(c) == "Plant/Piping.DirectPipingConnection" for c in connections)
-        if not connections or not direct or children(segment, "Items") or identity(segment, gen.OBJECT_CONTEXT):
+        if not connections or not direct or children(segment, "Items") or identity(segment):
             facts["unsupported"]["Plant/Piping.PipingNetworkSegment"] += 1
             facts["problems"].append(f"segment {segment.get('id')} in {file.name} is neither one pipe nor direct connections")
             continue
@@ -311,20 +327,22 @@ def records(facts: dict, sidecar: dict) -> dict:
     by_subject_predicate = {(a["subject_id"], a["predicate"]): (aid, a) for aid, a in assertions.items()
                             if a["predicate"] not in gen.RELATIONS}
     objects, tags = [], []
+    backend = gen.BACKENDS[sidecar["source_revision"]["source_id"]]
     for nid, n in facts["nodes"].items():
-        if not nid.startswith(extract.object_id("")):
+        found_id = gen.split_id(nid, backend.objects)
+        if found_id is None:
             continue
         side = sidecar["objects"].get(nid, {})
-        objects.append({"object_id": nid, "object_kind": n["kind"], "source_object_key": int(nid.removeprefix(extract.object_id(""))),
+        objects.append({"object_id": nid, "object_kind": n["kind"], "source_object_key": backend.key_type(found_id[1]),
                         "source_locator": side.get("source_locator")})
         if n.get("tag") is not None:
             tags.append({"object_id": nid, "tag_value": n["tag"], **side.get("tag", {})})
         for predicate, value in n["attributes"].items():
-            if predicate in gen.CARRIED[n["kind"]] and (nid, predicate) in by_subject_predicate:
+            if predicate in backend.carried.get(n["kind"], set()) and (nid, predicate) in by_subject_predicate:
                 aid, a = by_subject_predicate[(nid, predicate)]
                 found.append({"assertion_id": aid, **a, "value_or_target": value})
     for (subject, predicate), (aid, a) in by_subject_predicate.items():
-        if subject in facts["nodes"] and predicate not in gen.CARRIED[facts["nodes"][subject]["kind"]]:
+        if subject in facts["nodes"] and predicate not in backend.carried.get(facts["nodes"][subject]["kind"], set()):
             found.append({"assertion_id": aid, **a})
     relations = relation_index(sidecar)
     for relation in facts["relations"]:

@@ -100,6 +100,13 @@
         "objects",
         "p3d:object:105"
       ]
+    },
+    {
+      "name": "liong_rules-instrument-letters",
+      "stage": "liong_rules",
+      "file": "DEMO-PID-002.xml",
+      "find": "<Data property=\"ProcessInstrumentationFunctionCategory\">\n              <String>P</String>",
+      "replace": "<Data property=\"ProcessInstrumentationFunctionCategory\">\n              <String>Q</String>"
     }
   ]
 }
