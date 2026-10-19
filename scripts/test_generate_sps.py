@@ -44,6 +44,7 @@ def names() -> dict[str, str]:
     found |= {r["ItemGuid"]: f"{found[r['ParentItem']]}/{r['ItemTag']}" for r in ROWS["Nozzle"]}
     found |= {r["ItemGuid"]: "process connection" for r in ROWS["ProcessConnection"]}
     labels = {r["LabelledDepiction"]: r["LabelText"] for r in ROWS["LabelDepiction"]}
+    assert len(labels) == len(ROWS["LabelDepiction"]), "a line carries more than one label; the names would hide it"
     depicted = {d["DepictionGuid"]: d["ItemGuid"] for d in ROWS["Depiction"]}
     for run in ROWS["PipeRun"]:
         pieces = sorted(labels[d] for d, item in depicted.items() if item == run["ItemGuid"] and d in labels)

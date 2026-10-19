@@ -20,7 +20,10 @@ database. For W-SP, the SmartPlant-style schema is written, and CI applies it to
 Server ([DEC-082](decisions/DEC-082-smartplant-style-schema-choices.md)). A generator
 writes W-SP's W0 snapshot and answer key ([DEC-083](decisions/DEC-083-sps-generator-choices.md)),
 and CI loads the snapshot with its outbox event
-([DEC-084](decisions/DEC-084-sps-loader-choices.md)). Nothing else here is built, and no hosted database has been provisioned. The rest of MILESTONE-001b and the stages after it are future implementation work, not
+([DEC-084](decisions/DEC-084-sps-loader-choices.md)). Extraction from it rebuilds W-SP's
+graph, which matches W-SP's answer key exactly in a test; the DEXPI, publication and
+query steps do not yet run on W-SP ([DEC-085](decisions/DEC-085-sps-extraction-records.md)).
+Nothing else here is built, and no hosted database has been provisioned. The rest of MILESTONE-001b and the stages after it are future implementation work, not
 commands already executed.
 
 Document approval and gate closure precede dependent build work. No step here
