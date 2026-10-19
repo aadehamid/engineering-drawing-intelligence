@@ -220,6 +220,14 @@ class GeneratorTest(unittest.TestCase):
         self.assertEqual(sorted(p for p in gen.OUT.rglob("*") if p.is_file()),
                          sorted(p for p in FRESH if p.is_relative_to(gen.OUT)))
 
+    def test_the_answer_key_folder_holds_only_the_two_generators_keys(self):
+        # Each generator's --check sweeps only its own snapshot folder, so this test owns
+        # fixtures/answer-keys/: a stray or leftover key there fails here.
+        import generate_p3d
+
+        self.assertEqual(sorted(p for p in gen.ANSWER_KEY.parent.rglob("*") if p.is_file()),
+                         sorted([gen.ANSWER_KEY, generate_p3d.ANSWER_KEY]))
+
     def test_generation_is_deterministic(self):
         self.assertEqual(gen.outputs(), FRESH)
 

@@ -52,7 +52,8 @@ owner can reverse any of them.
    2030-02-01, after R0's revisions.
 9. **The Plant 3D generator's check.** `generate_p3d.py --check` now counts only
    its own answer key in `fixtures/answer-keys/`, so the folder can hold W-SP's key
-   too.
+   too. A test in `scripts/test_generate_sps.py` owns the folder: it fails when the
+   folder holds any file besides the two generators' keys.
 
 ## Alternatives considered
 
