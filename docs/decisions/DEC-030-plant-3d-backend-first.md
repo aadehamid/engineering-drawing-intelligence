@@ -47,5 +47,5 @@ The owner answered:
 
 - The vendor research run during the interview, on how each product stores
   connections.
-- MILESTONE-001b comes from the accepted recommendation. LIONG-011 does not define
-  it yet.
+- MILESTONE-001b comes from the accepted recommendation. LIONG-011 defines it in
+  its MILESTONE-001b section.
