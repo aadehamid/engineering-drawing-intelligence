@@ -100,6 +100,7 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-073 | The agent decides open questions for the owner during the night run of 2026-10-14 | Owner answered: "you have my permission to decide for me using every available data and external search of hgih quality sources to resolve any ambiquity" | [record](decisions/DEC-073-second-night-delegation.md) |
 | DEC-078 | The owner approves DEC-077's three least-settled mapping choices | Owner answered: "yes to all three" | [record](decisions/DEC-078-dec-077-choices-approved.md) |
 | DEC-079 | GATE-001 and the slice's part of GATE-003 are closed | Owner answered: "close" | [record](decisions/DEC-079-gate-001-003-closed-for-slice.md) |
+| DEC-080 | The agent decides open questions for the owner during the MILESTONE-001b night run | Owner chose the option "Yes, decide for me" | [record](decisions/DEC-080-milestone-001b-night-delegation.md) |
 
 ## Decisions made under delegation
 
