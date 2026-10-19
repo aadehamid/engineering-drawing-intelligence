@@ -1,4 +1,4 @@
-# DEC-087: The slice runner takes the backend as a parameter, and CI runs W-SP through SQL Server and Neo4j beside R0
+# DEC-087: The slice runner takes the backend as a parameter; in CI, one W-SP run publishes through Neo4j and another reads the loaded SQL Server backend
 
 Status: Decided
 Date: 2026-10-19

@@ -127,7 +127,7 @@ except DEC-077's three least-settled choices, which the owner approved in
 | DEC-084 | The SmartPlant-style loader reuses the Plant 3D loader's code, with the backend and its columns as parameters | Decided by the agent under DEC-080 | [record](decisions/DEC-084-sps-loader-choices.md) |
 | DEC-085 | SmartPlant-style extraction rebuilds W-SP's segments, flows, parent and continuation from the rows, keyed by the backend's GUIDs | Decided by the agent under DEC-080 | [record](decisions/DEC-085-sps-extraction-records.md) |
 | DEC-086 | W-SP's records map to DEXPI 2.0.1 through DEC-077's mapping, with sps identifier contexts, hand valves as OperatedValve and LT as category L | Decided by the agent under DEC-080 | [record](decisions/DEC-086-sps-dexpi-mapping.md) |
-| DEC-087 | The slice runner takes the backend as a parameter, and CI runs W-SP through SQL Server and Neo4j beside R0 | Decided by the agent under DEC-080 | [record](decisions/DEC-087-slice-backend-parameter.md) |
+| DEC-087 | The slice runner takes the backend as a parameter; in CI, one W-SP run publishes through Neo4j and another reads the loaded SQL Server backend | Decided by the agent under DEC-080 | [record](decisions/DEC-087-slice-backend-parameter.md) |
 
 ## New proposals
 
