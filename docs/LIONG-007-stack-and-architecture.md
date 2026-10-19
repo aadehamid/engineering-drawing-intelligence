@@ -17,8 +17,10 @@ This document records inspection and proposed design, not a deployed stack, test
 ## MILESTONE-001 slice choices
 
 The owner decided these components for MILESTONE-001's slice only. A decision
-picks the parts; GATE-001 and GATE-003 stay open until a pull request lands their
-closure evidence ([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)).
+picks the parts; a gate closes when a pull request lands its closure evidence
+([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)). GATE-001 and the
+slice's part of GATE-003 are closed ([DEC-079](decisions/DEC-079-gate-001-003-closed-for-slice.md));
+the rest of GATE-003 stays open.
 The longer-term gates below (GATE-TECH-001, 005 and 008) stay open beyond the slice.
 
 | Slice need | Choice | Record |

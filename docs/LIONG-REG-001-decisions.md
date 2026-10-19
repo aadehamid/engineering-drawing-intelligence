@@ -98,13 +98,16 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-071 | A pull request that settles an engineering practice updates the playbook in the same pull request | Owner accepted Q19 and Q22, with the comments recorded in the record | [record](decisions/DEC-071-playbook-grows-with-prs.md) |
 | DEC-072 | A DEXPI validity claim names every stage that ran, including the reference checks | Owner answered: "yes, add it to #32" | [record](decisions/DEC-072-claim-names-every-stage-that-ran.md) |
 | DEC-073 | The agent decides open questions for the owner during the night run of 2026-10-14 | Owner answered: "you have my permission to decide for me using every available data and external search of hgih quality sources to resolve any ambiquity" | [record](decisions/DEC-073-second-night-delegation.md) |
+| DEC-078 | The owner approves DEC-077's three least-settled mapping choices | Owner answered: "yes to all three" | [record](decisions/DEC-078-dec-077-choices-approved.md) |
+| DEC-079 | GATE-001 and the slice's part of GATE-003 are closed | Owner answered: "close" | [record](decisions/DEC-079-gate-001-003-closed-for-slice.md) |
 
 ## Decisions made under delegation
 
 The agent made these during two night runs, under the owner's delegations. Each row's
 Basis names its run's delegation: [DEC-048](decisions/DEC-048-night-delegation.md) for
-2026-10-13 and [DEC-073](decisions/DEC-073-second-night-delegation.md) for 2026-10-14. The owner has not reviewed them;
-each can be reversed by a later owner decision.
+2026-10-13 and [DEC-073](decisions/DEC-073-second-night-delegation.md) for 2026-10-14. The owner has not reviewed them,
+except DEC-077's three least-settled choices, which the owner approved in
+[DEC-078](decisions/DEC-078-dec-077-choices-approved.md). Each can be reversed by a later owner decision.
 
 | ID | Decision | Basis | Authoritative location |
 | --- | --- | --- | --- |
@@ -115,7 +118,7 @@ each can be reversed by a later owner decision.
 | DEC-074 | The pinned DEXPI 2.0.1 files are the XSD, the Core and Plant models and the reference P&ID, with the models taken from the published specification | Decided by the agent under DEC-073 | [record](decisions/DEC-074-dexpi-2-0-1-pinned-files.md) |
 | DEC-075 | Extraction writes LIONG-005's source records from the backend's tables, keyed by the backend's own object IDs | Decided by the agent under DEC-073 | [record](decisions/DEC-075-extraction-records.md) |
 | DEC-076 | A graph snapshot is published once to Neo4j under its content hash, and the cross-sheet query reads one snapshot | Decided by the agent under DEC-073 | [record](decisions/DEC-076-graph-publication.md) |
-| DEC-077 | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided by the agent under DEC-073 | [record](decisions/DEC-077-dexpi-mapping.md) |
+| DEC-077 | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided by the agent under DEC-073; three choices approved by the owner in DEC-078 | [record](decisions/DEC-077-dexpi-mapping.md) |
 
 ## New proposals
 
@@ -160,10 +163,13 @@ requirements. Approval must identify which groups or sections it covers.
 | GATE-008 | Review of all new design proposals and document versions | Treating the package as an approved implementation specification | Document/section approvals with version and unresolved exceptions |
 
 DEC-055 to DEC-069 choose the components for MILESTONE-001's slice under GATE-001
-and GATE-003. Both gates stay open until a pull request lands their closure
-evidence ([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)).
+and GATE-003. A gate closes when a pull request lands its closure evidence
+([DEC-055](decisions/DEC-055-slice-choices-close-gates-on-evidence.md)).
+GATE-001 and the slice's part of GATE-003 are closed
+([DEC-079](decisions/DEC-079-gate-001-003-closed-for-slice.md)); the rest of GATE-003
+stays open.
 
-The evidence DEC-055 names is now on `main`, for the slice's supported subset. For
+The closure evidence is on `main`, for the slice's supported subset. For
 GATE-001: the pinned artifacts and their license record in `standards/dexpi/2.0.1`
 ([DEC-074](decisions/DEC-074-dexpi-2-0-1-pinned-files.md)); positive round-trip fixtures,
 R0 to R2, which pass all four validation stages and regenerate byte for byte; and
@@ -172,8 +178,7 @@ the negative cases in `fixtures/dexpi-negative/cases.json`, each one planted fau
 exact pins in `pyproject.toml` and `uv.lock` and the pinned Neo4j image
 ([DEC-076](decisions/DEC-076-graph-publication.md)), and the compatibility tests that run
 the whole slice in CI: one run publishes through Neo4j, and another reads the loaded
-SQL Server backend. Neither gate is closed here; closing
-them is a separate pull request.
+SQL Server backend.
 
 Source-specific gates in LIONG-003, technology gates in LIONG-007, and operational
 gates in LIONG-009 refine this list. Closing one gate does not close the others.
