@@ -159,10 +159,12 @@ fill missing or insufficient public coverage, including backend records,
 revisions, operational context, and controlled failure cases.
 Evaluation must identify which results use public data and which use synthetic data.
 
-The open-source stack is not yet selected. The synthetic backends run on SQL
-Server, a recorded exception (DEC-027). Candidates include PostgreSQL with
-Apache AGE for the graph, Python
-and lxml for transformations. The expanded stack assessment considers modern
+MILESTONE-001's slice uses Neo4j for the graph and Python with lxml for DEXPI
+([LIONG-007](docs/LIONG-007-stack-and-architecture.md)). The rest of the open-source
+stack is not yet selected, and PostgreSQL with Apache AGE remains a candidate graph
+store; [the decision register](docs/LIONG-REG-001-decisions.md#open-questions-and-package-level-gates)
+holds each gate's state. The synthetic backends run on SQL Server, a recorded
+exception (DEC-027). The expanded stack assessment considers modern
 parsers, vision-language models, and optional segmentation for drawing extraction.
 FastAPI and Cytoscape.js are candidates for the application interface.
 
