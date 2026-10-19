@@ -145,8 +145,10 @@ class LoaderTests(unittest.TestCase):
         self.assertEqual((self.count("sps.DesignItem"), self.count("sps.Vessel"), self.events()), (0, 0, []))
 
     def test_both_backends_share_one_database_and_one_outbox(self):
-        # DEC-028 and DEC-047: p3d and sps side by side, with one outbox created once
-        load_p3d.create(self.conn)
+        # DEC-028 and DEC-047: p3d and sps side by side, with one outbox created once.
+        # setUp created sps and the outbox, so the second create applies only p3d's file.
+        self.assertEqual(load_p3d.create(self.conn), ["plant3d-style.sql"])
+        self.assertEqual(load_p3d.created_message(["plant3d-style.sql"]), "Applied plant3d-style.sql.")
         load_p3d.load(self.conn, P3D_SNAPSHOTS / "R0")
         loader.load(self.conn, SNAPSHOTS / "W0")
         self.assertEqual(self.events(), [("p3d", "R0", "R0", "Pending"), ("sps", "W-SP", "W0", "Pending")])

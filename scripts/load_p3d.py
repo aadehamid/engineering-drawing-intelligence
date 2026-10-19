@@ -76,9 +76,12 @@ def connect(setting: str | None = None, autocommit: bool = False) -> pytds.Conne
                          database=database, autocommit=autocommit)
 
 
-def create(conn: pytds.Connection, schemas: tuple[Path, ...] = SCHEMAS) -> None:
-    """Apply each schema file. The outbox is shared by every backend, so it is created once."""
-    cursor = conn.cursor()
+def create(conn: pytds.Connection, schemas: tuple[Path, ...] = SCHEMAS) -> list[str]:
+    """Apply each schema file and return the files applied.
+
+    The outbox is shared by every backend, so outbox.sql is skipped when schema outbox exists.
+    """
+    cursor, applied = conn.cursor(), []
     for path in schemas:
         if path.name == "outbox.sql":
             cursor.execute("SELECT SCHEMA_ID('outbox')")
@@ -86,7 +89,14 @@ def create(conn: pytds.Connection, schemas: tuple[Path, ...] = SCHEMAS) -> None:
                 continue
         for batch in batches(path.read_text(encoding="utf-8")):
             cursor.execute(batch)
+        applied.append(path.name)
     conn.commit()
+    return applied
+
+
+def created_message(applied: list[str]) -> str:
+    """What a create run did, naming only the schema files it applied."""
+    return f"Applied {', '.join(applied)}." if applied else "Applied no schema file."
 
 
 def read_snapshot(folder: Path, backend: str = "p3d",
@@ -184,8 +194,7 @@ def main(argv: list[str]) -> int:
         return 1
     try:
         if argv[0] == "create":
-            create(conn)
-            print("Created schemas p3d and outbox.")
+            print(created_message(create(conn)))
         else:
             print(f"{argv[1]}: {load(conn, Path(argv[1]))}")
     except LoadError as error:

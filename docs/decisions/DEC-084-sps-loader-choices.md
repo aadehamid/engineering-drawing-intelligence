@@ -24,7 +24,8 @@ decided during the MILESTONE-001b night run, under the owner's delegation in
    another backend, before any write.
 3. **One outbox.** Creating a backend applies `schemas/outbox.sql` only when schema
    `outbox` does not exist yet, so both backends can be created in one database in
-   either order. Each event names its backend.
+   either order. Each event names its backend. A create run prints only the schema
+   files it applied.
 
 ## Alternatives considered
 

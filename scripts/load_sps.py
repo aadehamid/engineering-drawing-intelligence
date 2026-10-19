@@ -43,8 +43,8 @@ COLUMNS = {
 }
 
 
-def create(conn) -> None:
-    shared.create(conn, SCHEMAS)
+def create(conn) -> list[str]:
+    return shared.create(conn, SCHEMAS)
 
 
 def read_snapshot(folder: Path) -> tuple[dict, str, dict[str, list[dict]]]:
@@ -66,8 +66,7 @@ def main(argv: list[str]) -> int:
         return 1
     try:
         if argv[0] == "create":
-            create(conn)
-            print("Created schema sps, and schema outbox if it was missing.")
+            print(shared.created_message(create(conn)))
         else:
             print(f"{argv[1]}: {load(conn, Path(argv[1]))}")
     except LoadError as error:
