@@ -42,6 +42,33 @@ this slice. [The decision register](LIONG-REG-001-decisions.md#open-questions-an
 gate's state. If available tooling supports only older DEXPI formats, stop that
 compatibility claim and propose a documented change; do not silently downgrade.
 
+## MILESTONE-001b
+
+MILESTONE-001b runs the same steps on W-SP, the world the SmartPlant-style backend is
+generated from ([DEC-030](decisions/DEC-030-plant-3d-backend-first.md),
+[DEC-035](decisions/DEC-035-r0-is-the-autodesk-world.md)). It holds only W-SP's
+SCN-001 equivalent, its baseline W0 ([DEC-042](decisions/DEC-042-w-sp-scn-001-first.md)):
+
+1. Materialize W-SP's SmartPlant-style backend from `worlds/W-SP.yaml`, in its own
+   schema of the same SQL Server database
+   ([DEC-028](decisions/DEC-028-one-database-two-schemas.md)).
+2. Extract source records from it without reading W-SP's answer key. Extraction
+   joins the pieces of a pipe run that inline valves split, and derives the pipeline
+   from the runs that share a line number.
+3. Generate DEXPI 2.0.1 for W-SP and validate it in DEC-064's four stages and the
+   exact round trip.
+4. Parse and publish one immutable graph snapshot of W-SP.
+5. Query W-SP's cross-sheet connection, TO-S2/B to FROM-S1/B, and return its source
+   evidence.
+6. Compare the published graph with W-SP's answer key, which must match exactly
+   ([DEC-059](decisions/DEC-059-exact-answer-key-comparison.md)), in
+   `scripts/run_slice.py` and CI.
+
+W-SP has no invalid variant; SCN-005's rejection stays on R0. Other scenarios reach
+W-SP only when a milestone needs them for SmartPlant (DEC-042). Like MILESTONE-001, it
+does not establish flat-file accuracy, live synchronization, production readiness, or
+safe isolation.
+
 ## Build sequence
 
 | Stage | Inputs and work | Exit evidence | Stop or recovery condition |
