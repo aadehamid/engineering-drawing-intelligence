@@ -136,6 +136,25 @@ class SnapshotExtractionTest(unittest.TestCase):
         self.assertEqual((len(run_a), len(run_b)), (1, 1))
         self.assertNotEqual(run_a, run_b)
 
+    def test_a_revision_without_an_approver_and_date_is_not_approved(self):
+        # DEC-039: the approval is the approver and the approval date, not a status value
+        for column in ("Approver", "ApprovedOn"):
+            with self.subTest(column=column):
+                rows = snapshot_rows()
+                for revision in rows["SheetRevision"]:
+                    revision[column] = None
+                self.assertEqual({d["status"] for d in from_snapshot(rows)["drawings"]}, {None})
+
+    def test_line_ends_are_read_as_items(self):
+        # DEC-081 pattern 2: an end names a design item. Point L-301-1's upstream end
+        # straight at TK-301 instead of its nozzle: the vessel is still the source.
+        rows = snapshot_rows()
+        vessel = next(r["ItemGuid"] for r in rows["Vessel"] if r["ItemTag"] == "TK-301")
+        nozzle = next(r["ItemGuid"] for r in rows["Nozzle"] if r["ParentItem"] == vessel)
+        line = next(r for r in rows["LineDepiction"] if nozzle in (r["End1Item"], r["End2Item"]))
+        line["End1Item" if line["End1Item"] == nozzle else "End2Item"] = vessel
+        self.assertTrue(score(from_snapshot(rows))["match"])
+
     def test_drawings_and_appearances(self):
         self.assertEqual(sorted((d["name"], d["revision"], d["status"]) for d in self.records["drawings"]),
                          [("DEMO-PID-101", "W0.0", "Approved"), ("DEMO-PID-102", "W0.0", "Approved")])
@@ -268,7 +287,7 @@ class DerivationTest(unittest.TestCase):
         rows = snapshot_rows()
         connection = rows["ProcessConnection"][0]["ItemGuid"]
         line = next(d["DepictionGuid"] for d in rows["Depiction"] if d["ItemGuid"] == connection)
-        next(r for r in rows["LineDepiction"] if r["DepictionGuid"] == line)["End2Mark"] = None
+        next(r for r in rows["LineDepiction"] if r["DepictionGuid"] == line)["End2Item"] = None
         with self.assertRaises(extract.ExtractionError):
             from_snapshot(rows)
 

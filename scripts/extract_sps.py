@@ -122,19 +122,16 @@ class Rows:
                 if line["DepictionGuid"] in self.depictions
                 and self.active(self.depictions[line["DepictionGuid"]]["ItemGuid"] or "", table)]
 
-    def end(self, mark: str | None) -> tuple[str | None, list[dict]]:
-        """The object a line end reaches, and the rows passed on the way.
+    def end(self, guid: str | None) -> tuple[str | None, list[dict]]:
+        """The object a line end's item reaches, and the rows passed on the way.
 
-        An active nozzle collapses into its parent vessel. A deleted nozzle does not:
-        the end names the nozzle itself, which is no object, for validation to reject.
-        A mark that names no depiction is kept as an unresolved ID for the same reason.
+        Each end names a design item (DEC-081 pattern 2). An active nozzle collapses
+        into its parent vessel. A deleted nozzle does not: the end names the nozzle
+        itself, which is no object, for validation to reject. An item that is missing
+        or deleted is kept as stated for the same reason.
         """
-        if mark is None:
+        if guid is None:
             return None, []
-        depiction = self.depictions.get(mark)
-        if depiction is None or depiction["ItemGuid"] is None:
-            return f"{SOURCE_ID}:depiction:{mark}", []
-        guid = depiction["ItemGuid"]
         if guid in self.by_class["Nozzle"]:
             return self.through_nozzle(guid), [{"table": "Nozzle", "ItemGuid": guid}]
         return item_id(guid), []
@@ -215,17 +212,17 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
             state(subject, "pipeline", name, group_locator, "derived")
         if run["FlowSense"] not in ("End1Upstream", "End2Upstream"):
             raise ExtractionError(f"run {run['ItemGuid']} has flow sense {run['FlowSense']!r}")
-        upstream, downstream = ((line["End1Mark"], line["End2Mark"]) if run["FlowSense"] == "End1Upstream"
-                                else (line["End2Mark"], line["End1Mark"]))
-        for predicate, mark in (("starts_at", upstream), ("ends_at", downstream)):
-            target, via = r.end(mark)
+        upstream, downstream = ((line["End1Item"], line["End2Item"]) if run["FlowSense"] == "End1Upstream"
+                                else (line["End2Item"], line["End1Item"]))
+        for predicate, end_item in (("starts_at", upstream), ("ends_at", downstream)):
+            target, via = r.end(end_item)
             if target is not None:
                 state(subject, predicate, target, locator | {"via": [run_locator, *via]}, "derived",
                       f"LineDepiction/{guid}/{predicate}")
 
     # Instrument parents: a process connection from an instrument to a vessel's nozzle.
     for line, connection in r.lines_of("ProcessConnection"):
-        ends = [r.depictions.get(mark or "", {}).get("ItemGuid") for mark in (line["End1Mark"], line["End2Mark"])]
+        ends = [line["End1Item"], line["End2Item"]]
         instruments = [g for g in ends if g in r.by_class["Instrument"]]
         nozzles = [g for g in ends if g in r.by_class["Nozzle"]]
         if len(instruments) != 1 or len(nozzles) != 1:
@@ -255,8 +252,11 @@ def extract(revision: dict, rows: dict[str, list[dict]], origin_uri: str, captur
 
     # Drawings, and where each object appears on them.
     for sheet in rows["Sheet"]:
-        revisions = sorted((x["MajorRev"], x["MinorRev"], x["ApprovalState"]) for x in rows["SheetRevision"]
-                           if x["SheetGuid"] == sheet["SheetGuid"])
+        # The source approval is the revision's approver and approval date (DEC-039): a
+        # revision with both is "Approved", and one without them has no status.
+        revisions = sorted((x["MajorRev"], x["MinorRev"],
+                            "Approved" if x["Approver"] is not None and x["ApprovedOn"] is not None else None)
+                           for x in rows["SheetRevision"] if x["SheetGuid"] == sheet["SheetGuid"])
         latest = revisions[-1] if revisions else (None, None, None)
         drawings.append({"artifact_id": sheet_id(sheet["SheetGuid"]), "name": sheet["SheetNo"],
                          "revision": f"{latest[0]}.{latest[1]}" if latest[0] else None, "status": latest[2],

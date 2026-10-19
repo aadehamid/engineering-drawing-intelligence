@@ -33,8 +33,8 @@ owner can reverse any of it.
    through them. A segment's tag is the text of the label on its line.
 4. **Rebuilt facts are marked derived.** Relationships use extract_p3d's predicates
    so that both backends' records map to the graph the same way:
-   - `starts_at` and `ends_at` for each segment, from its line's end marks, with
-     upstream set by the run's flow sense;
+   - `starts_at` and `ends_at` for each segment, from the items its line's ends
+     name, with upstream set by the run's flow sense;
    - an active nozzle at a line end counts as its parent vessel;
    - `owned_by` from an instrument to the vessel whose nozzle its process connection
      reaches;
@@ -54,7 +54,10 @@ owner can reverse any of it.
    reject, as DEC-075 does. A deleted nozzle counts as such an item: it is not
    collapsed into its vessel, so a segment end or an instrument parent through it
    names the nozzle.
-7. **No answer key.** The extractor never opens one; a test records every file it
+7. **Drawing approval.** A drawing's status is `Approved` when its latest revision row
+   has both an approver and an approval date, the fields
+   [DEC-039](DEC-039-approval-in-vendor-fields.md) names, and empty otherwise.
+8. **No answer key.** The extractor never opens one; a test records every file it
    opens and fails if any is an answer key.
 
 ## Alternatives considered
