@@ -124,6 +124,7 @@ except DEC-077's three least-settled choices, which the owner approved in
 | DEC-081 | The SmartPlant-style schema borrows seven storage patterns from Smart P&ID, renamed, with nozzle rows and an implied pipeline | Decided by the agent under DEC-080 | [record](decisions/DEC-081-smartplant-style-patterns.md) |
 | DEC-082 | The SmartPlant-style schema is one T-SQL file for schema sps, with GUID keys on its data tables, label depictions and a per-sheet revision rule | Decided by the agent under DEC-080 | [record](decisions/DEC-082-smartplant-style-schema-choices.md) |
 | DEC-083 | The SmartPlant-style generator writes W-SP's W0 as one JSON file per table, keyed by name-based GUIDs, with nozzle rows and one run drawn against its flow | Decided by the agent under DEC-080 | [record](decisions/DEC-083-sps-generator-choices.md) |
+| DEC-084 | The SmartPlant-style loader reuses the Plant 3D loader's code, with the backend and its columns as parameters | Decided by the agent under DEC-080 | [record](decisions/DEC-084-sps-loader-choices.md) |
 
 ## New proposals
 

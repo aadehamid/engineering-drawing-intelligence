@@ -45,7 +45,6 @@ COLUMNS = {
     "DrawingAppearance": ("RowId", "ObjectId", "DrawingId", "DrawingHandle"),
     "WorkHistory": ("HistoryId", "ObjectId", "DrawingId", "Revision", "ChangeKind", "Detail", "RecordedAt"),
 }
-DATA_TABLES = tuple(COLUMNS)
 EVENT_NAMESPACE = uuid.UUID("0d6e1b4a-8f2c-4e57-b9a3-61c27f0e5d48")
 
 
@@ -77,22 +76,43 @@ def connect(setting: str | None = None, autocommit: bool = False) -> pytds.Conne
                          database=database, autocommit=autocommit)
 
 
-def create(conn: pytds.Connection) -> None:
-    cursor = conn.cursor()
-    for path in SCHEMAS:
+def create(conn: pytds.Connection, schemas: tuple[Path, ...] = SCHEMAS) -> list[str]:
+    """Apply each schema file and return the files applied.
+
+    The outbox is shared by every backend, so outbox.sql is skipped when schema outbox exists.
+    """
+    cursor, applied = conn.cursor(), []
+    for path in schemas:
+        if path.name == "outbox.sql":
+            cursor.execute("SELECT SCHEMA_ID('outbox')")
+            if cursor.fetchone()[0] is not None:
+                continue
         for batch in batches(path.read_text(encoding="utf-8")):
             cursor.execute(batch)
+        applied.append(path.name)
     conn.commit()
+    return applied
 
 
-def read_snapshot(folder: Path) -> tuple[dict, str, dict[str, list[dict]]]:
-    """(revision record, payload digest, rows) for one snapshot, after checking every file's hash."""
+def created_message(applied: list[str]) -> str:
+    """What a create run did, naming only the schema files it applied."""
+    return f"Applied {', '.join(applied)}." if applied else "Applied no schema file."
+
+
+def read_snapshot(folder: Path, backend: str = "p3d",
+                  columns: dict[str, tuple[str, ...]] = COLUMNS) -> tuple[dict, str, dict[str, list[dict]]]:
+    """(revision record, payload digest, rows) for one snapshot, after checking every file's hash.
+
+    `backend` is the schema the rows are for, and `columns` its tables' columns.
+    """
     manifest = json.loads((folder.parent / "manifest.json").read_text(encoding="utf-8"))
     revision = folder.name
+    if manifest["backend"] != backend:
+        raise LoadError(f"the snapshot is for backend {manifest['backend']}, not {backend}; nothing was loaded")
     if revision not in manifest["revisions"]:
         raise LoadError(f"the manifest has no revision {revision}")
     rows, digests = {}, []
-    for table in DATA_TABLES:
+    for table in columns:
         name = f"{revision}/{table}.json"
         data = (folder / f"{table}.json").read_bytes()
         digest = hashlib.sha256(data).hexdigest()
@@ -100,8 +120,8 @@ def read_snapshot(folder: Path) -> tuple[dict, str, dict[str, list[dict]]]:
             raise LoadError(f"{name} does not match the manifest; nothing was loaded")
         rows[table] = json.loads(data)
         for row in rows[table]:
-            if set(row) != set(COLUMNS[table]):
-                raise LoadError(f"{name} has a row whose columns are not p3d.{table}'s; nothing was loaded")
+            if set(row) != set(columns[table]):
+                raise LoadError(f"{name} has a row whose columns are not {backend}.{table}'s; nothing was loaded")
         digests.append(f"{name} {digest}")
     record = manifest["revisions"][revision] | {
         "world": manifest["world"], "backend": manifest["backend"], "revision": revision}
@@ -118,13 +138,15 @@ def current(cursor, backend: str, world: str) -> tuple[str, str] | None:
     return (row[0], row[1]) if row else None
 
 
-def load(conn: pytds.Connection, folder: Path, before_commit: Callable[[], None] | None = None) -> str:
+def load(conn: pytds.Connection, folder: Path, before_commit: Callable[[], None] | None = None,
+         backend: str = "p3d", columns: dict[str, tuple[str, ...]] = COLUMNS) -> str:
     """Load one snapshot in one transaction. Returns 'loaded' or 'unchanged'.
 
     `before_commit` lets a test interrupt the load after every write and before the
-    commit, the first interruption point in LIONG-006's recovery table.
+    commit, the first interruption point in LIONG-006's recovery table. `backend` and
+    `columns` name the schema and its tables; scripts/load_sps.py passes its own.
     """
-    record, payload, rows = read_snapshot(folder)
+    record, payload, rows = read_snapshot(folder, backend, columns)
     cursor = conn.cursor()
     loaded = current(cursor, record["backend"], record["world"])
     cursor.execute("SELECT PayloadSha256 FROM outbox.PendingEvent WHERE Backend = %s AND World = %s AND Revision = %s",
@@ -140,13 +162,13 @@ def load(conn: pytds.Connection, folder: Path, before_commit: Callable[[], None]
         raise LoadError(f"revision {record['revision']} has base {record['base']}, "
                         f"but the backend holds {loaded[0] if loaded else 'nothing'}")
     try:
-        for table in reversed(DATA_TABLES):
-            cursor.execute(f"DELETE FROM p3d.{table}")
-        for table in DATA_TABLES:
-            columns = COLUMNS[table]
-            insert = f"INSERT INTO p3d.{table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
+        # The schema and table names come from the caller's constants, never from a file
+        for table in reversed(columns):
+            cursor.execute(f"DELETE FROM {backend}.{table}")
+        for table, names in columns.items():
+            insert = f"INSERT INTO {backend}.{table} ({', '.join(names)}) VALUES ({', '.join(['%s'] * len(names))})"
             for row in rows[table]:
-                cursor.execute(insert, tuple(row[c] for c in columns))
+                cursor.execute(insert, tuple(row[c] for c in names))
         event = uuid.uuid5(EVENT_NAMESPACE, f"{record['backend']}/{record['world']}/{record['revision']}/{payload}")
         cursor.execute(
             "INSERT INTO outbox.PendingEvent (EventId, Backend, World, Revision, PayloadSha256, RecordedAt) "
@@ -172,8 +194,7 @@ def main(argv: list[str]) -> int:
         return 1
     try:
         if argv[0] == "create":
-            create(conn)
-            print("Created schemas p3d and outbox.")
+            print(created_message(create(conn)))
         else:
             print(f"{argv[1]}: {load(conn, Path(argv[1]))}")
     except LoadError as error:
