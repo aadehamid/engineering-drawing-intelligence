@@ -33,9 +33,10 @@ ran ([DEC-072](DEC-072-claim-names-every-stage-that-ran.md)).
 
 ## Owner's words
 
-Asked on 2026-10-18 as the first of three questions after the night run of 2026-10-14:
-close GATE-001 and the slice's part of GATE-003, with the agent's recommendation to
-close both in a short pull request that cites the evidence on main, if the owner
+Asked on 2026-10-18 as the first of three questions after the night run of 2026-10-14.
+The second asked the owner to review DEC-077's three least-settled choices (DEC-078),
+and the third proposed a retro. The first asked whether to close GATE-001 and the
+slice's part of GATE-003, with the agent's recommendation to close both in a short pull request that cites the evidence on main, if the owner
 accepted the DEC-074 to DEC-077 choices. In their next reply the owner approved the
 three DEC-077 choices put to them (DEC-078); DEC-074 to DEC-076 were not put to them
 one by one.
