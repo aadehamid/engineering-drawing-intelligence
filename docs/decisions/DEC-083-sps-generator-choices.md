@@ -30,7 +30,8 @@ owner can reverse any of them.
 3. **Runs.** The segments that share a `run` attribute form one pipe run. The run's
    tag parts come from the segments' tags and line number, which must agree, and so
    must their sizes. Each segment becomes one line depiction whose ends name the
-   design items the world's flow edges join it to. Each line carries a label
+   design items the world's flow edges join it to, except at a vessel: there the end
+   names the vessel's nozzle (item 5, DEC-082 choice 6). Each line carries a label
    depiction with the segment's tag. Each distinct line key gets one line group row
    holding the line prefix and number, `L` and `301` for W-SP, and no run points to
    it.
