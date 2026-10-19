@@ -47,7 +47,8 @@ compatibility claim and propose a documented change; do not silently downgrade.
 MILESTONE-001b runs the same steps on W-SP, the world the SmartPlant-style backend is
 generated from ([DEC-030](decisions/DEC-030-plant-3d-backend-first.md),
 [DEC-035](decisions/DEC-035-r0-is-the-autodesk-world.md)). It holds only W-SP's
-SCN-001 equivalent, its baseline W0 ([DEC-042](decisions/DEC-042-w-sp-scn-001-first.md)):
+SCN-001 equivalent ([DEC-042](decisions/DEC-042-w-sp-scn-001-first.md)), in its
+baseline W0 ([DEC-052](decisions/DEC-052-w-sp-contents.md)):
 
 1. Materialize W-SP's SmartPlant-style backend from `worlds/W-SP.yaml`, in its own
    schema of the same SQL Server database
@@ -62,7 +63,11 @@ SCN-001 equivalent, its baseline W0 ([DEC-042](decisions/DEC-042-w-sp-scn-001-fi
    evidence.
 6. Compare the published graph with W-SP's answer key, which must match exactly
    ([DEC-059](decisions/DEC-059-exact-answer-key-comparison.md)), in
-   `scripts/run_slice.py` and CI.
+   `scripts/check.sh` and CI.
+
+Before starting, the gates that cover the components it uses must be closed.
+[The decision register](LIONG-REG-001-decisions.md#open-questions-and-package-level-gates)
+holds each gate's state.
 
 W-SP has no invalid variant; SCN-005's rejection stays on R0. Other scenarios reach
 W-SP only when a milestone needs them for SmartPlant (DEC-042). Like MILESTONE-001, it
@@ -75,6 +80,7 @@ safe isolation.
 | --- | --- | --- | --- |
 | M0: approve contracts | Review model, source policies, provider exceptions, and required tests | Approved sections/versions and unresolved-gate register | Unapproved substantive designs remain proposals |
 | M1: structured slice | Implement MILESTONE-001 | Source/exchange/graph manifests and independent exact comparison | Unsupported DEXPI stops the slice, not the standards requirement |
+| M1b: SmartPlant-style slice | Implement MILESTONE-001b on W-SP | W-SP's manifests and independent exact comparison | Same as M1 |
 | M2: controlled publication | Add revision events, reconciliation, candidate activation, and history | SCN-003 through SCN-008; duplicate, stale, and failure-injection reports | Failed candidate retains previous publication |
 | M3: drawing review | Integrate adapters and review on visible, licensed development fixtures only | Development SCN-002 results and the candidate comparison plan; no held-out or provider benchmark admission | Uncertain edges remain unresolved; no private evaluation material or unauthorized uploads |
 | M4: engineering context | Add work orders, measurement samples, documents, and MOC links | SCN-009 through SCN-012 with source locators | Missing required context is explicit |
