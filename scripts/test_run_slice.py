@@ -104,7 +104,8 @@ class SliceTest(unittest.TestCase):
         # time counts as well as one during the run
         opened = answer_key_guard.files_opened(
             "import run_slice\nfrom pathlib import Path\n"
-            f"for revision in ('R0', 'Rbad'):\n    run_slice.run(revision, Path({str(self.out)!r}) / revision, now={AT!r})\n")
+            f"for revision in ('R0', 'Rbad'):\n    run_slice.run(revision, Path({str(self.out)!r}) / revision, now={AT!r})\n"
+            f"run_slice.run('W0', Path({str(self.out)!r}) / 'W0', now={AT!r}, backend='sps')\n")
         self.assertTrue(opened, "the guard saw no file opened, so it proves nothing")
         self.assertFalse([path for path in opened if "answer-keys" in path])
 
