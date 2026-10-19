@@ -192,7 +192,7 @@ SQL Server backend.
 MILESTONE-001b adds W-SP's W0, from the SmartPlant-style backend, as a second positive
 round-trip fixture: it passes all four validation stages and regenerates byte for byte
 ([DEC-086](decisions/DEC-086-sps-dexpi-mapping.md)). The same compatibility tests run it
-in CI, through SQL Server and Neo4j
+in CI: one run publishes through Neo4j, and another reads the loaded SQL Server backend
 ([DEC-087](decisions/DEC-087-slice-backend-parameter.md)). This changes no gate's state.
 
 Source-specific gates in LIONG-003, technology gates in LIONG-007, and operational

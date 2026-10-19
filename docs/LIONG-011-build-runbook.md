@@ -23,10 +23,11 @@ and CI loads the snapshot with its outbox event
 ([DEC-084](decisions/DEC-084-sps-loader-choices.md)). Extraction from it rebuilds W-SP's
 graph ([DEC-085](decisions/DEC-085-sps-extraction-records.md)), and the DEXPI generator,
 validator and parser map it ([DEC-086](decisions/DEC-086-sps-dexpi-mapping.md)).
-`scripts/run_slice.py --backend sps` runs steps 2 to 6 on W0, from the snapshot or the
-loaded SQL Server backend, publishing to Neo4j in CI; the published graph matches
-W-SP's answer key exactly, and the cross-sheet query returns TO-S2/B on DEMO-PID-101
-continuing to FROM-S1/B on DEMO-PID-102 with its sheet-link evidence
+`scripts/run_slice.py --backend sps` runs steps 2 to 6 on W0. In CI, one run publishes
+the snapshot's graph to Neo4j, where it matches W-SP's answer key exactly and the
+cross-sheet query returns TO-S2/B on DEMO-PID-101 continuing to FROM-S1/B on
+DEMO-PID-102 with its sheet-link evidence; another reads the loaded SQL Server backend,
+and its parsed graph matches the answer key exactly
 ([DEC-087](decisions/DEC-087-slice-backend-parameter.md)).
 Nothing else here is built, and no hosted database has been provisioned. The stages
 after MILESTONE-001b are future implementation work, not commands already executed.
