@@ -71,7 +71,7 @@ class StaticSchemaTests(unittest.TestCase):
         for name in CLASS_TABLES:
             self.assertEqual(cols[name][0], "ItemGuid", name)
 
-    def test_every_key_is_a_guid(self):
+    def test_every_data_table_is_keyed_by_a_guid(self):
         for name, body in re.findall(r"CREATE TABLE sps\.(\w+) \((.*?)\n\);", self.text, re.DOTALL):
             key = re.search(r"^\s+(\w+)\s+(\w+).*PRIMARY KEY", body, re.MULTILINE)
             if name in ("ItemType", "ItemProperty", "SelectEntry"):

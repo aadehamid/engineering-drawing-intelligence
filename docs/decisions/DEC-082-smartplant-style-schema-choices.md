@@ -1,4 +1,4 @@
-# DEC-082: The SmartPlant-style schema is one T-SQL file for schema sps, keyed by GUIDs, with label depictions and a per-sheet revision rule
+# DEC-082: The SmartPlant-style schema is one T-SQL file for schema sps, with GUID keys on its data tables, label depictions and a per-sheet revision rule
 
 Status: Decided
 Date: 2026-10-19
@@ -29,8 +29,10 @@ them.
    `PipingFitting`, `Nozzle`, `ProcessConnection` and `SheetLink`. The process
    connection that DEC-081 pattern 7 names is a design item drawn as a line, like a
    pipe run.
-3. **Every key is a GUID.** Each row's key is a `UNIQUEIDENTIFIER`, with no integer
-   key beside it. DEC-081 pattern 1 takes the GUID form from a secondary source only.
+3. **Data rows are keyed by GUIDs.** Each data table's key is a `UNIQUEIDENTIFIER`,
+   with no integer key beside it. DEC-081 pattern 1 takes the GUID form from a
+   secondary source only. The three dictionary tables are keyed by name instead
+   (choice 8).
 4. **Tag parts.** Vessels, instruments and pipe runs store `TagLead`, `TagNumber` and
    `TagTail` next to the composed `ItemTag`. For a pipe run these are the line-number
    parts that DEC-081 pattern 4 matches on. A fitting's tag is one column. As
@@ -48,12 +50,17 @@ them.
    values W-SP uses, the line prefix and number, and no run stores a key to it.
    REF-TECH-022 says the application adds a pipeline entry as runs are drawn and that
    the relationship between pipeline and run is implicit. Which runs belong is found
-   by matching their line parts to the group's values. It is not a design item, since
-   no source found gives it a class table of its own.
+   by matching their line parts to the group's values. The product gives the
+   pipeline a table of its own (REF-TECH-022), but no source found shows that row
+   sharing the design items' key or their columns. Keeping the line group outside
+   `DesignItem` is the agent's choice: nothing in the item tables can then point to
+   it, and it adds no item that extraction could mistake for a graph node.
 8. **Data dictionary.** `ItemType`, `ItemProperty` and `SelectEntry` describe the
    item types W-SP uses, their columns and tag parts, and the select lists for item
    state, flow sense, link sense and depiction kind. The coded columns hold the
-   select-list values as text.
+   select-list values as text. These tables are keyed by name: `ItemType` by item
+   kind, `ItemProperty` by item kind and property, and `SelectEntry` by list and
+   value.
 
 ## Alternatives considered
 

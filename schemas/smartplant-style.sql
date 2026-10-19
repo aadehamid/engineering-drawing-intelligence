@@ -7,8 +7,9 @@
 -- records the choices this file makes under the owner's delegation (DEC-080).
 --
 -- It lives in the same database as schema p3d (DEC-028). No table has a foreign key
--- (DEC-043). Every key is a GUID that stays the same in every snapshot of a world,
--- and no other backend shares it (DEC-044). Run this file once on a database without
+-- (DEC-043). Every data table's key is a GUID that stays the same in every snapshot
+-- of a world, and no other backend shares it (DEC-044); the data dictionary's tables
+-- are keyed by name. Run this file once on a database without
 -- schema sps; it creates schema sps.
 
 CREATE SCHEMA sps;
