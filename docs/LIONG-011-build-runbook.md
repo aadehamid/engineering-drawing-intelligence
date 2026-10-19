@@ -21,8 +21,11 @@ Server ([DEC-082](decisions/DEC-082-smartplant-style-schema-choices.md)). A gene
 writes W-SP's W0 snapshot and answer key ([DEC-083](decisions/DEC-083-sps-generator-choices.md)),
 and CI loads the snapshot with its outbox event
 ([DEC-084](decisions/DEC-084-sps-loader-choices.md)). Extraction from it rebuilds W-SP's
-graph, which matches W-SP's answer key exactly in a test; the DEXPI, publication and
-query steps do not yet run on W-SP ([DEC-085](decisions/DEC-085-sps-extraction-records.md)).
+graph, which matches W-SP's answer key exactly in a test
+([DEC-085](decisions/DEC-085-sps-extraction-records.md)). The DEXPI step runs on W-SP
+in CI: W0 generates, passes the four validation stages, round-trips and parses back
+to the answer key's graph ([DEC-086](decisions/DEC-086-sps-dexpi-mapping.md)).
+Publication and the query do not yet run on W-SP.
 Nothing else here is built, and no hosted database has been provisioned. The rest of MILESTONE-001b and the stages after it are future implementation work, not
 commands already executed.
 

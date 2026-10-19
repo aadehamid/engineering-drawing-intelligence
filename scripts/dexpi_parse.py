@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read DEXPI 2.0.1 files and their sidecar back into an engineering graph (DEC-077).
+"""Read DEXPI 2.0.1 files and their sidecar back into an engineering graph (DEC-077, DEC-086).
 
 Usage:
   dexpi_parse.py PATH GRAPH_FILE [REPORT_FILE]
