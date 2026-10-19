@@ -1,6 +1,6 @@
 # LIONG-010: Evaluation and acceptance evidence
 
-Status: Proposed draft v0.1. The requirements are user-approved; the fixtures, measurement protocol, controls, numerical gates, and workload below are proposed. Of its checks, only SCN-001's structured route and SCN-005's minimal invalid-reference rejection have run, on the visible R0 development fixture (see "Current evidence"). No benchmarks, public-data annotation checks, or recovery drills have been executed.
+Status: Proposed draft v0.1. The requirements are user-approved; the fixtures, measurement protocol, controls, numerical gates, and workload below are proposed. Of its checks, only SCN-001's structured route and SCN-005's minimal invalid-reference rejection have run, on the visible R0 development fixture, and SCN-001's structured route also on W-SP's W0 (see "Current evidence"). No benchmarks, public-data annotation checks, or recovery drills have been executed.
 
 ## What acceptance means
 
@@ -224,7 +224,7 @@ The report header must state the tested revision, source authority, graph revisi
 
 ## Current evidence and implementation handoff
 
-MILESTONE-001's structured slice runs in `scripts/check.sh` and CI. `scripts/run_slice.py` takes R0, R1 and R2 from the Plant 3D-style backend through DEXPI and Neo4j. Each published graph matches the answer key exactly: 17 nodes and 31 edges for R0 and R1, 15 and 26 for R2. It rejects Rbad before publication with the key's reason, "FLOW P6->VB has missing endpoint VB". That covers SCN-001's structured route on the visible development fixture and SCN-005's minimal invalid-reference rejection, not held-out or public data. All other scenario checks are not executed. No public accuracy, review-time saving, DEXPI conformance, hardware performance, security enforcement, or recovery result has been measured.
+MILESTONE-001's structured slice runs in `scripts/check.sh` and CI. `scripts/run_slice.py` takes R0, R1 and R2 from the Plant 3D-style backend through DEXPI and Neo4j. Each published graph matches the answer key exactly: 17 nodes and 31 edges for R0 and R1, 15 and 26 for R2. It rejects Rbad before publication with the key's reason, "FLOW P6->VB has missing endpoint VB". With `--backend sps`, the same script takes W-SP's W0 from the SmartPlant-style backend, from its snapshot or from SQL Server, through DEXPI and Neo4j, and the published graph matches W-SP's answer key exactly. The cross-sheet query returns TO-S2/B on DEMO-PID-101 continuing to FROM-S1/B on DEMO-PID-102, with the two sheet-link rows as evidence. That covers SCN-001's structured route on the visible development fixture and on W-SP's baseline, and SCN-005's minimal invalid-reference rejection, not held-out or public data. All other scenario checks are not executed. No public accuracy, review-time saving, DEXPI conformance, hardware performance, security enforcement, or recovery result has been measured.
 
 Implementation should first generate and inspect R0, verify the selected DEXPI subset, and establish a working source-to-graph comparison. Then add failure fixtures and role/history controls before measuring public extraction or workload performance. Preserve the same denominators and scenario IDs through that work.
 

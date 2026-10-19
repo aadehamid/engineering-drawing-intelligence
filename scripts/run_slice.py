@@ -2,12 +2,14 @@
 """Run MILESTONE-001's structured slice for one revision, end to end (DEC-058, DEC-060).
 
 Usage:
-  run_slice.py REVISION OUT_FOLDER [--database] [--answer-key KEY_FILE]
+  run_slice.py REVISION OUT_FOLDER [--backend p3d|sps] [--database] [--answer-key KEY_FILE]
 
-Steps, each a plain Python call, in order:
-  2. extract   source records from the snapshot folder fixtures/p3d-r0/REVISION, or with
-               --database from the backend LIONG_SQLSERVER names (step 1, loading it, is
-               scripts/load_p3d.py)
+--backend names the vendor-style backend: p3d, the default, holds R0's revisions, and
+sps holds W-SP's W0 (MILESTONE-001b, DEC-087). Steps, each a plain Python call, in order:
+  2. extract   source records from the backend's snapshot folder, fixtures/p3d-r0/REVISION
+               or fixtures/sps-wsp/REVISION, or with --database from the backend
+               LIONG_SQLSERVER names (step 1, loading it, is scripts/load_p3d.py or
+               scripts/load_sps.py)
   3. generate  DEXPI 2.0.1 files and their sidecar, then validate them in four stages
   4. parse     the DEXPI back into the graph, and publish it to Neo4j if LIONG_NEO4J is set
   5. query     the published snapshot's cross-sheet connections
@@ -34,8 +36,11 @@ import dexpi_generate
 import dexpi_parse
 import dexpi_validate
 import extract_p3d
+import extract_sps
 
-SNAPSHOTS = extract_p3d.loader.ROOT / "fixtures" / "p3d-r0"
+# Each backend's extractor and the folder that holds its snapshots, one per revision.
+BACKENDS = {"p3d": (extract_p3d, Path("fixtures") / "p3d-r0"), "sps": (extract_sps, Path("fixtures") / "sps-wsp")}
+SNAPSHOTS = extract_p3d.loader.ROOT / BACKENDS["p3d"][1]
 OUTPUTS = ("source-records.json", "source-manifest.json", "exchange-manifest.json", "dexpi", "graph.json",
            "graph-manifest.json", "publication-receipt.json", "query.json", "result.json", "comparison")
 
@@ -48,9 +53,10 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def run(revision: str, out: Path, database: bool = False, now: str | None = None) -> dict:
+def run(revision: str, out: Path, database: bool = False, now: str | None = None, backend: str = "p3d") -> dict:
     """Run steps 2 to 5 and return the result: accepted with its graph, or rejected with a reason."""
     now = now or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    extractor, snapshots = BACKENDS[backend]
     out.mkdir(parents=True, exist_ok=True)
     for name in OUTPUTS:  # a run's records must all come from this run
         path = out / name
@@ -60,15 +66,15 @@ def run(revision: str, out: Path, database: bool = False, now: str | None = None
             path.unlink()
 
     if database:
-        with extract_p3d.loader.connect() as conn:
-            source_revision, rows = extract_p3d.rows_from_database(conn)
-        origin = "sqlserver:" + os.environ["LIONG_SQLSERVER"].split(",", 4)[4] + "/p3d"
+        with extractor.loader.connect() as conn:
+            source_revision, rows = extractor.rows_from_database(conn)
+        origin = "sqlserver:" + os.environ["LIONG_SQLSERVER"].split(",", 4)[4] + f"/{backend}"
         if source_revision["revision"] != revision:
             raise SystemExit(f"the backend holds {source_revision['revision']}, not {revision}")
     else:
-        source_revision, rows = extract_p3d.rows_from_snapshot(SNAPSHOTS / revision)
-        origin = f"snapshot:fixtures/p3d-r0/{revision}"
-    records = extract_p3d.extract(source_revision, rows, origin, now)
+        source_revision, rows = extractor.rows_from_snapshot(extract_p3d.loader.ROOT / snapshots / revision)
+        origin = f"snapshot:{(snapshots / revision).as_posix()}"
+    records = extractor.extract(source_revision, rows, origin, now)
     dump(out / "source-records.json", records)
     dump(out / "source-manifest.json", records["source_manifest"] | {"source_revision": records["source_revision"]})
 
@@ -128,6 +134,14 @@ def main(argv: list[str]) -> int:
     database = "--database" in args
     if database:
         args.remove("--database")
+    backend = "p3d"
+    if "--backend" in args:
+        index = args.index("--backend")
+        backend = args[index + 1] if index + 1 < len(args) else ""
+        del args[index:index + 2]
+        if backend not in BACKENDS:
+            print(__doc__, file=sys.stderr)
+            return 2
     key = None
     if "--answer-key" in args:
         index = args.index("--answer-key")
@@ -137,7 +151,7 @@ def main(argv: list[str]) -> int:
         print(__doc__, file=sys.stderr)
         return 2
     revision, out = args[0], Path(args[1])
-    result = run(revision, out, database)
+    result = run(revision, out, database, backend=backend)
     print(f"{revision}: {result['outcome']}" + (f": {result['reason']}" if result["outcome"] == "rejected" else ""))
     if key is None:
         return 0
