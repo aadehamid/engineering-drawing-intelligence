@@ -199,6 +199,6 @@ invoked, no documents were uploaded, and no license agreement was accepted.
 
 ## Review outcome
 
-Primary evidence establishes a native DEXPI 2.0 example and a separately licensed legacy example collection. It does not yet establish a working native 2.0 toolchain. Model import access, exact 2.0-family version selection, dataset-level rights checks, and public scan coverage remain open.
+Primary evidence establishes a native DEXPI 2.0 example and a separately licensed legacy example collection. It does not yet establish a working native 2.0 toolchain. Dataset-level rights checks and public scan coverage remain open. [The decision register](LIONG-REG-001-decisions.md#open-questions-and-package-level-gates) holds the state of the DEXPI questions (GATE-001).
 
 No new requirement or ontology adoption is approved by this register. The next review should decide the artifact set and bounded mapping candidates before implementation planning.
