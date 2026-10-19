@@ -222,6 +222,21 @@ class DerivationTest(unittest.TestCase):
                 found.append(type(error).__name__)
         return found
 
+    def test_the_latest_revision_is_the_one_recorded_last(self):
+        # W0.2 approved, then W0.10 recorded later and not yet approved: the drawing is
+        # at W0.10 with no approval, though "2" sorts after "10" as text
+        rows = snapshot_rows()
+        sheet = rows["Sheet"][0]["SheetGuid"]
+        rows["SheetRevision"] += [
+            {"RevisionGuid": str(uuid.uuid4()).upper(), "SheetGuid": sheet, "MajorRev": "W0", "MinorRev": "2",
+             "RevisedOn": "2030-02-02T08:00:00", "Approver": "DEMO-APPROVER", "ApprovedOn": "2030-02-02T09:00:00"},
+            {"RevisionGuid": str(uuid.uuid4()).upper(), "SheetGuid": sheet, "MajorRev": "W0", "MinorRev": "10",
+             "RevisedOn": "2030-02-03T08:00:00", "Approver": None, "ApprovedOn": None}]
+        results = self.in_both_orders(rows)
+        self.assertEqual(results[0], results[1])
+        drawing = next(d for d in results[0]["drawings"] if d["artifact_id"] == extract.sheet_id(sheet))
+        self.assertEqual((drawing["revision"], drawing["status"]), ("W0.10", None))
+
     def test_a_to_side_that_lost_its_mate_stops_extraction(self):
         # The From side still names the To side, which names nobody: the sides disagree
         rows = snapshot_rows()

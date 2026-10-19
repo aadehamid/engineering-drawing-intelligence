@@ -61,7 +61,9 @@ owner can reverse any of it.
    reject, as DEC-075 does. A deleted nozzle counts as such an item: it is not
    collapsed into its vessel, so a segment end or an instrument parent through it
    names the nozzle.
-7. **Drawing approval.** A drawing's status is `Approved` when its latest revision row
+7. **Drawing approval.** A drawing's latest revision is the row the source recorded
+   last, by its recorded time; its labels are text, so they are not sorted as
+   numbers. A drawing's status is `Approved` when that latest revision row
    has both an approver and an approval date, the fields
    [DEC-039](DEC-039-approval-in-vendor-fields.md) names, and empty otherwise.
 8. **No answer key.** The extractor never opens one; a test records every file it
