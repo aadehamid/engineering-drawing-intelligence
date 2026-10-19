@@ -28,8 +28,8 @@ loaded SQL Server backend, publishing to Neo4j in CI; the published graph matche
 W-SP's answer key exactly, and the cross-sheet query returns TO-S2/B on DEMO-PID-101
 continuing to FROM-S1/B on DEMO-PID-102 with its sheet-link evidence
 ([DEC-087](decisions/DEC-087-slice-backend-parameter.md)).
-Nothing else here is built, and no hosted database has been provisioned. The rest of MILESTONE-001b and the stages after it are future implementation work, not
-commands already executed.
+Nothing else here is built, and no hosted database has been provisioned. The stages
+after MILESTONE-001b are future implementation work, not commands already executed.
 
 Document approval and gate closure precede dependent build work. No step here
 authorizes cloud provisioning, charges, sensitive data, or publishing datasets.
