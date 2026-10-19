@@ -122,6 +122,7 @@ except DEC-077's three least-settled choices, which the owner approved in
 | DEC-076 | A graph snapshot is published once to Neo4j under its content hash, and the cross-sheet query reads one snapshot | Decided by the agent under DEC-073 | [record](decisions/DEC-076-graph-publication.md) |
 | DEC-077 | The p3d records map to DEXPI 2.0.1 as one file per drawing, with a LIONG sidecar for what DEXPI cannot carry | Decided by the agent under DEC-073; three choices approved by the owner in DEC-078 | [record](decisions/DEC-077-dexpi-mapping.md) |
 | DEC-081 | The SmartPlant-style schema borrows seven storage patterns from Smart P&ID, renamed, with nozzle rows and an implied pipeline | Decided by the agent under DEC-080 | [record](decisions/DEC-081-smartplant-style-patterns.md) |
+| DEC-082 | The SmartPlant-style schema is one T-SQL file for schema sps, keyed by GUIDs, with label depictions and a per-sheet revision rule | Decided by the agent under DEC-080 | [record](decisions/DEC-082-smartplant-style-schema-choices.md) |
 
 ## New proposals
 

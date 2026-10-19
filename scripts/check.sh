@@ -19,6 +19,7 @@ uv run --locked python scripts/test_liong_facts.py
 uv run --locked python scripts/world.py check
 uv run --locked python scripts/test_world.py
 uv run --locked python scripts/test_plant3d_schema.py
+uv run --locked python scripts/test_smartplant_schema.py
 uv run --locked python scripts/generate_p3d.py --check
 uv run --locked python scripts/test_generate_p3d.py
 uv run --locked python scripts/test_load_p3d.py

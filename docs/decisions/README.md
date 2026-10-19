@@ -76,6 +76,7 @@ state; a register row links here when its decision has a record.
 | [DEC-079](DEC-079-gate-001-003-closed-for-slice.md) | GATE-001 and the slice's part of GATE-003 are closed | Decided | 2026-10-18 |
 | [DEC-080](DEC-080-milestone-001b-night-delegation.md) | The agent decides open questions for the owner during the MILESTONE-001b night run | Decided | 2026-10-19 |
 | [DEC-081](DEC-081-smartplant-style-patterns.md) | The SmartPlant-style schema borrows seven storage patterns from Smart P&ID, renamed, with nozzle rows and an implied pipeline | Decided | 2026-10-19 |
+| [DEC-082](DEC-082-smartplant-style-schema-choices.md) | The SmartPlant-style schema is one T-SQL file for schema sps, keyed by GUIDs, with label depictions and a per-sheet revision rule | Decided | 2026-10-19 |
 
 ## Record format
 
