@@ -29,6 +29,7 @@ uv run --locked python scripts/test_load_sps.py
 uv run --locked python scripts/dexpi_pins.py check
 uv run --locked python scripts/test_dexpi_pins.py
 uv run --locked python scripts/test_extract_p3d.py
+uv run --locked python scripts/test_extract_sps.py
 uv run --locked python scripts/test_graph_publish.py
 uv run --locked python scripts/test_dexpi_generate.py
 uv run --locked python scripts/test_dexpi_parse.py

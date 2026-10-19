@@ -7,8 +7,9 @@ Usage:
 A result file holds {"outcome": "accepted", "graph": GRAPH} or
 {"outcome": "rejected", "reason": TEXT}. GRAPH is the published graph, in the shape
 scripts/graph_publish.py reads. The comparison maps every source ID
-(`p3d:object:<ObjectId>`, `p3d:drawing:<DrawingId>`) to the answer key's alias through
-the key's `keys` table, then requires the expected outcome and, for an accepted
+(`p3d:object:<ObjectId>` and `p3d:drawing:<DrawingId>`, or `sps:item:<GUID>`,
+`sps:line:<GUID>` and `sps:sheet:<GUID>`) to the answer key's alias through the key's
+`keys` table, for the backend the key names, then requires the expected outcome and, for an accepted
 revision, exactly the expected nodes and edges; for a rejected one, exactly the
 expected reason. It writes report.json and report.md to OUT_DIR, and exits 1 on any
 difference.
@@ -22,25 +23,28 @@ from pathlib import Path
 import re
 import sys
 
-SOURCE_ID = re.compile(r"p3d:(?:object|drawing):(\d+)")
+GUID = r"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"
+SOURCE_ID = re.compile(rf"(p3d):(?:object|drawing):(\d+)|(sps):(?:item|line|sheet):({GUID})")
 
 
 class CompareError(Exception):
     """The result names a source key the answer key does not know."""
 
 
-def aliases(answer_key: dict) -> dict[int, str]:
-    return {key: alias for alias, key in answer_key["keys"].items()}
+def aliases(answer_key: dict) -> dict[tuple[str, str], str]:
+    """Each (backend, source key) in the answer key, mapped to its alias."""
+    return {(answer_key["backend"], str(key)): alias for alias, key in answer_key["keys"].items()}
 
 
-def alias(identifier: str, names: dict[int, str]) -> str:
+def alias(identifier: str, names: dict[tuple[str, str], str]) -> str:
     match = SOURCE_ID.fullmatch(identifier)
-    if not match or int(match.group(1)) not in names:
+    key = (match.group(1) or match.group(3), match.group(2) or match.group(4)) if match else None
+    if key not in names:
         raise CompareError(f"{identifier} is not a key in the answer key")
-    return names[int(match.group(1))]
+    return names[key]
 
 
-def normalize_graph(graph: dict, names: dict[int, str]) -> tuple[list[str], list[list[str]]]:
+def normalize_graph(graph: dict, names: dict[tuple[str, str], str]) -> tuple[list[str], list[list[str]]]:
     """The graph as the answer key writes it: sorted aliases and sorted [kind, source, target]."""
     nodes = sorted(alias(node["id"], names) for node in graph["nodes"])
     edges = sorted([edge["kind"], alias(edge["source"], names), alias(edge["target"], names)]
@@ -48,7 +52,7 @@ def normalize_graph(graph: dict, names: dict[int, str]) -> tuple[list[str], list
     return nodes, edges
 
 
-def normalize_reason(reason: str, names: dict[int, str]) -> str:
+def normalize_reason(reason: str, names: dict[tuple[str, str], str]) -> str:
     return SOURCE_ID.sub(lambda match: alias(match.group(0), names), reason)
 
 

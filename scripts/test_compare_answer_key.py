@@ -18,6 +18,7 @@ import compare_answer_key as cmp  # noqa: E402
 
 REAL_KEY = json.loads((Path(__file__).resolve().parents[1] / "fixtures" / "answer-keys" / "p3d-r0.json").read_text())
 KEY = {
+    "backend": "p3d",
     "keys": {"X1": 108, "X2": 109, "P5": 115, "S1": 901, "S2": 902},
     "revisions": {
         "R0": {"expected": "accepted", "reason": None, "nodes": ["P5", "S1", "S2", "X1", "X2"],
@@ -100,6 +101,23 @@ class CompareTest(unittest.TestCase):
         result = {"outcome": "rejected", "reason": "FLOW p3d:object:115->p3d:object:109 has missing endpoint p3d:object:109"}
         self.assertEqual(cmp.compare(result, KEY, "Rbad")["differences"],
                          ["reason is 'FLOW P5->X2 has missing endpoint X2', expected 'FLOW X2->P5 has missing endpoint P5'"])
+
+    def test_a_smartplant_style_graph_maps_through_its_guids(self):
+        a, b, s = "0A1B2C3D-0000-5000-8000-000000000001", "0A1B2C3D-0000-5000-8000-000000000002", \
+            "0A1B2C3D-0000-5000-8000-000000000003"
+        key = {"backend": "sps", "keys": {"X1": a, "P5": b, "S2": s},
+               "revisions": {"W0": {"expected": "accepted", "reason": None, "nodes": ["P5", "S2", "X1"],
+                                    "edges": [["FLOW", "X1", "P5"], ["ON_SHEET", "P5", "S2"]]}}}
+        graph = {"nodes": [{"id": f"sps:item:{a}"}, {"id": f"sps:line:{b}"}, {"id": f"sps:sheet:{s}"}],
+                 "edges": [{"kind": "FLOW", "source": f"sps:item:{a}", "target": f"sps:line:{b}"},
+                           {"kind": "ON_SHEET", "source": f"sps:line:{b}", "target": f"sps:sheet:{s}"}]}
+        self.assertEqual(cmp.compare(accepted(graph), key, "W0")["differences"], [])
+        # A Plant 3D ID never matches a SmartPlant-style key, and the reverse
+        graph["nodes"].append({"id": "p3d:object:108"})
+        self.assertEqual(cmp.compare(accepted(graph), key, "W0")["differences"],
+                         ["p3d:object:108 is not a key in the answer key"])
+        self.assertEqual(cmp.compare(accepted({"nodes": [{"id": f"sps:item:{a}"}], "edges": []}), KEY, "R0")["differences"],
+                         [f"sps:item:{a} is not a key in the answer key"])
 
     def test_reports_are_written(self):
         with tempfile.TemporaryDirectory() as folder:
