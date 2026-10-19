@@ -34,3 +34,17 @@ pair check (fixed in `c2cd189`), then "15 nodes", "seventeen nodes", a backticke
 number, and a long noun phrase escaping the sweep (redesigned in `d956bd2` and
 `afc3d7d`). The Cursor review of #8 then found `17-node/31-edge` in SCN-001
 escaping it (fixed in `55231c3`).
+
+## Status text and decision records claim only what their tests and sources show
+
+A sentence that says what CI or a run does names the test that does it, or can be
+checked against that test, and claims nothing more; two runs stay two runs. A
+decision record states only what its cited sources say. For a vendor documentation
+portal that renders neighbouring topics on one page, that is the cited topic's own
+content.
+
+Taught by: the Cursor review of #50 found LIONG-010 and LIONG-011 joining a snapshot
+run published to Neo4j and a SQL Server run into one (fixed in `0b5ad9c` and
+`385b0ae`). The Cursor review of #43 found register rows citing section pages and
+claims read from neighbouring topics (fixed in `88deb31`). The Cursor review of #46
+found DEC-083 naming the wrong end item for a vessel (fixed in `40c760c`).
