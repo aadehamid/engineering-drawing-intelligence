@@ -30,3 +30,11 @@ workspace/
 __pycache__/
 
 .venv/
+
+# Entire state and generated agent integrations
+/.entire/
+/.claude/
+/.codex/
+/.cursor/
+/.opencode/
+/.pi/
