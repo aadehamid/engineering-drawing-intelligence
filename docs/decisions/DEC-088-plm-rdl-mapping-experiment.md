@@ -37,7 +37,7 @@ recommendations.
   way to close or refute its mapping gate.
 - Trying COPI's alignments instead: rejected for now — its claims are unverified
   ([DEC-089](DEC-089-registered-candidates-posture.md)), while REF-STD-012's
-  artifact is pinned, hashed, and license-stamped.
+  artifact is inspected and hashed, with its license stated in the artifact.
 
 ## Owner's words
 
@@ -57,8 +57,8 @@ The owner answered:
 
 ## Evidence
 
-- REF-STD-012: the inspected downloads, the pinned artifact candidate, its
-  hashes, and the CC BY-SA 4.0 license triple recorded 2026-11-08.
+- REF-STD-012: the inspected downloads, the artifact candidate and its hashes,
+  and the CC BY-SA 4.0 license triple recorded 2026-11-08.
 - DEC-089: the posture for the other candidates, decided in the same owner
   message.
 - The register's reuse-gate rules, which keep adoption closed until an owner

@@ -26,10 +26,12 @@ owner approved the recommendations.
 3. **OntoCAPE and PREMIS remain background references.** No experiment, mapping,
    or artifact pinning is owed to them.
 4. **A PageIndex demo, bounded to the synthetic fixtures.** One trial of the
-   Page Search API answers a page-relevance question over a synthetic drawing
-   set with the service's free credit, so the evidence stays synthetic. Nothing
-   internal goes to the service, nothing is built on it, and its terms, privacy,
-   upload, and retention conditions are reviewed before any second use.
+   Page Search API, within about one hour, answers a page-relevance question
+   over a synthetic drawing set with the service's free credit, so the evidence
+   stays synthetic. Nothing internal goes to the service, nothing is built on
+   it, and — as this record's addition beyond the quoted recommendation — its
+   terms, privacy, upload, and retention conditions are reviewed before any
+   second use.
 5. **No adoption is approved.** This decision approves postures and one demo
    only; every registered candidate keeps its reuse gates.
 
