@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M6XZMXXJF7GAKPY0FPR1FENT",
+  "session_id": "01a1b976-2592-723e-9919-3e8efdc4a8ee",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-08T16:25:16.746087Z",
+  "branch": "decision-reference-actions",
+  "checkpoints_count": 2,
+  "save_step_count": 3,
+  "files_touched": [],
+  "agent": "Pi",
+  "model": "glm-5.3-flash:cloud",
+  "turn_id": "a0feff689f60",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 289123,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 5197248,
+    "output_tokens": 8539,
+    "api_call_count": 20
+  },
+  "redaction": {
+    "replacements": 14,
+    "layers": {
+      "betterleaks": 9,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 1,
+      "credentialed_uri": 0,
+      "entropy": 5,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  },
+  "session_metrics": {
+    "turn_count": 8
+  }
+}
