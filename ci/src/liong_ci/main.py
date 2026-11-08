@@ -6,20 +6,56 @@ from dagger import DefaultPath, Ignore, check, dag, function, object_type
 # Allow project inputs, not the host checkout's Git history or local agent state.
 # Everything else is small (about 4 MB tracked), so this list only drops what the
 # checks do not read and what must never leave the laptop.
-# Allow project inputs, not the host checkout's Git history or local agent state.
-# Everything tracked is small (about 4 MB), so plain exclude patterns are enough.
+# Allow project inputs, not the host checkout's Git history, local agent state, or
+# Git-ignored secrets. The list mirrors .gitignore, so the source this check sees
+# matches what a fresh CI checkout contains; nothing under here can leave the
+# laptop unasked.
 SOURCE_FILTER = [
     "**/.git",
     "**/.git/**",
     "**/.entire",
     "**/.entire/**",
+    "**/.claude",
+    "**/.claude/**",
+    "**/.codex",
+    "**/.codex/**",
+    "**/.cursor",
+    "**/.cursor/**",
+    "**/.opencode",
+    "**/.opencode/**",
+    "**/.pi",
+    "**/.pi/**",
+    "**/.env",
+    "**/.env.*",
+    "**/*.pem",
+    "**/*.key",
+    "**/*.p12",
+    "**/credentials.json",
+    "**/.DS_Store",
+    "**/.AppleDouble",
+    "**/.LSOverride",
+    "**/._*",
+    "**/Thumbs.db",
+    "**/Desktop.ini",
+    "**/~$*",
+    "**/*.tmp",
+    "**/*.temp",
+    "**/*.swp",
+    "**/*.swo",
+    "**/.vscode",
+    "**/.vscode/**",
+    "**/.idea",
+    "**/.idea/**",
+    "**/.delta",
+    "**/.delta/**",
+    "workspace",
+    "workspace/**",
     "**/.venv",
     "**/__pycache__",
     "**/.pytest_cache",
     "**/.ruff_cache",
     "**/.mypy_cache",
     "**/node_modules",
-    "**/.DS_Store",
     "out",
     "out/**",
 ]
