@@ -1,0 +1,10 @@
+you should be using dagger. you can turn repo public for this session and turn back to private when you are done
+
+---
+
+is this reconciled way of working with dagger+entire?
+
+---
+
+this is a great ontology that we can use here as well . can you review it and record it in the repo if you agree
+https://brickschema.org/
