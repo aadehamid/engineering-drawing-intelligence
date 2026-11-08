@@ -3,7 +3,7 @@
   "checkpoint_id": "01M6WWFYF8P7J5Z48YJFYZ3EV8",
   "strategy": "manual-commit",
   "branch": "brick-reference-register",
-  "checkpoints_count": 4,
+  "checkpoints_count": 6,
   "files_touched": [
     "scripts/hooks/pre-push"
   ],
@@ -21,24 +21,31 @@
       "compact_transcript": "/1/transcript.jsonl",
       "content_hash": "/1/content_hash.txt",
       "prompt": "/1/prompt.txt"
+    },
+    {
+      "metadata": "/2/metadata.json",
+      "transcript": "/2/full.jsonl",
+      "compact_transcript": "/2/transcript.jsonl",
+      "content_hash": "/2/content_hash.txt",
+      "prompt": "/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 164678,
+    "input_tokens": 270280,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 2244246,
-    "output_tokens": 16557,
-    "api_call_count": 43
+    "cache_read_tokens": 2972608,
+    "output_tokens": 23483,
+    "api_call_count": 61
   },
   "redaction": {
-    "replacements": 3,
+    "replacements": 5,
     "layers": {
       "betterleaks": 0,
       "connection_string": 0,
       "credential_key": 0,
-      "credential_value": 1,
+      "credential_value": 2,
       "credentialed_uri": 0,
-      "entropy": 2,
+      "entropy": 3,
       "key_context": 0,
       "provider_token": 2,
       "shell_stdin": 0

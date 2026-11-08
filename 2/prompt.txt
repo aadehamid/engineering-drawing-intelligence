@@ -1,0 +1,31 @@
+how do i solev these warnings
+
+[Skill warnings]
+  "supacode-cli" collision:
+    ✓ auto (user) ~/.pi/agent/skills/supacode-cli/SKILL.md
+    ✗ ~/.agents/skills/supacode-cli/SKILL.md (skipped)
+  "tinyfish-authenticated" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-authenticated/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-authenticated/SKILL.md (skipped)
+  "tinyfish-automation" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-automation/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-automation/SKILL.md (skipped)
+  "tinyfish-browser" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-browser/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-browser/SKILL.md (skipped)
+  "tinyfish-datasets" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-datasets/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-datasets/SKILL.md (skipped)
+  "tinyfish-monitor" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-monitor/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-monitor/SKILL.md (skipped)
+  "tinyfish-web" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-web/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-web/SKILL.md (skipped)
+  "tinyfish-websearch" collision:
+    ✓ auto (user) ~/.pi/agent/skills/tinyfish-websearch/SKILL.md
+    ✗ ~/.agents/skills/tinyfish-websearch/SKILL.md (skipped)
+
+---
+
+go ahead
