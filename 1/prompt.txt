@@ -1,0 +1,27 @@
+how do i solve all of the below
+
+[Extension issues]
+  builtin:mcp
+    Extension /Users/hamidadesokan/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts registers command `/mcp`, so built-in extension `mcp`
+was not loaded. To use `mcp`, run `pi config` and make sure it is enabled under Built-in extensions, then disable or remove the existing
+extension. We recommend only having one or the other loaded at a time.
+
+
+ Obsidian CLI extension loaded (tool: obsidian_cli)
+
+ Warning: /Users/hamidadesokan/.pi/agent/mcp.json: Ignored settings (details in /mcp-adapter): "eraser": lifecycle.
+
+ Warning: MCP server "reason-network" registered by /Users/hamidadesokan/.pi/agent/extensions/reason-network.ts: ignored settings exposure:
+ deferred.
+
+ Warning: Extension package "builtin:mcp": Extension /Users/hamidadesokan/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts registers
+ command `/mcp`, so built-in extension `mcp` was not loaded. To use `mcp`, run `pi config` and make sure it is enabled under Built-in
+ extensions, then disable or remove the existing extension. We recommend only having one or the other loaded at a time.
+
+---
+
+I will like to use the one that comes with pi itself?
+
+---
+
+do the clean up
