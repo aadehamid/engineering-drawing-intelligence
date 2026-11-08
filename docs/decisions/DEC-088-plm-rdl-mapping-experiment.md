@@ -16,15 +16,13 @@ recommendations.
 
 ## Decision
 
-1. **An experiment, not an adoption.** The project pins
+1. **An experiment, not an adoption.** Before the first pin, the license triple of every PLM module and of the CFIHOS artifact is read, as [REF-STD-012](../LIONG-REF-001-reference-register.md) requires, and the owner decision before any reuse remains separate from this one. The project then pins
    `https://rds.posccaesar.org/ontology/plm/ont/equipment/0.9.1/plm-equipment.ttl`
    and its imports with SHA-256 hashes, and maps a bounded subset of its
    equipment terms against the equipment records the checks already validate
    (R0's and W-SP's). No graph entity in the published graph takes Brick,
    PLM-RDL, or any other external vocabulary as its class during the experiment.
-2. **Read-only and self-contained.** Redistribution of the pinned file or of
-   derived vocabulary is out of scope; CC BY-SA 4.0's share-alike applies only
-   if a later adoption decision decides otherwise. The experiment writes no
+2. **Read-only and self-contained.** The experiment redistributes nothing, so it stays inside CC BY-SA 4.0, whose share-alike conditions apply to any redistribution of adapted content. The experiment writes no
    pipeline code into the checks; a mapping note and fixtures are its outputs.
 3. **Evidence first.** The experiment's findings land in a reference-register
    note under REF-STD-012, and reuse then waits for its own owner decision. A
