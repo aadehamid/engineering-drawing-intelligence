@@ -1,0 +1,67 @@
+give what you know of this project can you share a prompt to search for publickly available ontology that we can reuse here
+
+---
+
+use tiny to search Find publicly available ontologies/vocabularies that LIONG could reuse for a
+   pipeline that turns engineering P&ID drawings into a validated, queryable graph.
+
+   Project context:
+   - Inputs are P&ID drawings and their data from two vendor-style SQL Server
+     backends modeled on AutoCAD Plant 3D and Hexagon SmartPlant P&ID storage.
+   - The exchange format is DEXPI 2.0.1 (pinned XSD and Plant/Core models); the
+     output is a Neo4j property graph of equipment, tags, drawings, revisions,
+     sheets, off-page-connector pairs, pipe runs and their pipelines, nozzles,
+     and instruments (e.g., PI, LT) with exact match against an answer key.
+   - Provenance (drawing revision, approval, modification history) is a core
+     requirement, not an afterthought.
+   - Semantic stack: RDF/OWL/SKOS concepts validated with SHACL; entities carry
+     QUDT quantity kinds; a W3C PROV-O candidate covers document provenance and
+     SOSA/SSN is the candidate for measurement (observation, feature of interest).
+   - A separate Party and Core ontology (in progress in a shared release) covers
+     people, organizations, roles, and core business objects.
+
+   What I need you to find — one or more per area, with the strongest first:
+   1. Equipment and plant-item taxonomy for process plants (pumps, vessels,
+      valves, instrument loops, piping networks) — e.g., candidates like ISO
+      15926-2 with its reference data, CFIHOS, ISA-95/88, or others I haven't
+      found; prefer ones with published, machine-readable artifacts.
+   2. Drawing/diagram and symbol semantics: vocabularies that distinguish a
+      symbol on a drawing from the physical item it represents, off-page
+      continuation, and sheet-to-sheet connections.
+   3. Instrumentation and measurement points compatible with the SOSA
+      observation model and with instrument loop tag semantics.
+   4. Document, revision, approval, and change-management semantics that go
+      beyond PROV-O (e.g., engineering document ontologies, MOC workflows).
+   5. Cross-industry engineering-asset ontologies suitable as upper/bridge
+      layers (BFO-based or similar) worth aligning a core ontology to.
+
+   For each candidate, report exactly:
+   - Name, publisher, and the precise version/release to use, with a permanent
+     URL for the artifact (TTL/OWL/RDF preferred) or tagged source commit.
+   - License with the exact statement and where it is printed on the artifact,
+     plus any dependency imports and their licenses.
+   - Maturity signals: version date, standards-body status, release cadence,
+     known production adopters.
+   - Scope fit: which of the five areas it covers, with 2-3 example terms
+     quoted verbatim (IRI + rdfs:label/comment).
+   - What it cannot cover for a P&ID use case.
+   - Whether it is SHACL-validated, SKOS-organized, or plain OWL.
+   - Any tooling needed to consume it (and its license).
+
+   Exclusions — already inspected, do not re-report: DEXPI itself, QUDT,
+   PROV-O, SOSA/SSN, RealEstateCore, Brick, IOF Core, POSC Caesar/ISO 15926
+   RDL (access was 403; note if you can reach their primary artifacts and
+   quote a working URL), W3C Web Annotation, pyDEXPI.
+
+   Hard rules:
+   - Primary sources only: publisher pages, tagged releases, or repository
+     commits — never blog posts or aggregator copy. For anything on GitHub or
+     GitLab, read it via the API at a pinned commit.
+   - Never claim license clearance, conformance, or completeness; state what
+     the inspected source supports.
+   - Where a term count, version number, or date is given, it must come from
+     the pinned artifact you inspected.
+
+---
+
+also access https://search.pageindex.ai/examples/steel-shop-drawing for this project. Then we document this one and the research result you just sheared together
