@@ -41,10 +41,16 @@ recommendations.
 
 ## Owner's words
 
-On 2026-11-08 (UTC), reviewing the agent's recommendations on the registered
-ontology candidates and the PageIndex review:
+On 2026-11-08 (UTC), after the reference-register round, the agent recommended, in
+its own words in the session:
 
-The owner said:
+1. "PLM-RDL equipment module — trial it first. ... pin plm-equipment.ttl
+   0.9.1, hash it, and run a small mapping experiment against R0's and W-SP's
+   equipment records — read-only, no adoption, no redistribution." With the
+   caveats recorded in DEC-089: an adoption decision later, and CC BY-SA 4.0
+   share-alike conditions on any redistribution.
+
+The owner answered:
 
 > I like your recommendations. let us act on them.
 

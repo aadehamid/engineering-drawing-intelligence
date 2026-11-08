@@ -17,8 +17,9 @@ owner approved the recommendations.
 ## Decision
 
 1. **CCO stays a reference.** Whether an upper layer built on BFO and CCO should
-   align or replace anything is deferred until the owner's shared-release work
-   decides the core ontology's fate. This record starts no alignment work.
+   align or replace anything is deferred to an owner decision, which is exactly
+   the decision question [REF-STD-013](../LIONG-REF-001-reference-register.md)
+   records; this record starts no alignment work and keeps the gate open.
 2. **COPI stays on watch.** Its CC BY 4.0 license is recorded, but its ISO
    15926-4/CFIHOS/DEXPI alignment claims remain unverified. It is a source of
    mapping ideas for DEC-088's experiment, not a vocabulary to consume.
@@ -45,10 +46,22 @@ owner approved the recommendations.
 
 ## Owner's words
 
-On 2026-11-08 (UTC), reviewing the agent's recommendations on the registered
-ontology candidates and the PageIndex review:
+On 2026-11-08 (UTC), after the reference-register round, the agent recommended, in
+its own words in the session:
 
-The owner said:
+1. On CCO and BFO: "keep CCO as reference reading; revisit only when the
+   shared-release question is settled. If that decision does land and wants a
+   BFO-based upper layer, CCO is then the obvious candidate."
+2. On COPI: "watch, don't adopt ... Its real near-term value is a source of
+   mapping ideas for the PLM-RDL experiment."
+3. On OntoCAPE and PREMIS: "leave as recorded."
+4. On PageIndex: "a one-hour trial against the synthetic fixtures with the $5
+   free credit would produce an honest 'does it find the right pages in a
+   drawing set' data point. But it's a hosted third-party service — drawings only go up
+   in synthetic, nothing-internal form, per the corpus rules, and its retention
+   terms are unread. I wouldn't build anything on it yet."
+
+The owner answered:
 
 > I like your recommendations. let us act on them.
 
