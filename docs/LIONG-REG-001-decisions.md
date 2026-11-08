@@ -101,6 +101,8 @@ Later provider, independence, role, and drafting confirmations are recorded here
 | DEC-078 | The owner approves DEC-077's three least-settled mapping choices | Owner answered: "yes to all three" | [record](decisions/DEC-078-dec-077-choices-approved.md) |
 | DEC-079 | GATE-001 and the slice's part of GATE-003 are closed | Owner answered: "close" | [record](decisions/DEC-079-gate-001-003-closed-for-slice.md) |
 | DEC-080 | The agent decides open questions for the owner during the MILESTONE-001b night run | Owner chose the option "Yes, decide for me" | [record](decisions/DEC-080-milestone-001b-night-delegation.md) |
+| DEC-088 | A bounded PLM-RDL equipment mapping experiment precedes any vocabulary reuse | Owner answered: "I like your recommendations. let us act on them." | [record](decisions/DEC-088-plm-rdl-mapping-experiment.md) |
+| DEC-089 | The registered ontology candidates stay references, and the PageIndex demo is bounded to the synthetic fixtures | Owner answered: "I like your recommendations. let us act on them." | [record](decisions/DEC-089-registered-candidates-posture.md) |
 
 ## Decisions made under delegation
 

@@ -82,6 +82,8 @@ state; a register row links here when its decision has a record.
 | [DEC-085](DEC-085-sps-extraction-records.md) | SmartPlant-style extraction rebuilds W-SP's segments, flows, parent and continuation from the rows, keyed by the backend's GUIDs | Decided | 2026-10-19 |
 | [DEC-086](DEC-086-sps-dexpi-mapping.md) | W-SP's records map to DEXPI 2.0.1 through DEC-077's mapping, with sps identifier contexts, hand valves as OperatedValve and LT as category L | Decided | 2026-10-19 |
 | [DEC-087](DEC-087-slice-backend-parameter.md) | The slice runner takes the backend as a parameter; in CI, one W-SP run publishes through Neo4j and another reads the loaded SQL Server backend | Decided | 2026-10-19 |
+| [DEC-088](DEC-088-plm-rdl-mapping-experiment.md) | A bounded PLM-RDL equipment mapping experiment precedes any vocabulary reuse | Decided | 2026-11-08 |
+| [DEC-089](DEC-089-registered-candidates-posture.md) | The registered ontology candidates stay references, and the PageIndex demo is bounded to the synthetic fixtures | Decided | 2026-11-08 |
 
 ## Record format
 
