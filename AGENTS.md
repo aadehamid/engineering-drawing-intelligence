@@ -25,7 +25,10 @@ the reading order and which document is authoritative for what.
 ## Checks
 
 `scripts/check.sh` runs every mechanical check. CI runs it on every pull request,
-and the pre-push hook runs it before every push. It fails if any check changes a
+and the pre-push hook runs it before every push. Dagger Cloud runs the same
+script on every push through the `ci/` module, with the SQL Server and Neo4j
+services CI configures; run it locally the same way with `dagger -m ci call
+project`. It fails if any check changes a
 tracked file, an untracked file that is not gitignored, the index, or git status.
 
 The review archive in `docs/releases/` contains the root baseline files, every
