@@ -24,9 +24,9 @@ recommendations.
    PLM-RDL, or any other external vocabulary as its class during the experiment.
 2. **Read-only and self-contained.** The experiment redistributes nothing, so it stays inside CC BY-SA 4.0, whose share-alike conditions apply to any redistribution of adapted content. The experiment writes no
    pipeline code into the checks; a mapping note and fixtures are its outputs.
-3. **Evidence first.** The experiment's findings land in a reference-register
-   note under REF-STD-012, and reuse then waits for its own owner decision. A
-   merge of the experiment alone decides nothing.
+3. **Evidence first.** The experiment produces a mapping note and fixtures, and
+   its findings are recorded in a reference-register note under REF-STD-012 for
+   the owner's reuse decision. A merge of the experiment alone decides nothing.
 
 ## Alternatives considered
 
@@ -47,9 +47,12 @@ its own words in the session:
 1. On PLM-RDL: "The concrete next step: pin plm-equipment.ttl 0.9.1, hash it, and run a small mapping
    experiment against R0's and W-SP's equipment records — read-only, no
    adoption, no redistribution. That would give the owner real evidence for the
-   reuse decision instead of a register entry." Hashing the imports, the
-   read-only scope, the mapping-note and fixture outputs, and the restriction
-   on graph classes are this record's elaboration of that approved step.
+   reuse decision instead of a register entry." Hashing the imports, the bar
+   on writing pipeline code into the checks, the mapping-note and fixture
+   outputs and their destination under REF-STD-012, the rule that a merge of
+   the experiment alone decides nothing, and the restriction on graph classes
+   are this record's additions to the approved step — the quote carries the
+   read-only scope and the no-adoption bar itself.
 
 The owner answered:
 

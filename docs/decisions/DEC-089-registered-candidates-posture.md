@@ -37,9 +37,9 @@ owner approved the recommendations.
 
 ## Alternatives considered
 
-- Starting a BFO/CCO alignment now: rejected — REF-STD-013's alignment question
-  is an owner decision this record leaves open, and starting it would bypass
-  that gate.
+- Starting a BFO/CCO alignment now: rejected — the CCO role question REF-STD-013
+  records (upper or bridge layer, or reference only) is an owner decision this
+  record leaves open, and starting an alignment would bypass that gate.
 - Using COPI as the mapping's starting point: rejected — its alignment claims
   are unverified against artifacts.
 - Treating the PageSearch demo as a capability to build on: rejected —
