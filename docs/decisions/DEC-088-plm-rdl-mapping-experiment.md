@@ -44,11 +44,12 @@ recommendations.
 On 2026-11-08 (UTC), after the reference-register round, the agent recommended, in
 its own words in the session:
 
-1. "PLM-RDL equipment module — trial it first. ... pin plm-equipment.ttl
-   0.9.1, hash it, and run a small mapping experiment against R0's and W-SP's
-   equipment records — read-only, no adoption, no redistribution." With the
-   caveats recorded in DEC-089: an adoption decision later, and CC BY-SA 4.0
-   share-alike conditions on any redistribution.
+1. On PLM-RDL: "The concrete next step: pin plm-equipment.ttl 0.9.1, hash it, and run a small mapping
+   experiment against R0's and W-SP's equipment records — read-only, no
+   adoption, no redistribution. That would give the owner real evidence for the
+   reuse decision instead of a register entry." Hashing the imports, the
+   read-only scope, the mapping-note and fixture outputs, and the restriction
+   on graph classes are this record's elaboration of that approved step.
 
 The owner answered:
 

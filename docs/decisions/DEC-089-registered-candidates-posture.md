@@ -16,10 +16,10 @@ owner approved the recommendations.
 
 ## Decision
 
-1. **CCO stays a reference.** Whether an upper layer built on BFO and CCO should
-   align or replace anything is deferred to an owner decision, which is exactly
-   the decision question [REF-STD-013](../LIONG-REF-001-reference-register.md)
-   records; this record starts no alignment work and keeps the gate open.
+1. **CCO stays a reference.** REF-STD-013's decision question stands open:
+   whether CCO with BFO serves this project as an upper or bridge layer, or as
+   a reference only. Until the owner answers it, this record starts no
+   alignment work.
 2. **COPI stays on watch.** Its CC BY 4.0 license is recorded, but its ISO
    15926-4/CFIHOS/DEXPI alignment claims remain unverified. It is a source of
    mapping ideas for DEC-088's experiment, not a vocabulary to consume.
@@ -35,9 +35,9 @@ owner approved the recommendations.
 
 ## Alternatives considered
 
-- Starting a BFO/CCO alignment of the core ontology now: rejected — the core
-  ontology effort is still in flight, and two masters in one ontology design
-  would contradict the register's deferral guidance.
+- Starting a BFO/CCO alignment now: rejected — REF-STD-013's alignment question
+  is an owner decision this record leaves open, and starting it would bypass
+  that gate.
 - Using COPI as the mapping's starting point: rejected — its alignment claims
   are unverified against artifacts.
 - Treating the PageSearch demo as a capability to build on: rejected —
