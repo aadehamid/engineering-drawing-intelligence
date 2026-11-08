@@ -128,6 +128,8 @@ except DEC-077's three least-settled choices, which the owner approved in
 | DEC-085 | SmartPlant-style extraction rebuilds W-SP's segments, flows, parent and continuation from the rows, keyed by the backend's GUIDs | Decided by the agent under DEC-080 | [record](decisions/DEC-085-sps-extraction-records.md) |
 | DEC-086 | W-SP's records map to DEXPI 2.0.1 through DEC-077's mapping, with sps identifier contexts, hand valves as OperatedValve and LT as category L | Decided by the agent under DEC-080 | [record](decisions/DEC-086-sps-dexpi-mapping.md) |
 | DEC-087 | The slice runner takes the backend as a parameter; in CI, one W-SP run publishes through Neo4j and another reads the loaded SQL Server backend | Decided by the agent under DEC-080 | [record](decisions/DEC-087-slice-backend-parameter.md) |
+| DEC-088 | A bounded PLM-RDL equipment mapping experiment precedes any vocabulary reuse | Decided by the owner, quoted in the record | [record](decisions/DEC-088-plm-rdl-mapping-experiment.md) |
+| DEC-089 | The registered ontology candidates stay references, and the PageIndex demo is bounded to the synthetic fixtures | Decided by the owner, quoted in the record | [record](decisions/DEC-089-registered-candidates-posture.md) |
 
 ## New proposals
 
