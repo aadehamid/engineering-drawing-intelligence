@@ -26,8 +26,15 @@ The original approved baseline remains available:
 ## Project status
 
 The scope is confirmed. The expanded version 0.1 package is a draft for review;
-new technical proposals are not automatically approved. LIONG remains independent
-of PPC, which is a documentation and architecture reference.
+new technical proposals are not automatically approved. On 2026-11-26 this
+repository was renamed from `aadehamid/Engineering_Drawing_to_Graph` to
+`aadehamid/engineering-drawing-intelligence`. LIONG remains independent of PPC,
+which is a documentation and architecture reference. PPC reconciled its baseline
+on 2026-11-26 (`ADR-0040` through `ADR-0056`), replacing DuckLake, Kafka,
+Jena/Fuseki, and Cloudflare D1 with Delta Lake on R2, NATS JetStream with a
+transactional outbox, Git Turtle with `pyshacl` projected to Neo4j Community,
+and PostgreSQL workflow state; see
+[LIONG-007](docs/LIONG-007-stack-and-architecture.md#2026-11-26-ppc-baseline-update).
 
 This repository contains documentation and documentation-checking utilities, not
 a working engineering pipeline. Public-source research and a PPC stack assessment
