@@ -36,6 +36,23 @@ transactional outbox, Git Turtle with `pyshacl` projected to Neo4j Community,
 and PostgreSQL workflow state; see
 [LIONG-007](docs/LIONG-007-stack-and-architecture.md#2026-11-26-ppc-baseline-update).
 
+Across the five-repository downstream ecosystem (`enterprise-performance-model`,
+`enterprise-context-engineering`, `industrial-context-engineering`,
+`engineering-drawing-intelligence`, and `pearland-petroleum-corporation`),
+`aadehamid/pearland-petroleum-corporation` owns the single canonical enterprise
+world model (Refinery A v1; architecture reconciled on 2026-11-26 at commit
+`f3086f7862c2cfd75c29ed0c48ed5ead4f513d1f`, with renamed sister-repository links
+landed in PPC PR #12 at `ebc226f7da52c1a34b32af2ac2acea16b88d5183`, covering
+`ADR-0040`, `ADR-0041`, `ADR-0042`, and `ADR-0053`; registered in
+[REF-PPC-001](docs/LIONG-REF-001-reference-register.md#ref-ppc-001-ppc-documentation-reference)).
+PPC integrates this repository's structured DEXPI and graph contracts through a
+commit-pinned provisional adapter (`ADR-0042`), isolates hidden world truth
+under `evaluation/hidden/`, and plans to publish Refinery A's coherent
+`observable/` equipment and topology manifest via `WorldExportBundle` in `WP-8B`
+(`ADR-0053`). LIONG's local fixtures (`R0.yaml` and `W-SP.yaml`) remain this
+repository's standalone regression worlds and are classified by PPC as
+`LEGACY_PRE_WORLD_MODEL`.
+
 This repository contains documentation and documentation-checking utilities, not
 a working engineering pipeline. Public-source research and a PPC stack assessment
 are recorded in the package. Dataset admission, DEXPI interoperability, component locks

@@ -10,6 +10,8 @@ The facility context is a fictional LIONG demonstration in Lekki, Lagos State, N
 
 Read [sources and ontology](LIONG-003-sources-and-ontology.md), [domain model](LIONG-004-domain-model.md), and [data contracts](LIONG-005-data-contracts.md) alongside this specification. [Evaluation](LIONG-010-evaluation.md) defines the scoring rules and evidence required for these scenarios.
 
+Cross-repository world-model boundary (2026-11-26): `R0` and `W-SP` are LIONG's standalone local canonical worlds for testing the structured and flat-file engineering pipelines. Across the integrated five-repository downstream ecosystem, `aadehamid/pearland-petroleum-corporation` owns the single canonical Refinery A v1 enterprise world model (architecture reconciled at `f3086f7862c2cfd75c29ed0c48ed5ead4f513d1f`, renamed sister-repository links landed in PPC PR #12 at `ebc226f7da52c1a34b32af2ac2acea16b88d5183`, covering `ADR-0040`, `ADR-0041`, `ADR-0042`, and `ADR-0053`; registered in [REF-PPC-001](LIONG-REF-001-reference-register.md#ref-ppc-001-ppc-documentation-reference)), isolates hidden truth under `evaluation/hidden/`, and plans to publish Refinery A's coherent `observable/` equipment and topology manifest in `WorldExportBundle` (`WP-8B`). From PPC's perspective, pre-world-model synthetic fixtures are classified as `LEGACY_PRE_WORLD_MODEL`; this repository keeps `R0` and `W-SP` as its local regression fixtures.
+
 ## Canonical world and separate representations
 
 A canonical world defines engineering truth, including revisions and intended errors.
