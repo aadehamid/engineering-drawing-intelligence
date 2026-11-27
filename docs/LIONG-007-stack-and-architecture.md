@@ -54,7 +54,7 @@ Inspection used PPC commit `01027a84be5d453cbb4e2ea091e4884729918b15`, including
 
 ### 2026-11-26 PPC baseline update
 
-PPC reconciled its architecture baseline at commit `f3086f7862c2cfd75c29ed0c48ed5ead4f513d1f` (`PPC-ARCH-000` and `ADR-0040` through `ADR-0056`) [REF-TECH-001b]. Five updates supersede the `01027a84` rows in the table below.
+PPC reconciled its architecture baseline at commit `f3086f7862c2cfd75c29ed0c48ed5ead4f513d1f` and updated renamed sister-repository links in PPC PR #12 at commit `ebc226f7da52c1a34b32af2ac2acea16b88d5183` (`PPC-ARCH-000` and `ADR-0040` through `ADR-0056`) [REF-TECH-001b]. Five updates supersede the `01027a84` rows in the table below.
 
 - Analytical storage moved from DuckLake to Delta Lake on Cloudflare R2 (`ADR-0045`).
 - Slice 1 event transport uses NATS JetStream with a transactional outbox rather than Kafka and Debezium (`ADR-0046`).
