@@ -52,6 +52,18 @@ with `scripts/dexpi_parse.py` ([DEC-077](decisions/DEC-077-dexpi-mapping.md)).
 
 Inspection used PPC commit `01027a84be5d453cbb4e2ea091e4884729918b15`, including its README and PPC-002, PPC-007, PPC-010, PPC-013, and PPC-014. The tree contains documentation, archived documentation bundles, and `.gitkeep` placeholders. It does not provide runnable application code or dependency pins. Its README identifies the current stage as architecture baseline and implementation preparation [REF-TECH-001].
 
+### 2026-11-26 PPC baseline update
+
+PPC reconciled its architecture baseline at commit `f3086f7862c2cfd75c29ed0c48ed5ead4f513d1f` (`PPC-ARCH-000` and `ADR-0040` through `ADR-0056`) [REF-TECH-001b]. Five updates supersede the `01027a84` rows in the table below.
+
+- Analytical storage moved from DuckLake to Delta Lake on Cloudflare R2 (`ADR-0045`).
+- Slice 1 event transport uses Redpanda with a transactional outbox rather than Kafka and Debezium (`ADR-0046`).
+- Formal semantics moved from a standing Apache Jena/Fuseki server to Git Turtle validated by `pyshacl` and projected to Neo4j Community (`ADR-0044`).
+- Workflow state runs on PostgreSQL with no Cloudflare D1 (`ADR-0055`).
+- PPC integrates `aadehamid/engineering-drawing-intelligence` (renamed from `Engineering_Drawing_to_Graph` on 2026-11-26) through a commit-pinned provisional adapter (`ADR-0042`) and plans to export a coherent Refinery A equipment and topology dataset via `WorldExportBundle` in `WP-8B` (`ADR-0053`). From PPC's perspective, earlier synthetic fixtures are classified as `LEGACY_PRE_WORLD_MODEL`.
+
+LIONG remains independent of PPC, and this update adds no runtime dependency or automatic component approval.
+
 PPC proposes a broad synthetic enterprise, including commercial applications, lakehouse analytics, formal semantics, an operational graph, and agents. LIONG needs a narrower engineering information product. Reuse below means a documented pattern or responsibility, not a working PPC component or permission to copy unverified source.
 
 | PPC component | PPC responsibility | LIONG responsibility | Treatment, Proposed | Rationale | Outstanding version, license, or integration checks |
