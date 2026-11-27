@@ -57,7 +57,7 @@ Inspection used PPC commit `01027a84be5d453cbb4e2ea091e4884729918b15`, including
 PPC reconciled its architecture baseline at commit `f3086f7862c2cfd75c29ed0c48ed5ead4f513d1f` (`PPC-ARCH-000` and `ADR-0040` through `ADR-0056`) [REF-TECH-001b]. Five updates supersede the `01027a84` rows in the table below.
 
 - Analytical storage moved from DuckLake to Delta Lake on Cloudflare R2 (`ADR-0045`).
-- Slice 1 event transport uses Redpanda with a transactional outbox rather than Kafka and Debezium (`ADR-0046`).
+- Slice 1 event transport uses NATS JetStream with a transactional outbox rather than Kafka and Debezium (`ADR-0046`).
 - Formal semantics moved from a standing Apache Jena/Fuseki server to Git Turtle validated by `pyshacl` and projected to Neo4j Community (`ADR-0044`).
 - Workflow state runs on PostgreSQL with no Cloudflare D1 (`ADR-0055`).
 - PPC integrates `aadehamid/engineering-drawing-intelligence` (renamed from `Engineering_Drawing_to_Graph` on 2026-11-26) through a commit-pinned provisional adapter (`ADR-0042`) and plans to export a coherent Refinery A equipment and topology dataset via `WorldExportBundle` in `WP-8B` (`ADR-0053`). From PPC's perspective, earlier synthetic fixtures are classified as `LEGACY_PRE_WORLD_MODEL`.
