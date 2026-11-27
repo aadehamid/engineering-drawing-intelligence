@@ -86,6 +86,15 @@ PPC is a reference for documentation and design patterns. LIONG has no automatic
 dependency on PPC or its upstream EPM/ECE repositories. Its commercial models,
 financial policies, provider arrangements, and model choices are not inherited.
 
+In the broader five-repository downstream ecosystem reconciled on 2026-11-26
+(`aadehamid/pearland-petroleum-corporation` `ADR-0040`, `ADR-0041`, `ADR-0042`,
+and `ADR-0053`, commit `ebc226f`), PPC owns the single canonical enterprise
+world model (Refinery A v1) and plans to publish an `observable/`
+`WorldExportBundle` equipment and topology manifest in `WP-8B` while keeping
+hidden world truth under `evaluation/hidden/`. PPC consumes EDI contracts via a
+commit-pinned provisional adapter. LIONG remains independent for its own
+milestones and local fixtures.
+
 The initial scope excludes P&ID authoring, live facility integration, operational control,
 valve-operating procedures, declarations that equipment is safe to isolate,
 calculation engines, downstream ML analytics, forecasting, and simulation. Inspection,
